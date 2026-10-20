@@ -124,6 +124,10 @@
   /* 20.10: «Внешнее меню» и «Блюда для деактивации» — каждое на всю ширину, в 2 строки */
   .frm-grid .field-anchor[data-field="menu"],
   .frm-grid .field-anchor[data-field="dish"] { grid-column: 1 / -1; }
+  /* названия категорий в подсказках блюд — Body S medium (как в дереве блюд формы v1) */
+  .fpop__cat .ds-select-item__label { font-weight: var(--ds-font-body-s-14-normal-medium-weight, 500); }
+  /* вкладки формы скрыты (20.10), но элемент остаётся в разметке */
+  .frm-tabs[hidden] { display: none !important; }
   /* S2/S3/S4: вкладки формы, таблица выбранных блюд и панель выбора */
   .frm-tabs { margin: 0; }
   .frm-tabnote { display: block; margin-top: 4px; font: var(--ds-font-caption-l-12-normal-regular); color: var(--ds-color-text-negative, #ff5252); }
@@ -368,8 +372,8 @@
       </div>
     </header>
 
-  <!-- S2: вкладки формы. «БЛЮДА» — S3, выбор блюд/категорий — S4. -->
-  <div class="ds-tabs frm-tabs" role="tablist" aria-label="Баннер">
+  <!-- S2: вкладки формы скрыты (решение 20.10: «скрыть табы пока») — всё в одной форме, как в «Новом баннере» -->
+  <div class="ds-tabs frm-tabs" role="tablist" aria-label="Баннер" hidden>
     <button type="button" class="ds-tab ds-tab--active" data-ftab="details" role="tab" aria-selected="true">Детали</button>
     <button type="button" class="ds-tab" data-ftab="dishes" role="tab" aria-selected="false">Блюда<span class="ds-tab__counter" id="dishesCount" hidden></span></button>
   </div>
@@ -380,7 +384,7 @@
        текст — сводка по вкладкам. 20.10: крестика НЕТ — сообщение привязано к состоянию формы. -->
   <div class="ds-banner ds-banner--horizontal ds-banner--warning frm-warn" id="warnBar">
     <span class="ds-banner__icon" aria-hidden="true"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons">warning</span></span></span>
-    <span class="ds-banner__text">Чтобы создать баннер, заполните обязательные поля на вкладке «Детали» и выберите блюда для деактивации на вкладке «Блюда»</span>
+    <span class="ds-banner__text">Чтобы создать баннер, заполните обязательные поля и выберите блюда для деактивации</span>
   </div>
 
   <!-- Пояснение — компонент ДС Banners (Accent); текст ставится в .ds-banner__text -->
@@ -456,6 +460,30 @@
           <div class="ds-select-container fpop" id="menuPop" role="listbox" aria-label="Подсказки внешнего меню" hidden>
             <div class="fpop__wrap">
               <div class="ds-select-container__content fpop__scroll" id="menuItems"></div>
+              <div class="ds-scroll ds-scroll--v ds-scroll--middle fscroll" aria-hidden="true" hidden>
+                <div class="ds-scroll__background"><div class="ds-scroll__knob"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Блюда для деактивации — Chips Input + подсказки (как меню/место);
+             источник — выбранные меню: категории (medium) и блюда, поиск внутри списка. -->
+        <div class="field-anchor" data-field="dish" hidden>
+          <div class="aci" id="dishField">
+            <div class="ds-chips-input">
+              <div class="ds-chips-input__frame">
+                <span class="aci-caption" id="dishLabel" hidden>Блюда для деактивации *</span>
+                <div class="ds-chips-input__content" id="dishChips">
+                  <input class="aci-input" id="dishInput" type="text" placeholder="Выберите блюда для деактивации" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dishPop" aria-label="Блюда для деактивации">
+                </div>
+              </div>
+            </div>
+          </div>
+          <span class="ds-input__support" id="dishErr" hidden></span>
+          <div class="ds-select-container fpop" id="dishPop" role="listbox" aria-label="Подсказки блюд" hidden>
+            <div class="fpop__wrap">
+              <div class="ds-select-container__content fpop__scroll" id="dishItems"></div>
               <div class="ds-scroll ds-scroll--v ds-scroll--middle fscroll" aria-hidden="true" hidden>
                 <div class="ds-scroll__background"><div class="ds-scroll__knob"></div></div>
               </div>
@@ -782,6 +810,7 @@
   var sizeField = qs('#sizeField'), sizeValue = qs('#sizeValue'), sizeLabel = qs('#sizeLabel');
   var menuChips = qs('#menuChips'), placeChips = qs('#placeChips');
   var menuInput = qs('#menuInput'), placeInput = qs('#placeInput');
+  var dishField = qs('#dishField'), dishLabel = qs('#dishLabel'), dishChips = qs('#dishChips'), dishInput = qs('#dishInput');
   var menuNote = qs('#menuNote');
   var linkClear = qs('#linkClear');
   var upBox = qs('#upBox'), upInput = qs('#upInput'), upCap = qs('#upCap');
@@ -804,6 +833,7 @@
     type: { field: typeField, inner: qs('.ds-input', typeField), support: qs('#typeErr') },
     menu: { field: menuField, inner: menuField, input: menuInput, chipsInput: true, support: qs('#menuErr') },
     place: { field: placeField, inner: placeField, input: placeInput, chipsInput: true, support: qs('#placeErr') },
+    dish: { field: dishField, inner: dishField, input: dishInput, chipsInput: true, support: qs('#dishErr') },
     size: { field: sizeField, inner: qs('.ds-input', sizeField), support: qs('#sizeErr') }
   };
 
@@ -813,6 +843,7 @@
     if (key === 'menu') return state.menu.length > 0;
     if (key === 'place') return state.place.length > 0;
     if (key === 'size') return !!state.size;
+    if (key === 'dish') return state.dish.length > 0;
     return false;
   }
 
@@ -1244,6 +1275,54 @@
     if (on) { if (state.place.indexOf(v) < 0) state.place.push(v); }
     else state.place = state.place.filter(function (x) { return x !== v; });
     updateForm();
+  }
+
+  /* ── ВЕРСИЯ 2: Блюда для деактивации — подсказки автокомплита ─────────── */
+  var dishPop = qs('#dishPop'), dishItems = qs('#dishItems');
+  /* пункты: сначала категория (medium), затем её блюда — в порядке групп меню */
+  function dishOptionList() {
+    var out = [];
+    dishGroups().forEach(function (g) {
+      out.push({ value: g.cat, cat: true });
+      g.dishes.forEach(function (d) { out.push({ value: d, cat: false }); });
+    });
+    return out;
+  }
+  function buildDishList() {
+    dishItems.innerHTML = '';
+    var src = dishSource();
+    if (!src.length) {
+      dishItems.appendChild(emptyItem(state.menu.length ? 'В выбранном внешнем меню нет блюд' : 'Сначала выберите внешнее меню'));
+      return;
+    }
+    var q = dishInput.value.trim().toLowerCase();
+    var opts = dishOptionList().filter(function (o) { return !q || o.value.toLowerCase().indexOf(q) > -1; });
+    if (!opts.length) {
+      dishItems.appendChild(emptyItem('Ничего не найдено'));
+      return;
+    }
+    var vals = opts.map(function (o) { return o.value; });
+    var allOn = vals.every(function (v) { return state.dish.indexOf(v) > -1; });
+    var someOn = vals.some(function (v) { return state.dish.indexOf(v) > -1; });
+    dishItems.appendChild(checkboxItem('__all', 'Все', allOn, function (on) {
+      vals.forEach(function (v) {
+        if (on) { if (state.dish.indexOf(v) < 0) state.dish.push(v); }
+        else state.dish = state.dish.filter(function (x) { return x !== v; });
+      });
+      touched.dish = true;
+      updateForm();
+    }, { indeterminate: someOn && !allOn }));
+    var div = document.createElement('div');
+    div.className = 'ds-divider';
+    dishItems.appendChild(div);
+    opts.forEach(function (o) {
+      dishItems.appendChild(checkboxItem(o.value, o.value, state.dish.indexOf(o.value) > -1,
+        function (on) { if (o.cat) setCatValue(o.value, on); else setDishValue(o.value, on); },
+        { itemClass: o.cat ? 'fpop__cat' : '' }));
+    });
+  }
+  function removeDishValue(v) {
+    if (catsOfMenus().indexOf(v) > -1) setCatValue(v, false); else setDishValue(v, false);
   }
 
   /* ── S3: вкладка «БЛЮДА» — таблица с категориями и блюдами ────────── */
