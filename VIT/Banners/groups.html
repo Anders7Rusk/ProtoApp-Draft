@@ -13,12 +13,12 @@
   (подтверждения), Snackbar. Вне ДС — только раскладка.
 -->
 <script src="sidenav-menu.js"></script>
-<script src="Design-System/connect.js" defer></script>
-<link rel="stylesheet" href="Design-System/organisms/app-header-content/header-content.css?v=1">
-<script src="Design-System/organisms/app-header-content/header-content.js?v=1" defer></script>
-<link rel="stylesheet" href="Design-System/organisms/app-table-header-actions/table-header-actions.css?v=3">
-<script src="Design-System/organisms/app-table-header-actions/table-header-actions.js?v=3" defer></script>
-<script src="Design-System/components-web/components/Datepicker_DS/datepicker.js"></script>
+<script src="../../Design-System/connect.js" defer></script>
+<link rel="stylesheet" href="../../Design-System/organisms/app-header-content/header-content.css?v=1">
+<script src="../../Design-System/organisms/app-header-content/header-content.js?v=1" defer></script>
+<link rel="stylesheet" href="../../Design-System/organisms/app-table-header-actions/table-header-actions.css?v=3">
+<script src="../../Design-System/organisms/app-table-header-actions/table-header-actions.js?v=3" defer></script>
+<script src="../../Design-System/components-web/components/Datepicker_DS/datepicker.js"></script>
 <style>
   .material-icons { font-family: 'Material Icons Outlined'; }
   /* шапка приложения — для этого проекта без меню ресторанов, периода/календаря и поиска
@@ -652,7 +652,7 @@
   <div class="ds-snackbar__progress"></div>
 </div>
 
-<script src="Design-System/components-web/ds-patterns.js"></script>
+<script src="../../Design-System/components-web/ds-patterns.js"></script>
 <script>
 (function () {
   'use strict';
@@ -745,6 +745,14 @@
     });
     return out;
   }
+  /* Счётчик группы = только те баннеры, что есть в справочнике; удалённые не считаем нигде
+     (в списке, в табе, в «Выбрано») — одно правило для всех мест. */
+  function validBannerRefs(g) {
+    var ids = {};
+    allBannerCatalog().forEach(function (b) { ids[b.id] = 1; });
+    return (g && g.banners ? g.banners : []).filter(function (r) { return r && ids[r.bannerId]; });
+  }
+  function validBannerCount(g) { return validBannerRefs(g).length; }
 
   /* ── состояние списка ────────────────────────────────────────────────── */
   var groups = readGroups();
@@ -847,12 +855,13 @@
       row.setAttribute('data-group-id', g.id);
       row.innerHTML =
         '<div class="ds-table-content-cell g-c-check"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-group-check="' + g.id + '"' + (listState.selected.indexOf(g.id) >= 0 ? ' checked' : '') + '><span class="ds-checkbox__box"></span></label></div></div>' +
-        '<div class="ds-table-content-cell g-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><button type="button" class="g-name-btn" data-edit="' + g.id + '">' + esc(g.name) + '</button><span class="g-sub">Баннеров: ' + (g.banners || []).length + '</span></div></div></div></div>' +
+        '<div class="ds-table-content-cell g-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><button type="button" class="g-name-btn" data-edit="' + g.id + '">' + esc(g.name) + '</button><span class="g-sub">Баннеров: ' + validBannerCount(g) + '</span></div></div></div></div>' +
         '<div class="ds-table-content-cell g-c-pbo"><span class="ds-text-body-s-14-normal-regular">' + groupPboCount(g) + '</span></div>' +
         '<div class="ds-table-content-cell g-c-from"><span class="ds-text-body-s-14-normal-regular">' + fmtDate(g.dateFrom) + '</span></div>' +
         '<div class="ds-table-content-cell g-c-to"><span class="ds-text-body-s-14-normal-regular">' + fmtDate(g.dateTo) + '</span></div>' +
         '<div class="ds-table-content-cell g-c-active">' + statusHtml(g) + '</div>' +
-        '<div class="ds-table-content-cell g-c-actions"><span class="g-row-actions">' + actionIcon('content_copy', 'Копировать', 'copy') + (g.deleted ? actionIcon('restore', 'Восстановить', 'restore') : actionIcon('delete', 'Удалить', 'delete')) + '</span></div>';
+    /* у удалённой строки — ТОЛЬКО «Восстановить» (без копирования и удаления), как в списке баннеров */
+        '<div class="ds-table-content-cell g-c-actions"><span class="g-row-actions">' + (g.deleted ? actionIcon('restore', 'Восстановить', 'restore') : actionIcon('content_copy', 'Копировать', 'copy') + actionIcon('delete', 'Удалить', 'delete')) + '</span></div>';
       box.appendChild(row);
       fillEmptyCells(row);
     });
@@ -936,6 +945,7 @@
     draft.deleted = false;
     draft.dateFrom = '';
     draft.dateTo = '';
+    pruneBannerRefs();   /* удалённые баннеры в копию не переносим — их нет в справочнике */
     mode = 'copy';
     showGroupView();
   }
@@ -1168,7 +1178,16 @@
     input.placeholder = (filled || focused) ? (hint || '') : label.textContent;
   }
   function syncName() { syncFloat(nameWrap, nameInput, nameLabel, ''); }
+  /* в состав группы могут попасть только баннеры из справочника (удалённые в выбор не входят);
+     без этой чистки копия группы с удалёнными баннерами давала счётчик 1 и ни одной отметки */
+  function pruneBannerRefs() {
+    if (!draft) return;
+    var ids = {};
+    allBannerCatalog().forEach(function (b) { ids[b.id] = 1; });
+    draft.banners = (draft.banners || []).filter(function (r) { return ids[r.bannerId]; });
+  }
   function fillGroup() {
+    pruneBannerRefs();
     nameInput.value = draft.name || '';
     draft.type = draft.type || 'restaurants';
     draft.template = draft.template || 'tmpl-1';

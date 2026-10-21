@@ -15,7 +15,7 @@
       «Выберите внешнее меню» / «Выберите файл»;
     • каркас — собственный, по конвенции страниц раздела (подключение одной строкой,
       статичная разметка, свой скрипт только на клики);
-    • плашка ревью, шапка и боковое меню приложения — из `Design-System/connect.js` (сами, не собираются);
+    • плашка ревью, шапка и боковое меню приложения — из `../../Design-System/connect.js` (сами, не собираются);
     • организмы подключаются вручную по своим readme (через connect.js они не приходят):
       `app-header-content` — шапка раздела: заголовок, поиск и действия (постановка: поиск и «Добавить»
       в верхней панели справа); `app-table-header-actions` — полоса таблицы: заголовок
@@ -90,11 +90,11 @@
   взяты из них, данные строк — из примеров постановки.
 -->
 <script src="sidenav-menu.js"></script>
-<script src="Design-System/connect.js" defer></script>
-<link rel="stylesheet" href="Design-System/organisms/app-header-content/header-content.css?v=1">
-<script src="Design-System/organisms/app-header-content/header-content.js?v=1" defer></script>
-<link rel="stylesheet" href="Design-System/organisms/app-table-header-actions/table-header-actions.css?v=3">
-<script src="Design-System/organisms/app-table-header-actions/table-header-actions.js?v=3" defer></script>
+<script src="../../Design-System/connect.js" defer></script>
+<link rel="stylesheet" href="../../Design-System/organisms/app-header-content/header-content.css?v=1">
+<script src="../../Design-System/organisms/app-header-content/header-content.js?v=1" defer></script>
+<link rel="stylesheet" href="../../Design-System/organisms/app-table-header-actions/table-header-actions.css?v=3">
+<script src="../../Design-System/organisms/app-table-header-actions/table-header-actions.js?v=3" defer></script>
 <style>
   html, body { margin: 0; font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif; }
 
@@ -916,7 +916,7 @@
   <div class="ds-snackbar__progress"></div>
 </div>
 
-<script src="Design-System/components-web/ds-patterns.js"></script>
+<script src="../../Design-System/components-web/ds-patterns.js"></script>
 <script>
 /* Свой код экрана: аккордеоны групп, группировка (селект), рабочий фильтр (поля-селекты + списки
    Select container: тип, баннер, меню), поиск по названию, сортировка, тумблер удалённых
@@ -1559,8 +1559,8 @@
 
   /* B-15/B-16/B-17: колонка действий у КАЖДОЙ строки списка. Иконки появляются
      при наведении на строку (и при фокусе клавиатурой); действия — копировать/удалить.
-     20.10 (заказчик): удалённые баннеры можно копировать и ВОССТАНОВИТЬ; у удалённой
-     строки вместо «Удалить» — «Восстановить», удалять уже удалённое нельзя. */
+     20.10 (заказчик): у удалённой строки — ТОЛЬКО «Восстановить» (без копирования
+     и удаления), правило одно для всех страниц. */
   function rowActionButton(id, deleted) {
     return deleted
       ? '<button type="button" class="ds-btn-icon ds-btn-icon--s ds-btn-icon--neutral ds-btn-icon--text row-restore" data-row-restore="' + escHtml(id) + '" aria-label="Восстановить баннер" title="Восстановить"><span class="ds-icon-size ds-icon-size--5x"><img data-tha-icon="restore" width="20" height="20" alt=""></span></button>'
@@ -1568,7 +1568,7 @@
   }
   function rowActionsCell(id, deleted) {
     return '<div class="ds-table-content-cell t-c-actions"><span class="t-row-actions">' +
-      '<button type="button" class="ds-btn-icon ds-btn-icon--s ds-btn-icon--neutral ds-btn-icon--text row-copy" data-row-copy="' + escHtml(id) + '" aria-label="Скопировать баннер" title="Скопировать баннер"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">content_copy</span></span></button>' +
+      (deleted ? '' : '<button type="button" class="ds-btn-icon ds-btn-icon--s ds-btn-icon--neutral ds-btn-icon--text row-copy" data-row-copy="' + escHtml(id) + '" aria-label="Скопировать баннер" title="Скопировать баннер"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">content_copy</span></span></button>') +
       rowActionButton(id, deleted) +
       '</span></div>';
   }
@@ -1579,6 +1579,9 @@
       var cell = row.querySelector('.t-c-actions');
       if (!cell) return;
       var id = row.getAttribute('data-banner');
+      /* удалённую строку копировать нельзя — только Восстановить */
+      var copy = cell.querySelector('[data-row-copy]');
+      if (copy) copy.hidden = isDeleted(row);
       var del = cell.querySelector('[data-row-delete]');
       var rest = cell.querySelector('[data-row-restore]');
       if (isDeleted(row) && del) {

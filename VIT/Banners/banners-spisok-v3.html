@@ -3,9 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Киоски · Баннеры — прототип на ДС</title>
+<title>Киоски · Баннеры (версия 3 · иконки) — прототип на ДС</title>
 <!--
-  ЭКРАН «Управление киосками → Баннеры» (kiosk-management/index.html#/banners) после доработки.
+  ЭКРАН «Управление киосками → Баннеры» (kiosk-management/index.html#/banners) — ВЕРСИЯ 3 (иконки):
+  по мотивам версии 1 (таблица без Expansion panel). Отличия: группировка списка — Button toggle ДС
+  (ds-button-toggle, размер S; текстовые сегменты «Тип» / «Место», полные названия — в тултипах);
+  фильтры «Файл»/«Внешнее меню» — иконки filter у колонок в шапке таблицы (как на стенде
+  Table_DS: иконка filter_list + точка Badge на активном фильтре), попап значений раскрывается под иконкой.
   ОТКУДА ЧТО ВЗЯТО:
     • постановка — вики VIT «Киоски: оптимизация управления баннерами» (стр. 181774290),
       задача 1 — Jira PB-8074 / WEB-22902; подписи в разметке — из постановки и вайрфреймов
@@ -15,11 +19,11 @@
       «Выберите внешнее меню» / «Выберите файл»;
     • каркас — собственный, по конвенции страниц раздела (подключение одной строкой,
       статичная разметка, свой скрипт только на клики);
-    • плашка ревью, шапка и боковое меню приложения — из `Design-System/connect.js` (сами, не собираются);
+    • плашка ревью, шапка и боковое меню приложения — из `../../Design-System/connect.js` (сами, не собираются);
     • организмы подключаются вручную по своим readme (через connect.js они не приходят):
       `app-header-content` — шапка раздела: заголовок, поиск и действия (постановка: поиск и «Добавить»
       в верхней панели справа); `app-table-header-actions` — полоса таблицы: заголовок
-      («Фильтры:» — было «Группировать» с 16.10, с 20.10 — «Фильтры:»; в режиме выбора — счётчик выбранного), слот «После заголовка»
+      («Фильтр:» — переименован 16.10, было «Группировать»; в режиме выбора — счётчик выбранного), слот «После заголовка»
       (поля-селекты тип/баннер/меню, затем тумблер «Удалённые: N»), ФИЛЬТР-ПОЛЯ и массовые действия;
     • компоненты ДС: Title (текстовый стиль H1), Button, Button icon, Button icon group, Button group,
       Button toggle, Menu (ds-menu-container + пункты ds-menu-item — фильтр и панель массового меню),
@@ -58,12 +62,11 @@
       3) счётчик внизу — «Показано X из Y баннеров» при активном фильтре/поиске;
       4) (19.10 чип-статус «Удалён» в ячейке названия УБРАН по замечанию заказчика) удалённые строки
          видны по виду disable + зачёркиванию; счётчик удалённых — на тумблере «Удалённые: N»;
-      5) фильтр и группировка в полосе после «Фильтры:» (всё в ЛЕВОЙ части — правило 16.10):
-         группировка — компонент Button toggle (размер S, Outlined, сегменты «Тип»/«Место»,
-         полные названия — в тултипах; 20.10 — как в версии 3), фильтры «Файл»/«Внешнее меню» —
-         поля-селекты (Select form + Select container), размер S = 36; в списках — чекбоксы,
-         кнопки [Сбросить | Применить] в футере; поиск — в обоих списках; состояние полей:
-         название при незаданном, «Название: значение / N» при заданном;
+      5) фильтр и группировка — ТРИ ПОЛЯ-СЕЛЕКТА после «Фильтр:» в порядке заказчика (16.10: «тип,
+         баннер, меню»; группировка — тоже селект, вместо Button toggle): Select form + Select container,
+         размер S = 36; в списках фильтров — чекбоксы, в списке группировки — радиокнопки (одиночный
+         выбор); поиск — в обоих фильтрах; состояние полей: название при незаданном, «Название: значение /
+         N» при заданном; всё в ЛЕВОЙ части полосы таблицы (правило 16.10);
       6) пустые состояния: «Ничего не найдено» со сбросом фильтров / «Пока нет баннеров» (E1 памятки);
       7) тумблер удалённых: как в варианте 1 — только текст «Удалённые: N» — со счётчиком, без иконки (вариант 2
          «иконка delete + Hint» был убран по замечанию заказчика 16.10: «сделай как в первой
@@ -91,11 +94,11 @@
   взяты из них, данные строк — из примеров постановки.
 -->
 <script src="sidenav-menu.js"></script>
-<script src="Design-System/connect.js" defer></script>
-<link rel="stylesheet" href="Design-System/organisms/app-header-content/header-content.css?v=1">
-<script src="Design-System/organisms/app-header-content/header-content.js?v=1" defer></script>
-<link rel="stylesheet" href="Design-System/organisms/app-table-header-actions/table-header-actions.css?v=3">
-<script src="Design-System/organisms/app-table-header-actions/table-header-actions.js?v=3" defer></script>
+<script src="../../Design-System/connect.js" defer></script>
+<link rel="stylesheet" href="../../Design-System/organisms/app-header-content/header-content.css?v=1">
+<script src="../../Design-System/organisms/app-header-content/header-content.js?v=1" defer></script>
+<link rel="stylesheet" href="../../Design-System/organisms/app-table-header-actions/table-header-actions.css?v=3">
+<script src="../../Design-System/organisms/app-table-header-actions/table-header-actions.js?v=3" defer></script>
 <style>
   html, body { margin: 0; font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif; }
 
@@ -124,6 +127,10 @@
      (заказчик 16.10: «отступы между селектами давай тоже 8… только между селектами»);
      зазоры «счётчик → поля» и «поля → тумблер» — родные 16 полосы */
   .filter-fields { display: flex; align-items: center; gap: var(--ds-size-2x, 8px); min-width: 0; }
+  /* попапы вынесены из полосы: обёртки не участвуют в потоке (иначе flex-gap .page даёт лишние отступы) */
+  .page > .filter-anchor { display: contents; }
+  /* ВЕРСИЯ 3: без выделения счётчик «Выбрано: N» скрыт — иначе пустой tha__sel оставляет фантомный зазор 16 */
+  .tha__sel.is-off { display: none; }
 
   /* косяк выгрузки ДС: у полос таблицы артбордный width: fit-content — полосы не тянутся на всю
      ширину (видно на строках групп: линия обрывается по тексту). В прототипе полосы — по контейнеру */
@@ -227,6 +234,19 @@
      все группы» в левом слоте остаётся нейтральной */
   .ds-table-header-cell.th-active .ds-text-ui__element-right .ds-icon-size { color: var(--ds-color-icon-accent, #448aff); }
   .ds-table-header-cell.th-active .ds-text-ui__element-left .ds-icon-size { color: var(--ds-color-icon-primary, #616161); }
+  /* ВЕРСИЯ 3: иконки-фильтры в шапке таблицы (как на стенде Table_DS: filter_list + точка Badge
+     на активном фильтре) + Button toggle группировки (компонент ДС, размер S) с тултипами */
+  .h-filter { position: relative; cursor: pointer; }
+  .h-filter-dot { position: absolute; top: -2px; right: -2px; }
+  .h-filter-dot[hidden] { display: none; }
+  .bt-seg { position: relative; }
+  .icon-tip { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); z-index: 70;
+    width: max-content; max-width: 240px; padding: 4px 8px; border-radius: var(--ds-radius-2x, 8px);
+    background: #333333; color: #ffffff; font: var(--ds-font-caption-l-12-normal-regular); line-height: 16px;
+    visibility: hidden; opacity: 0; transition: opacity .15s ease; pointer-events: none; }
+  .bt-seg:hover .icon-tip, .bt-seg:focus-visible .icon-tip { visibility: visible; opacity: 1; }
+  /* попапы фильтров — фиксированно под иконкой шапки (позицию задаёт скрипт) */
+  #bannerFilterPop, #menuFilterPop { position: fixed; top: 0; left: 0; width: 320px; z-index: 80; }
 
   /* выбранная строка — Accent/5: основная механика таблицы (fixes.css п. 42, журнал №195) — классом ds-table-content-row--selected */
 
@@ -265,14 +285,7 @@
   /* поле фильтра — ФИКСИРОВАННАЯ ширина НА КАЖДОЕ ПОЛЕ под максимум содержимого (S, 16px);
      селект НЕ дёргается при смене значений/группировки; ширина списка задаётся независимо (.fpop) */
   .fsel { cursor: pointer; }
-  /* Группировка — компонент Button toggle ДС (размер S, Type=Outlined): текстовые сегменты
-     «Тип» / «Место», выбранный — с акцентной заливкой, полные названия — в тултипах */
-  .bt-seg { position: relative; }
-  .icon-tip { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); z-index: 70;
-    width: max-content; max-width: 240px; padding: 4px 8px; border-radius: var(--ds-radius-2x, 8px);
-    background: #333333; color: #ffffff; font: var(--ds-font-caption-l-12-normal-regular); line-height: 16px;
-    visibility: hidden; opacity: 0; transition: opacity .15s ease; pointer-events: none; }
-  .bt-seg:hover .icon-tip, .bt-seg:focus-visible .icon-tip { visibility: visible; opacity: 1; }
+  .fsel--group { width: 226px; }   /* «Тип расположения» / «Место расположения» (224.2) */
   .fsel--banner { width: 168px; }  /* «Баннер: 99» + ✕ + ▾ (167.2) */
   .fsel--menu { width: 230px; }    /* «Внешнее меню: 99» + ✕ + ▾ (228.9) */
   .fsel .ds-input__field { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -311,10 +324,8 @@
   .mass-edit__note { display: block; padding: 0 var(--ds-space-4x, 16px) var(--ds-space-2x, 8px); font: var(--ds-font-caption-l-12-normal-regular); color: var(--ds-color-text-secondary, #616161); }
   /* список — тот же Select container, что в фильтрах и списках формы: только ограничиваем высоту */
   .mass-edit .fpop__scroll { max-height: 264px; }
-  /* в flex-колонке пункты не должны сжиматься (иначе двухстрочные названия обрезаются) */
   .mass-edit .fpop__scroll > .ds-select-item { flex: none; }
   .mass-edit .ds-select-item__label { white-space: normal; word-break: break-word; }
-  /* скролл списка — инстанс Scroll ДС (ds-scroll--v), рядом со списком, как в фильтрах */
   .mass-edit .fscroll { flex: none; align-self: stretch; }
   .filter-dot { position: absolute; top: 0; right: 0; }
   /* удалённая строка — вид «удалено» (замечание заказчика 16.10: «показывается всё в дизейбле,
@@ -403,9 +414,11 @@
 
 <!-- Иконки наборов организмов подставляются их модулями по data-hc-icon / data-tha-icon
      из точных SVG Figma (шапка: search, close, search-off, add; полоса: filter_list, edit,
-     delete-negative, close). Инлайн-спрайт — только стрелка сортировки таблицы (не из набора) -->
+     delete-negative, close). Инлайн-спрайт — стрелка сортировки и иконка фильтра шапки таблицы
+     (фильтр — как на стенде Table_DS, журнал №177) -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-sort" viewBox="0 0 20 20"><path transform="translate(5 4.58333)" d="M5 10.8333L0 5.83333L1.16667 4.66667L4.16667 7.66667V0H5.83333V7.66667L8.83333 4.66667L10 5.83333L5 10.8333Z"/></symbol>
+  <symbol id="ic-filter-list" viewBox="0 0 20 20"><path transform="scale(0.833333)" d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></symbol>
 </svg>
 <style>/* спрайтовые иконки: fill ставится на сам svg — селектор «svg path» не доходит до содержимого
    use (теневое дерево), из-за чего иконки рендерились чёрными (0,0,0) */
@@ -449,7 +462,7 @@
   </header>
 
   <!-- Полоса над таблицей — организм table-header-actions.
-       Слева — «Фильтры» и поля группировки/фильтра (порядок заказчика 16.10: тип расположения, баннер, меню),
+       ВЕРСИЯ 3: слева — Button toggle группировки (компонент ДС, размер S; две иконки с тултипами),
        затем разделитель и тумблер «Удалённые: N» — со счётчиком (только текст, 16.10); справа — массовые
        действия, показываются только при выборе строк: «Изменить внешнее меню» и «Удалить» — для обычных
        баннеров, «Восстановить» — для удалённых (постановка: «при отображении удаленных баннеров должна
@@ -465,15 +478,19 @@
            (заказчик 16.10: «сделать 8 только между N и X»; остальные зазоры полосы — родные).
            Крестик — сразу за счётчиком («Выбрано: N ✕»); текст «Очистить выбор» убран 16.10.
            Иконка close — из набора организма (data-tha-icon); клик снимает всё выделение -->
-      <span class="tha__sel">
-        <span class="tha__title" id="stripTitle">Фильтры:</span>
+      <span class="tha__sel is-off" id="stripSel">
+        <span class="tha__title" id="stripTitle"></span>
         <div class="tha__after" id="stripAfterSel" hidden>
           <button type="button" class="tha__text-action" id="stripClear" aria-label="Очистить выбор"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><img data-tha-icon="close" width="20" height="20" alt=""></span></button>
         </div>
       </span>
-      <!-- Группировка — ВЕРСИЯ 1 (20.10): компонент Button toggle ДС (ds-button-toggle, размер S,
-           Type=Outlined) — текстовые сегменты «Тип» / «Место», полные названия — в тултипах;
-           выбранный сегмент — с акцентной заливкой, выбор применяется сразу -->
+      <!-- Подпись группировки — в полосе (организм table header actions), как «Фильтр:» в версии 1 -->
+      <span class="tha__title" id="grpLabel">Группировка:</span>
+      <!-- Группировка — ВЕРСИЯ 3: компонент Button toggle ДС (ds-button-toggle, размер S),
+           Type=Outlined — видимый контейнер с рамкой, выбранный сегмент — с акцентной заливкой
+           (как на стенде Button-Toggle_DS); сегменты — текстовые Button «Тип» / «Место»
+           (вариант 7, выбран заказчиком 20.10), полные названия — в тултипах.
+           Фильтры «Файл»/«Внешнее меню» уехали в шапку таблицы (иконка filter у колонки) -->
       <!-- Поля-селекты — группой .filter-fields: зазор 8 ТОЛЬКО между полями (заказчик 16.10:
            «отступы между селектами давай тоже 8… только между селектами»); остальные зазоры — 16 -->
       <span class="filter-fields">
@@ -487,95 +504,6 @@
             <span class="icon-tip" role="tooltip">Место расположения</span>
           </button>
         </div>
-      <!-- Фильтр — ПОЛЯ-СЕЛЕКТЫ (Select form) + списки (Select container), размер S (36); порядок
-           заказчика 16.10 после заголовка полосы: тип (группировка, см. выше), БАННЕР, МЕНЮ.
-           16.10, замечания заказчика: (1) поля в ЛЕВОЙ зоне — «справа только кнопки и иконки действий»;
-           (2) при незаданном фильтре поле показывает НАЗВАНИЕ («Баннер»/«Внешнее меню»); при заданном
-           название остаётся и добавляется состав — «Внешнее меню: значение/N» (замечание 16.10: «Выбрано
-           чего??? Название должно оставаться»); в размере S подпись поля в ДС не выводится — название
-           работает как Empty-текст; (3) структура списков — как на стенде Select (контейнер): Search → Title →
-           Divider → пункты с чекбоксами → Divider → футер [Сбросить | Применить] в ОБОИХ списках;
-           поиск — в обоих; список — по ширине поля, зазор 2 -->
-      <span class="filter-anchor">
-        <div class="ds-select-form ds-select-form--s ds-select-form--empty fsel fsel--banner" id="bannerFilterField" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="Фильтр по файлу">
-          <div class="ds-input ds-input--s">
-            <div class="ds-input__frame">
-              <div class="ds-input__content">
-                <span class="ds-input__field" id="bannerFilterValue">Файл</span>
-              </div>
-              <!-- при непустом фильтре — крестик «сбросить» (16.10): слева от стрелки,
-                   иконки группой (компонент Icon group: крестик + стрелка) -->
-              <span class="ds-input__icon ds-icon-group">
-                <span class="ds-icon-group__icon" id="bannerFilterClear" role="button" tabindex="0" aria-label="Сбросить фильтр по файлу" hidden><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><span class="material-icons" aria-hidden="true">close</span></span></span>
-                <span class="ds-icon-group__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">arrow_drop_down</span></span></span>
-              </span>
-            </div>
-          </div>
-        </div>
-        <div class="ds-select-container fpop fpop--banner" id="bannerFilterPop" role="listbox" aria-label="Выберите файл" hidden>
-          <div class="ds-select-container__search">
-            <span class="ds-search ds-search--s fpop__sfield">
-              <span class="ds-search__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">search</span></span></span>
-              <input class="ds-search__label" type="text" id="bannerFilterSearch" placeholder="Поиск по названию" aria-label="Поиск по названию файла">
-            </span>
-          </div>
-          <div class="ds-select-container__title"><span class="fpop__title">Выберите файл</span></div>
-          <div class="ds-divider"></div>
-          <div class="fpop__wrap">
-            <div class="ds-select-container__content fpop__scroll" id="bannerFilterItems"></div>
-            <div class="ds-scroll ds-scroll--v ds-scroll--middle fscroll" aria-hidden="true" hidden>
-              <div class="ds-scroll__background"><div class="ds-scroll__knob"></div></div>
-            </div>
-          </div>
-          <div class="ds-divider"></div>
-          <div class="ds-select-container__button-group">
-            <div class="ds-btn-group ds-btn-group--horizontal">
-              <button class="ds-btn ds-btn--s ds-btn--neutral ds-btn--outlined" type="button" id="bannerFilterReset"><span class="ds-btn__label">Сбросить</span></button>
-              <button class="ds-btn ds-btn--s ds-btn--accent ds-btn--filled" type="button" id="bannerFilterApply"><span class="ds-btn__label">Применить</span></button>
-            </div>
-          </div>
-        </div>
-      </span>
-      <span class="filter-anchor">
-        <div class="ds-select-form ds-select-form--s ds-select-form--empty fsel fsel--menu" id="menuFilterField" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="Фильтр по внешнему меню">
-          <div class="ds-input ds-input--s">
-            <div class="ds-input__frame">
-              <div class="ds-input__content">
-                <span class="ds-input__field" id="menuFilterValue">Внешнее меню</span>
-              </div>
-              <!-- при непустом фильтре — крестик «сбросить» (16.10): слева от стрелки,
-                   иконки группой (компонент Icon group: крестик + стрелка) -->
-              <span class="ds-input__icon ds-icon-group">
-                <span class="ds-icon-group__icon" id="menuFilterClear" role="button" tabindex="0" aria-label="Сбросить фильтр по внешнему меню" hidden><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><span class="material-icons" aria-hidden="true">close</span></span></span>
-                <span class="ds-icon-group__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">arrow_drop_down</span></span></span>
-              </span>
-            </div>
-          </div>
-        </div>
-        <div class="ds-select-container fpop fpop--menu" id="menuFilterPop" role="listbox" aria-label="Выберите внешнее меню" hidden>
-          <div class="ds-select-container__search">
-            <span class="ds-search ds-search--s fpop__sfield">
-              <span class="ds-search__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">search</span></span></span>
-              <input class="ds-search__label" type="text" id="menuFilterSearch" placeholder="Поиск по названию" aria-label="Поиск по названию внешнего меню">
-            </span>
-          </div>
-          <div class="ds-select-container__title"><span class="fpop__title">Выберите внешнее меню</span></div>
-          <div class="ds-divider"></div>
-          <div class="fpop__wrap">
-            <div class="ds-select-container__content fpop__scroll" id="menuFilterItems"></div>
-            <div class="ds-scroll ds-scroll--v ds-scroll--middle fscroll" aria-hidden="true" hidden>
-              <div class="ds-scroll__background"><div class="ds-scroll__knob"></div></div>
-            </div>
-          </div>
-          <div class="ds-divider"></div>
-          <div class="ds-select-container__button-group">
-            <div class="ds-btn-group ds-btn-group--horizontal">
-              <button class="ds-btn ds-btn--s ds-btn--neutral ds-btn--outlined" type="button" id="menuFilterReset"><span class="ds-btn__label">Сбросить</span></button>
-              <button class="ds-btn ds-btn--s ds-btn--accent ds-btn--filled" type="button" id="menuFilterApply"><span class="ds-btn__label">Применить</span></button>
-            </div>
-          </div>
-        </div>
-      </span>
       </span><!-- /.filter-fields -->
       <!-- Слот «После заголовка» — разделитель + тумблер удалённых, ПОСЛЕ фильтр-селектов.
            Тумблер (16.10, как в варианте 1 — замечание заказчика: «сделай как в первой версии…
@@ -638,6 +566,60 @@
     </div>
   </div>
 
+  <!-- ВЕРСИЯ 3: попапы фильтров «Файл»/«Внешнее меню» — открываются по иконке в шапке таблицы
+       (position: fixed — позицию задаёт скрипт под иконкой; вне полосы, чтобы не давали зазоров).
+       Активный фильтр — точка Badge на иконке (как на стенде Table_DS) -->
+  <span class="filter-anchor">
+    <div class="ds-select-container fpop fpop--banner" id="bannerFilterPop" role="listbox" aria-label="Выберите файл" hidden>
+      <div class="ds-select-container__search">
+        <span class="ds-search ds-search--s fpop__sfield">
+          <span class="ds-search__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">search</span></span></span>
+          <input class="ds-search__label" type="text" id="bannerFilterSearch" placeholder="Поиск по названию" aria-label="Поиск по названию файла">
+        </span>
+      </div>
+      <div class="ds-select-container__title"><span class="fpop__title">Выберите файл</span></div>
+      <div class="ds-divider"></div>
+      <div class="fpop__wrap">
+        <div class="ds-select-container__content fpop__scroll" id="bannerFilterItems"></div>
+        <div class="ds-scroll ds-scroll--v ds-scroll--middle fscroll" aria-hidden="true" hidden>
+          <div class="ds-scroll__background"><div class="ds-scroll__knob"></div></div>
+        </div>
+      </div>
+      <div class="ds-divider"></div>
+      <div class="ds-select-container__button-group">
+        <div class="ds-btn-group ds-btn-group--horizontal">
+          <button class="ds-btn ds-btn--s ds-btn--neutral ds-btn--outlined" type="button" id="bannerFilterReset"><span class="ds-btn__label">Сбросить</span></button>
+          <button class="ds-btn ds-btn--s ds-btn--accent ds-btn--filled" type="button" id="bannerFilterApply"><span class="ds-btn__label">Применить</span></button>
+        </div>
+      </div>
+    </div>
+  </span>
+  <span class="filter-anchor">
+    <div class="ds-select-container fpop fpop--menu" id="menuFilterPop" role="listbox" aria-label="Выберите внешнее меню" hidden>
+      <div class="ds-select-container__search">
+        <span class="ds-search ds-search--s fpop__sfield">
+          <span class="ds-search__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">search</span></span></span>
+          <input class="ds-search__label" type="text" id="menuFilterSearch" placeholder="Поиск по названию" aria-label="Поиск по названию внешнего меню">
+        </span>
+      </div>
+      <div class="ds-select-container__title"><span class="fpop__title">Выберите внешнее меню</span></div>
+      <div class="ds-divider"></div>
+      <div class="fpop__wrap">
+        <div class="ds-select-container__content fpop__scroll" id="menuFilterItems"></div>
+        <div class="ds-scroll ds-scroll--v ds-scroll--middle fscroll" aria-hidden="true" hidden>
+          <div class="ds-scroll__background"><div class="ds-scroll__knob"></div></div>
+        </div>
+      </div>
+      <div class="ds-divider"></div>
+      <div class="ds-select-container__button-group">
+        <div class="ds-btn-group ds-btn-group--horizontal">
+          <button class="ds-btn ds-btn--s ds-btn--neutral ds-btn--outlined" type="button" id="menuFilterReset"><span class="ds-btn__label">Сбросить</span></button>
+          <button class="ds-btn ds-btn--s ds-btn--accent ds-btn--filled" type="button" id="menuFilterApply"><span class="ds-btn__label">Применить</span></button>
+        </div>
+      </div>
+    </div>
+  </span>
+
   <!-- ═══ Группировка по типу расположения ═══
        Постановка: «Группировка по Типу расположения. Могут 2 типов: Маркетинговые: Экран ожидания
        *Заставки* (WAITING_SCREEN), Категории меню *Баннеры категорий* (MENU_CATEGORIES);
@@ -650,9 +632,9 @@
     <div class="ds-table-header-row">
       <div class="ds-table-header-cell t-c-check"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-check-all><span class="ds-checkbox__box"></span></label></div></div>
       <div class="ds-table-header-cell t-c-photo"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Фото</span></div></div></div></div>
-      <div class="ds-table-header-cell t-c-file" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Файл</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span></span></div></div></div>
+      <div class="ds-table-header-cell t-c-file" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Файл</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state h-filter" data-filter="file" role="button" tabindex="0" aria-label="Фильтр по файлу" aria-expanded="false"><svg width="20" height="20" aria-hidden="true"><use href="#ic-filter-list"/></svg><span class="ds-badge ds-badge--point ds-badge--accent h-filter-dot" hidden aria-hidden="true"></span></span></span></div></div></div>
       <div class="ds-table-header-cell t-c-name" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><span class="ds-text-ui__element-left"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state" role="button" tabindex="0" data-toggle-all-groups="" aria-label="Раскрыть все группы" aria-expanded="false" title="Раскрыть все группы"><span class="material-icons" aria-hidden="true">unfold_more</span></span></span><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Название</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span></span></div></div></div>
-      <div class="ds-table-header-cell t-c-menu" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Внешнее меню</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span></span></div></div></div>
+      <div class="ds-table-header-cell t-c-menu" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Внешнее меню</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state h-filter" data-filter="menu" role="button" tabindex="0" aria-label="Фильтр по внешнему меню" aria-expanded="false"><svg width="20" height="20" aria-hidden="true"><use href="#ic-filter-list"/></svg><span class="ds-badge ds-badge--point ds-badge--accent h-filter-dot" hidden aria-hidden="true"></span></span></span></div></div></div>
       <div class="ds-table-header-cell t-c-dish" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Блюда</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span></span></div></div></div>
       <div class="ds-table-header-cell t-c-place" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Место расположения</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span></span></div></div></div>
     </div>
@@ -762,9 +744,9 @@
     <div class="ds-table-header-row">
       <div class="ds-table-header-cell t-c-check"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-check-all-place><span class="ds-checkbox__box"></span></label></div></div>
       <div class="ds-table-header-cell t-c-photo"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Фото</span></div></div></div></div>
-      <div class="ds-table-header-cell t-c-file" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Файл</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span></span></div></div></div>
+      <div class="ds-table-header-cell t-c-file" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Файл</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state h-filter" data-filter="file" role="button" tabindex="0" aria-label="Фильтр по файлу" aria-expanded="false"><svg width="20" height="20" aria-hidden="true"><use href="#ic-filter-list"/></svg><span class="ds-badge ds-badge--point ds-badge--accent h-filter-dot" hidden aria-hidden="true"></span></span></span></div></div></div>
       <div class="ds-table-header-cell t-c-name" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><span class="ds-text-ui__element-left"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state" role="button" tabindex="0" data-toggle-all-groups="" aria-label="Раскрыть все группы" aria-expanded="false" title="Раскрыть все группы"><span class="material-icons" aria-hidden="true">unfold_more</span></span></span><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Название</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span></span></div></div></div>
-      <div class="ds-table-header-cell t-c-menu" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Внешнее меню</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span></span></div></div></div>
+      <div class="ds-table-header-cell t-c-menu" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Внешнее меню</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state h-filter" data-filter="menu" role="button" tabindex="0" aria-label="Фильтр по внешнему меню" aria-expanded="false"><svg width="20" height="20" aria-hidden="true"><use href="#ic-filter-list"/></svg><span class="ds-badge ds-badge--point ds-badge--accent h-filter-dot" hidden aria-hidden="true"></span></span></span></div></div></div>
     </div>
 
     <div class="ds-table-content-row group-row" data-group="p-burgers" role="button" tabindex="0" aria-expanded="false">
@@ -893,7 +875,7 @@
   <div class="ds-snackbar__progress"></div>
 </div>
 
-<script src="Design-System/components-web/ds-patterns.js"></script>
+<script src="../../Design-System/components-web/ds-patterns.js"></script>
 <script>
 /* Свой код экрана: аккордеоны групп, группировка (селект), рабочий фильтр (поля-селекты + списки
    Select container: тип, баннер, меню), поиск по названию, сортировка, тумблер удалённых
@@ -919,6 +901,8 @@
   var currentView = 'type';   /* ВЕРСИЯ 2: активный вид таблицы — для счётчика и пустого состояния */
 
   var stripTitle = document.getElementById('stripTitle');
+  var stripSel = document.getElementById('stripSel');
+  var grpLabel = document.getElementById('grpLabel');
   var stripMass = document.getElementById('stripMass');
   var stripAfter = document.getElementById('stripAfter');
   var stripAfterSel = document.getElementById('stripAfterSel');
@@ -948,6 +932,11 @@
     var el = r.querySelector('.t-c-name .ds-text-ui__list-item');
     return el ? el.textContent.trim() : '';
   }
+  /* значение колонки «Файл» — по ней фильтрует иконка фильтра в шапке этой колонки */
+  function rowFile(r) {
+    var el = r.querySelector('.t-c-file .ds-text-ui__list-item');
+    return el ? el.textContent.trim() : '';
+  }
   function cellValues(el) {
     var d = el.getAttribute('data-values');
     return d ? d.split('|') : el.textContent.trim().split(/,\s*/);
@@ -965,7 +954,7 @@
   function rowMatches(r) {
     if (state.q && rowName(r).toLowerCase().indexOf(state.q) < 0) return false;
     if (state.menus && !rowMenus(r).some(function (m) { return state.menus.indexOf(m) >= 0; })) return false;
-    if (state.banners && state.banners.indexOf(rowName(r)) < 0) return false;
+    if (state.banners && state.banners.indexOf(rowFile(r)) < 0) return false;
     return true;
   }
   function anyFilterActive() { return state.q !== '' || !!state.menus || !!state.banners; }
@@ -1145,7 +1134,9 @@
     /* в режиме выделения (строка / группа / «выбрать все») панель — контекстная:
        фильтры и группировка скрыты, чтобы их смена не снимала часть выделения молча */
     if (filterFields) filterFields.hidden = banners.length > 0;
-    stripTitle.textContent = banners.length ? selectedLabel(banners.length) : 'Фильтры:';
+    if (grpLabel) grpLabel.hidden = banners.length > 0;
+    stripTitle.textContent = banners.length ? selectedLabel(banners.length) : '';
+    if (stripSel) stripSel.classList.toggle('is-off', banners.length === 0);
   }
 
   function uniqChipValues() {
@@ -1155,9 +1146,11 @@
     });
     return out;
   }
-  function uniqNames() {
+  /* значения фильтра «Файл» — из колонки «Файл» (имена файлов), а не из «Названия»:
+     иконка фильтра стоит в шапке колонки «Файл» и должна фильтровать именно её */
+  function uniqFiles() {
     var out = [];
-    qsa('.tbl [data-group-rows] .t-c-name .ds-text-ui__list-item').forEach(function (c) {
+    qsa('.tbl [data-group-rows] .t-c-file .ds-text-ui__list-item').forEach(function (c) {
       var v = c.textContent.trim();
       if (out.indexOf(v) < 0) out.push(v);
     });
@@ -1637,8 +1630,8 @@
   });
 
   /* Группировки: «Группировка может быть двух типов» — тип расположения / место расположения.
-     20.10: вместо поля-селекта — компонент Button toggle ДС (размер S, Type=Outlined),
-     текстовые сегменты «Тип» / «Место»; выбранный — с акцентной заливкой, выбор применяется сразу */
+     ВЕРСИЯ 3: компонент Button toggle ДС (размер S, Type=Outlined) — текстовые сегменты
+     «Тип» / «Место» (вариант 7); выбранный сегмент — с акцентной заливкой, выбор применяется сразу */
   var grpTypeBtn = document.getElementById('grpType');
   var grpPlaceBtn = document.getElementById('grpPlace');
   function setGrpSeg(btn, on) {
@@ -1659,23 +1652,15 @@
   grpTypeBtn.addEventListener('click', function () { applyGrouping('type'); });
   grpPlaceBtn.addEventListener('click', function () { applyGrouping('place'); });
 
-  /* Фильтр (ВЕРСИЯ 2, пересборка 16.10: «сделать селектами и выпадающим списком»): два поля-селекта
-     на ПРАВОЙ стороне полосы таблицы (правило заказчика: фильтр относится только к таблице → место
-     в header table actions, все действия полосы — справа). Поля — компонент Select form, списки —
-     компонент Select container: «Внешнее меню» — чекбоксы + футер [Сбросить | Применить];
-     «Баннер» — поиск по названию, выбор пункта применяется сразу (кнопок нет) */
-  var menuFilterField = document.getElementById('menuFilterField');
-  var menuFilterValue = document.getElementById('menuFilterValue');
+  /* Фильтры (ВЕРСИЯ 3): «Файл» и «Внешнее меню» — иконки filter у колонок в шапке таблицы;
+     попап (Select container: поиск → заголовок → чекбоксы → футер [Сбросить | Применить])
+     раскрывается под иконкой. Списки и футеры — как в версии 1 */
   var menuFilterPop = document.getElementById('menuFilterPop');
   var menuFilterItems = document.getElementById('menuFilterItems');
   var menuFilterSearch = document.getElementById('menuFilterSearch');
-  var bannerFilterField = document.getElementById('bannerFilterField');
-  var bannerFilterValue = document.getElementById('bannerFilterValue');
   var bannerFilterPop = document.getElementById('bannerFilterPop');
   var bannerFilterItems = document.getElementById('bannerFilterItems');
   var bannerFilterSearch = document.getElementById('bannerFilterSearch');
-  var menuFilterClear = document.getElementById('menuFilterClear');
-  var bannerFilterClear = document.getElementById('bannerFilterClear');
 
   /* скролл списка — компонент Scroll: системная полоса скрыта, ползунок показывает позицию
      (механика — общий файл ДС ds-patterns.js, в странице — только вызов) */
@@ -1689,21 +1674,34 @@
   function closeFilters() {
     menuFilterPop.hidden = true;
     bannerFilterPop.hidden = true;
-    menuFilterField.setAttribute('aria-expanded', 'false');
-    bannerFilterField.setAttribute('aria-expanded', 'false');
+    qsa('.h-filter').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
   }
-  function toggleFilter(pop, field, rebuild) {
+  /* открытие попапа — фиксированно под иконкой в шапке таблицы (ВЕРСИЯ 3, как на стенде Table_DS) */
+  function toggleHeaderFilter(pop, icon, rebuild) {
     var wasHidden = pop.hidden;
     closeFilters();
     if (wasHidden) {
+      var r = icon.getBoundingClientRect();
+      pop.style.left = Math.round(Math.min(r.left, window.innerWidth - 336)) + 'px';
+      pop.style.top = Math.round(r.bottom + 2) + 'px';
       pop.hidden = false;
-      field.setAttribute('aria-expanded', 'true');
+      icon.setAttribute('aria-expanded', 'true');
       rebuild();            /* при открытии — из применённого фильтра (правки без «Применить» отбрасываются) */
       syncPopScroll(pop);
     }
   }
-  menuFilterField.addEventListener('click', function (e) { e.stopPropagation(); toggleFilter(menuFilterPop, menuFilterField, buildMenuFilterList); });
-  bannerFilterField.addEventListener('click', function (e) { e.stopPropagation(); toggleFilter(bannerFilterPop, bannerFilterField, buildBannerFilterList); });
+  qsa('.h-filter[data-filter="file"]').forEach(function (b) {
+    b.addEventListener('click', function (e) { e.stopPropagation(); toggleHeaderFilter(bannerFilterPop, b, buildBannerFilterList); });
+    b.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); b.click(); }
+    });
+  });
+  qsa('.h-filter[data-filter="menu"]').forEach(function (b) {
+    b.addEventListener('click', function (e) { e.stopPropagation(); toggleHeaderFilter(menuFilterPop, b, buildMenuFilterList); });
+    b.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); b.click(); }
+    });
+  });
   menuFilterPop.addEventListener('click', function (e) { e.stopPropagation(); });
   bannerFilterPop.addEventListener('click', function (e) { e.stopPropagation(); });
   document.addEventListener('click', function () { closeFilters(); });
@@ -1782,7 +1780,7 @@
     applyMenuQuery();   /* поиск сохраняется при пересборке */
   }
   function buildBannerFilterList() {
-    buildFilterList(bannerFilterItems, uniqNames(), state.banners);
+    buildFilterList(bannerFilterItems, uniqFiles(), state.banners);
     applyBannerQuery();   /* поиск сохраняется при пересборке */
   }
   function applyFilterState() {
@@ -1809,19 +1807,7 @@
     applyFilterState();
   });
 
-  /* крестик в поле — сброс фильтра (16.10): клик не должен открывать список (stopPropagation) */
-  menuFilterClear.addEventListener('click', function (e) {
-    e.stopPropagation();
-    state.menus = null;
-    buildMenuFilterList();
-    applyFilterState();
-  });
-  bannerFilterClear.addEventListener('click', function (e) {
-    e.stopPropagation();
-    state.banners = null;
-    buildBannerFilterList();
-    applyFilterState();
-  });
+  /* ВЕРСИЯ 3: крестика в поле больше нет — сброс фильтра кнопкой «Сбросить» в попапе */
 
   /* Многозначные ячейки «Меню»/«Место расположения» — как было ранее:
      значения обычным текстом, ячейка показывает максимум 2 строки, в конце
@@ -1900,21 +1886,13 @@
   }
   menuFilterSearch.addEventListener('input', applyMenuQuery);
 
-  /* поля: название при незаданном фильтре (Empty); при заданном название ОСТАЁТСЯ и показывается
-     состав — «Внешнее меню: значение» / «Внешнее меню: N» (замечание заказчика 16.10:
-     «Выбрано чего??? Название должно оставаться. Внешнее меню: 3») */
+  /* точка Badge на иконке фильтра — есть применённые значения (компонент Badge: Point, Accent;
+     как на стенде Table_DS, журнал №177) */
   function updateFilterFields() {
     var menuOn = !!state.menus;
     var bannerOn = !!state.banners;
-    menuFilterValue.textContent = menuOn ? 'Внешнее меню: ' + (state.menus.length === 1 ? state.menus[0] : state.menus.length) : 'Внешнее меню';
-    bannerFilterValue.textContent = bannerOn ? 'Файл: ' + (state.banners.length === 1 ? state.banners[0] : state.banners.length) : 'Файл';
-    menuFilterField.classList.toggle('ds-select-form--empty', !menuOn);
-    menuFilterField.classList.toggle('ds-select-form--populated', menuOn);
-    bannerFilterField.classList.toggle('ds-select-form--empty', !bannerOn);
-    bannerFilterField.classList.toggle('ds-select-form--populated', bannerOn);
-    /* крестик «сбросить» — только при непустом фильтре (16.10) */
-    menuFilterClear.hidden = !menuOn;
-    bannerFilterClear.hidden = !bannerOn;
+    qsa('.h-filter[data-filter="menu"] .h-filter-dot').forEach(function (d) { d.hidden = !menuOn; });
+    qsa('.h-filter[data-filter="file"] .h-filter-dot').forEach(function (d) { d.hidden = !bannerOn; });
   }
   /* пересборка обоих списков (снятие чипов, «Сбросить всё» в строке фильтров) */
   function syncFilterBoxes() {
@@ -2140,13 +2118,11 @@
         massEditApply.disabled = massEditChoice.length === 0;
       }, true);
     });
-    syncMassEditScroll();
-  }
-  /* скролл списка меню — компонент Scroll (механика — ds-patterns.js) */
-  function syncMassEditScroll() {
     DSPatterns.scrollSync(massEditList, massEditPanel.querySelector('.fscroll'));
   }
-  massEditList.addEventListener('scroll', syncMassEditScroll);
+  massEditList.addEventListener('scroll', function () {
+    DSPatterns.scrollSync(massEditList, massEditPanel.querySelector('.fscroll'));
+  });
   massEdit.addEventListener('click', function (e) {
     e.stopPropagation();
     if (massEditPanel.hidden) {
@@ -2154,8 +2130,8 @@
       buildMassEditList();
       massEditApply.disabled = true;
       massEditPanel.hidden = false;
+      DSPatterns.scrollSync(massEditList, massEditPanel.querySelector('.fscroll'));
       massEdit.setAttribute('aria-expanded', 'true');
-      syncMassEditScroll();
     } else {
       closeMassEditPanel();
     }
