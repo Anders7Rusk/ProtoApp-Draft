@@ -342,11 +342,14 @@
       </div>
       <div class="tha__right">
         <div id="listMass" hidden>
-          <button type="button" class="ds-btn-icon ds-btn-icon--m ds-btn-icon--neutral ds-btn-icon--text" aria-label="Удалить выбранные" title="Удалить" id="listDelete">
-            <span class="ds-btn-icon__icon"><img data-tha-icon="delete-negative" width="20" height="20" alt=""></span>
+          <!-- массовые действия — как в списках баннеров: кнопка с иконкой И подписью (не только иконка) -->
+          <button type="button" class="ds-btn ds-btn--m ds-btn--negative ds-btn--text" aria-label="Удалить выбранные" title="Удалить" id="listDelete">
+            <span class="ds-btn__icon"><img data-tha-icon="delete-negative" width="20" height="20" alt=""></span>
+            <span class="ds-btn__label">Удалить</span>
           </button>
-          <button type="button" class="ds-btn-icon ds-btn-icon--m ds-btn-icon--neutral ds-btn-icon--text" aria-label="Восстановить выбранные" title="Восстановить" id="listRestore" hidden>
-            <span class="ds-btn-icon__icon"><img data-tha-icon="restore" width="20" height="20" alt=""></span>
+          <button type="button" class="ds-btn ds-btn--m ds-btn--neutral ds-btn--text" aria-label="Восстановить выбранные" title="Восстановить" id="listRestore" hidden>
+            <span class="ds-btn__icon"><img data-tha-icon="restore" width="20" height="20" alt=""></span>
+            <span class="ds-btn__label">Восстановить</span>
           </button>
         </div>
       </div>
