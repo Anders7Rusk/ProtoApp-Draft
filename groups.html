@@ -119,6 +119,14 @@
   .frm-group__title { font: var(--ds-font-body-s-14-normal-medium); letter-spacing: var(--ds-font-body-s-14-normal-medium-spacing); color: var(--ds-color-text-primary, #333333); margin: 0 0 var(--ds-space-2x, 8px); }
   .g-field .ds-input-datepicker { width: 100%; min-height: 0; }
   .g-field .ds-input-datepicker .ds-input { width: 100%; }
+  /* кнопка «Сохранить»: тултип на обёртке (disabled-кнопка не ловит hover) — как в форме баннера */
+  .save-wrap { position: relative; }
+  .save-tip { position: absolute; top: calc(100% + var(--ds-space-2x, 8px)); right: 0; z-index: 70;
+    width: max-content; max-width: 340px; padding: var(--ds-space-2x, 8px) var(--ds-space-3x, 12px);
+    border-radius: var(--ds-radius-2x, 8px); background: #333333; color: #ffffff;
+    font: var(--ds-font-caption-l-12-normal-regular); line-height: 16px;
+    visibility: hidden; opacity: 0; transition: opacity .15s ease; }
+  .save-wrap:hover .save-tip { visibility: visible; opacity: 1; }
   .g-head__title { font: var(--ds-font-body-m-16-normal-medium); color: var(--ds-color-text-primary, #333333); }
   /* Гайд «Принципы группировки контента»: карточка — радиус 16, только обводка;
      инпуты — 16 по вертикали и 16 в строке; подпись → поле — 8. */
@@ -381,7 +389,10 @@
       </div>
       <div class="hc__right">
         <div class="ds-btn-group ds-btn-group--horizontal hc__actions">
-          <button type="button" class="ds-btn ds-btn--m ds-btn--accent ds-btn--filled" id="groupSave"><span class="ds-btn__label">Сохранить</span></button>
+          <div class="save-wrap" id="saveWrap">
+            <button type="button" class="ds-btn ds-btn--m ds-btn--accent ds-btn--filled" id="groupSave" disabled><span class="ds-btn__label">Сохранить</span></button>
+            <div class="save-tip" id="saveTip" role="tooltip" hidden></div>
+          </div>
         </div>
       </div>
     </header>
@@ -1172,6 +1183,8 @@
     updateGroupNotice();
     /* счётчик на вкладке «Баннеры» — сразу при открытии формы, не только после перехода на вкладку */
     syncBannerStrip();
+    /* обязательные поля нового/открытого черновика: кнопка «Сохранить» активна только когда всё есть */
+    updateGroupSaveState();
   }
   function updateTypeUi() {
     var isTemplate = draft.type === 'template';
@@ -1623,6 +1636,33 @@
     });
     return out;
   }
+  /* ── «Сохранить» — как «Создать» в форме баннера: неактивна, пока не заполнены
+     обязательные поля (название, дата начала показа, рестораны/шаблон по типу);
+     в тултипе — что осталось заполнить ── */
+  function groupMissing() {
+    var miss = [];
+    if (!nameInput.value.trim()) miss.push('name');
+    if (!toIsoDate(fromDp.get())) miss.push('from');
+    var type = draft.type || 'restaurants';
+    if (type === 'restaurants' && !draft.allRestaurants && !pboDraft.length) miss.push('pbo');
+    if (type === 'template' && !draft.template) miss.push('template');
+    return miss;
+  }
+  function updateGroupSaveState() {
+    var btn = qs('#groupSave');
+    if (!btn) return;
+    /* на списке групп формы нет — черновика тоже */
+    if (!draft || qs('#groupView').hidden) return;
+    var miss = groupMissing();
+    var invalid = miss.length > 0;
+    btn.disabled = invalid;
+    var tip = qs('#saveTip');
+    if (tip) {
+      var names = { name: 'название', from: 'дата начала показа', pbo: 'рестораны', template: 'шаблон' };
+      tip.textContent = invalid ? 'Не заполнено: ' + miss.map(function (k) { return names[k]; }).join(', ') + '.' : '';
+      tip.hidden = !invalid;
+    }
+  }
   function saveGroup() {
     clearGroupErrors();
     var ok = true;
@@ -1760,6 +1800,14 @@
   nameInput.addEventListener('input', syncName);
   nameInput.addEventListener('focus', syncName);
   nameInput.addEventListener('blur', syncName);
+  /* состояние «Сохранить» пересчитываем на любое действие в форме (ввод, календарь, списки) */
+  nameInput.addEventListener('input', updateGroupSaveState);
+  fromWrap.addEventListener('input', updateGroupSaveState);
+  fromWrap.addEventListener('change', updateGroupSaveState);
+  toWrap.addEventListener('input', updateGroupSaveState);
+  toWrap.addEventListener('change', updateGroupSaveState);
+  document.addEventListener('click', function () { setTimeout(updateGroupSaveState, 0); });
+  updateGroupSaveState();
 
 
   typeFieldEl.addEventListener('click', function (e) { e.stopPropagation(); if (typePop.hidden) openTypePop(); else closeAllPops(); });
