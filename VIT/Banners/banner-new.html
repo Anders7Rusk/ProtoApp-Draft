@@ -986,7 +986,16 @@
   /* список прижат к НИЗУ ПОЛЯ (а не обёртки): подсказка/предупреждение под полем
      не отодвигает выпадающий список (как в Material: панель привязана к триггеру) */
   function positionPop(p) {
-    if (p.pop && p.field) p.pop.style.top = (p.field.offsetHeight + 2) + 'px';
+    if (!p.pop || !p.field) return;
+    p.pop.classList.remove('fpop--up');
+    p.pop.style.top = (p.field.offsetHeight + 2) + 'px';
+    /* если внизу не хватает места — список раскрывается вверх (как Select в Material) */
+    var pr = p.pop.getBoundingClientRect();
+    var fr = p.field.getBoundingClientRect();
+    if (pr.bottom > window.innerHeight - 8 && fr.top - 2 - p.pop.offsetHeight > 8) {
+      p.pop.style.top = (-(p.pop.offsetHeight + 2)) + 'px';
+      p.pop.classList.add('fpop--up');
+    }
   }
   function refreshPops() {
     pops.forEach(function (p) {

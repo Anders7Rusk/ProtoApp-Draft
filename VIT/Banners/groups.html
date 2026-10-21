@@ -144,6 +144,8 @@
   .fsel.is-error .ds-input__support { color: var(--ds-color-text-negative, #ff5252); }
   .ds-input__support[hidden] { display: none; }
   .g-pop { position: absolute; top: calc(100% + 2px); left: 0; z-index: 60; width: 100%; min-height: 0; }
+  /* если внизу не хватает места — список раскрывается вверх (паттерн Select) */
+  .g-pop.g-pop--up { top: auto; bottom: calc(100% + 2px); }
   .g-pop__wrap { display: flex; flex-direction: row; align-items: flex-start; width: 100%; min-height: 0; }
   .g-pop .ds-select-container__content { flex: 1 1 auto; min-width: 0; max-height: 320px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding-bottom: var(--ds-space-2x, 8px); }
   .g-pop .ds-select-container__content::-webkit-scrollbar { display: none; }
@@ -161,11 +163,14 @@
   /* поиск — 8 со всех сторон (как #dishPop в форме баннера) */
   .g-pop .ds-select-container__search { padding: var(--ds-space-2x, 8px); }
   .g-pop .ds-select-container__search[hidden] { display: none !important; }   /* правило ДС: поиск только при >12 значений */
+  /* разделитель под поиском гасится вместе с ним (иначе линия сверху над первым пунктом) */
+  .g-pop > .ds-divider[hidden] { display: none !important; }
   .g-pop .ds-search { width: 100%; }
   .g-pop .ds-select-container__button-group { justify-content: flex-end; }
   /* «Все» — Body S medium (как «Все рестораны» на списке баннеров) */
   .g-pop .g-pop__all .ds-select-item__label { font-weight: var(--ds-font-body-s-14-normal-medium-weight, 500); }
-  /* пункт-действие «Добавить по кодам» — строка списка, текст-ссылка */
+  /* пункт-действие «Добавить по кодам» — строка-ссылка целиком: и текст, и иконка в цвет ссылки */
+  .g-pop .g-pop__addcodes,
   .g-pop .g-pop__addcodes .ds-select-item__label { color: var(--ds-color-text-ui-link-text-color, #448aff); }
   /* диалог «Добавить рестораны по кодам» — поле кодов (Textarea ДС) */
   .addcodes-area { width: 100%; min-height: 0; }
@@ -386,6 +391,9 @@
       <button type="button" class="ds-tab" data-gtab="banners" role="tab" aria-selected="false">Баннеры<span class="ds-tab__counter" id="gtabBannersCount" hidden></span></button>
     </div>
 
+    <!-- Плашка о составе — над карточкой (видна на обеих вкладках), компонент Banners (Accent) -->
+    <div class="ds-banner ds-banner--accent ds-banner--horizontal g-notice" id="groupNotice" hidden><span class="ds-banner__text"></span></div>
+
     <div class="g-tabpanel" data-gpanel="details">
       <div class="g-card ds-card ds-card--outlined ds-card--custom">
         <div class="frm-groups">
@@ -539,7 +547,6 @@
             </div>
           </section>
 
-          <div class="g-full ds-banner ds-banner--accent ds-banner--horizontal g-notice" id="groupNotice" hidden><span class="ds-banner__text"></span></div>
         </div>
       </div>
     </div>
@@ -629,6 +636,7 @@
   <div class="ds-snackbar__body">
     <span class="ds-snackbar__icon"><span class="material-icons" aria-hidden="true">info</span></span>
     <div class="ds-snackbar__content"><span class="ds-snackbar__label" id="toastLabel"></span></div>
+    <button type="button" class="ds-snackbar__button sb__btn" id="toastAction" hidden><span class="ds-btn__label">Отменить</span></button>
   </div>
   <div class="ds-snackbar__progress"></div>
 </div>
@@ -920,8 +928,8 @@
     qs('#groupTitle').textContent = mode === 'edit' ? 'Редактировать группу' : mode === 'copy' ? 'Копия группы' : 'Новая группа';
     setTab('details');
     fillGroup();
-    qs('#groupNotice').hidden = true;
-    qs('#groupNotice .ds-banner__text').textContent = '';
+    /* состояние плашки выставляет updateGroupNotice() внутри fillGroup —
+       принудительно скрывать после заполнения нельзя (плашка не появлялась при открытии) */
   }
   function hideGroupView() { qs('#groupView').hidden = true; qs('#listView').hidden = false; qs('#listHeader').hidden = false; renderList(); }
   function setTab(next) {
@@ -1046,10 +1054,21 @@
   function syncPopScrollList(pop) {
     DSPatterns.scrollSync(pop.querySelector('.ds-select-container__content'), pop.querySelector('.fscroll'));
   }
+  /* направление раскрытия: вниз, а если места нет — вверх (как Select в Material) */
+  function placePop(fieldEl, pop) {
+    pop.classList.remove('g-pop--up');
+    if (!fieldEl) return;
+    var r = fieldEl.getBoundingClientRect();
+    var ph = pop.offsetHeight;
+    if (r.bottom + 2 + ph > window.innerHeight - 8 && r.top - 2 - ph > 8) pop.classList.add('g-pop--up');
+  }
   /* Правило ДС (iiko-ds-spec.md, шаг 3б; AGENTS.md): поиск в Select container — только если значений больше 12 */
   function syncPopSearch(pop, count) {
     var slot = pop.querySelector('.ds-select-container__search');
-    if (slot) slot.hidden = count <= 12;
+    var hide = count <= 12;
+    if (slot) slot.hidden = hide;
+    var div = slot && slot.nextElementSibling;   /* разделитель между поиском и списком */
+    if (div && div.classList && div.classList.contains('ds-divider')) div.hidden = hide;
   }
   function openTypePop() {
     closeAllPops();
@@ -1058,15 +1077,19 @@
     typeFieldEl.classList.add('is-open');
     typeFieldEl.setAttribute('aria-expanded', 'true');
     syncPopScrollList(typePop);
+    placePop(typeFieldEl, typePop);
   }
   /* Исключенные рестораны — мультиселект с поиском: «Все», рестораны, «Добавить по кодам» */
   function renderExclList() {
     var q = exclSearch.value.trim().toLowerCase();
+    var visible = PBO.filter(function (p) { return !q || (p.id + ' ' + p.name).toLowerCase().indexOf(q) >= 0; });
     exclList.innerHTML = '';
     if (!q) {
-      exclList.appendChild(checkboxItem('Все', !!draft.exclAll, false, function (on) {
+      exclList.appendChild(checkboxItem('Все', !!draft.exclAll, !draft.exclAll && exclDraft.length > 0, function (on) {
         draft.exclAll = on;
-        if (on) { exclDraft = []; draft.exclCodes = []; }
+        /* «Все» — Select all: отмечаем ВСЕ пункты списка (как в фильтрах и в формах) */
+        if (on) { exclDraft = visible.map(function (p) { return p.id; }); draft.exclCodes = []; }
+        else { exclDraft = []; }
         updateExclValue();
         renderExclList();
       }, 'g-pop__all'));
@@ -1075,13 +1098,15 @@
       allDiv.className = 'ds-divider';
       exclList.appendChild(allDiv);
     }
-    PBO.filter(function (p) { return !q || (p.id + ' ' + p.name).toLowerCase().indexOf(q) >= 0; }).forEach(function (p) {
-      var checked = exclDraft.indexOf(p.id) >= 0;
+    visible.forEach(function (p) {
+      var checked = !!draft.exclAll || exclDraft.indexOf(p.id) >= 0;
       exclList.appendChild(checkboxItem(p.id + ' · ' + p.name, checked, false, function (on) {
         draft.exclAll = false;
         if (on) { if (exclDraft.indexOf(p.id) < 0) exclDraft.push(p.id); }
         else exclDraft = exclDraft.filter(function (x) { return x !== p.id; });
         updateExclValue();
+        /* перерисовываем список: строка «Все» сразу получает промежуточное состояние (как в «Ресторанах») */
+        renderExclList();
       }));
     });
     if (!q) {
@@ -1105,7 +1130,7 @@
     exclPop.hidden = !open;
     exclFieldEl.classList.toggle('is-open', open);
     exclFieldEl.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if (open) { exclSearch.value = ''; renderExclList(); syncPopSearch(exclPop, PBO.length); }
+    if (open) { exclSearch.value = ''; renderExclList(); syncPopSearch(exclPop, PBO.length); placePop(exclFieldEl, exclPop); }
   }
   function openTemplatePop() {
     closeAllPops();
@@ -1114,6 +1139,7 @@
     templateFieldEl.classList.add('is-open');
     templateFieldEl.setAttribute('aria-expanded', 'true');
     syncPopScrollList(templatePop);
+    placePop(templateFieldEl, templatePop);
   }
   function syncFloat(wrap, input, label, hint) {
     var filled = !!input.value.trim();
@@ -1144,6 +1170,8 @@
     updatePboValue();
     clearGroupErrors();
     updateGroupNotice();
+    /* счётчик на вкладке «Баннеры» — сразу при открытии формы, не только после перехода на вкладку */
+    syncBannerStrip();
   }
   function updateTypeUi() {
     var isTemplate = draft.type === 'template';
@@ -1188,14 +1216,16 @@
     pboPop.hidden = !open;
     pboFieldEl.classList.toggle('is-open', open);
     pboFieldEl.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if (open) { pboSearch.value = ''; renderPboList(); syncPopSearch(pboPop, PBO.length); syncPopScrollList(pboPop); }
+    if (open) { pboSearch.value = ''; renderPboList(); syncPopSearch(pboPop, PBO.length); placePop(pboFieldEl, pboPop); syncPopScrollList(pboPop); }
   }
   function renderPboList() {
     var q = pboSearch.value.trim().toLowerCase();
+    var visible = PBO.filter(function (p) { return !q || (p.id + ' ' + p.name).toLowerCase().indexOf(q) >= 0; });
     pboList.innerHTML = '';
     pboList.appendChild(checkboxItem('Все рестораны', !!draft.allRestaurants, !draft.allRestaurants && pboDraft.length > 0, function (checked) {
       draft.allRestaurants = checked;
-      if (checked) pboDraft = [];
+      /* «Все рестораны» — Select all: отмечаем ВСЕ пункты списка */
+      pboDraft = checked ? visible.map(function (p) { return p.id; }) : [];
       updatePboValue();
       renderPboList();
     }, 'g-pop__all'));
@@ -1203,8 +1233,8 @@
     var pboAllDiv = document.createElement('div');
     pboAllDiv.className = 'ds-divider';
     pboList.appendChild(pboAllDiv);
-    PBO.filter(function (p) { return !q || (p.id + ' ' + p.name).toLowerCase().indexOf(q) >= 0; }).forEach(function (p) {
-      var checked = !draft.allRestaurants && pboDraft.indexOf(p.id) >= 0;
+    visible.forEach(function (p) {
+      var checked = !!draft.allRestaurants || pboDraft.indexOf(p.id) >= 0;
       pboList.appendChild(checkboxItem(p.id + ' · ' + p.name, checked, false, function (on) {
         draft.allRestaurants = false;
         if (on) { if (pboDraft.indexOf(p.id) < 0) pboDraft.push(p.id); }
@@ -1463,8 +1493,9 @@
   }
   /* ── диалоги / тосты ─────────────────────────────────────────────────── */
   var toastTimer = null;
+  var toastUndo = null;
   var TOAST_ICONS = { neutral: 'info', positive: 'check_circle', negative: 'error', warning: 'warning' };
-  function toast(text, status) {
+  function toast(text, status, undoFn) {
     status = TOAST_ICONS[status] ? status : 'neutral';
     var t = qs('#toast');
     t.classList.remove('sb--neutral', 'sb--positive', 'sb--negative', 'sb--warning');
@@ -1472,10 +1503,20 @@
     var ic = t.querySelector('.ds-snackbar__icon .material-icons');
     if (ic) ic.textContent = TOAST_ICONS[status];
     qs('#toastLabel').textContent = text;
+    toastUndo = undoFn || null;
+    var act = qs('#toastAction');
+    if (act) act.hidden = !undoFn;   /* действие — только когда отмена возможна */
     t.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.hidden = true; }, 4000);
+    toastTimer = setTimeout(function () { t.hidden = true; toastUndo = null; }, undoFn ? 5000 : 4000);
   }
+  qs('#toastAction').addEventListener('click', function () {
+    var fn = toastUndo;
+    qs('#toast').hidden = true;
+    toastUndo = null;
+    clearTimeout(toastTimer);
+    if (fn) fn();
+  });
   function showDialog(title, text, actions) {
     qs('#dlg').classList.remove('dlg--wide');
     qs('#dlgTitle').textContent = title;
@@ -1645,7 +1686,9 @@
         normal.forEach(function (g) { g.deleted = true; g.active = false; });
         writeGroups(groups);
         listState.selected = [];
-        closeDlg(); renderList(); toast('Удалено групп: ' + normal.length, 'negative');
+        closeDlg(); renderList();
+        /* удаление обратимое — нейтральный снекбар с «Отменить», как в списках баннеров */
+        toast('Удалено групп: ' + normal.length, 'neutral', function () { restoreGroups(normal.map(function (g) { return g.id; })); });
       } }
     ]);
   }

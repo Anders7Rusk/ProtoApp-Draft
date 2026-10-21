@@ -125,7 +125,14 @@
   .frm-grid .field-anchor[data-field="menu"],
   .frm-grid .field-anchor[data-field="dish"] { grid-column: 1 / -1; }
   /* названия категорий в подсказках блюд — Body S medium (как в дереве блюд формы v1) */
+  .fpop__cat { align-items: center; }
   .fpop__cat .ds-select-item__label { font-weight: var(--ds-font-body-s-14-normal-medium-weight, 500); }
+  /* иерархия — как в списке блюд «Нового баннера» (v1): категория = строка-группа
+     (шеврон раскрытия + чекбокс + название), блюда — с отступом под своей категорией */
+  .fpop__cat .ds-select-item__element-left { align-self: center; display: flex; align-items: center; gap: var(--ds-space-1x, 4px); }
+  .fpop__cat-chevron { display: inline-flex; align-items: center; justify-content: center; width: var(--ds-size-5x, 20px); height: var(--ds-size-5x, 20px); border-radius: var(--ds-radius-1x, 4px); color: var(--ds-color-icon-primary, #616161); }
+  .fpop__cat-chevron:hover { background: var(--ds-color-select-item-hover-background, #f5f5f5); }
+  .fpop__opt--child { padding-left: calc(var(--ds-select-item-pad-left, 16px) + var(--ds-size-5x, 20px) + 4px); }
   /* вкладки формы скрыты (20.10), но элемент остаётся в разметке */
   .frm-tabs[hidden] { display: none !important; }
   /* S2/S3/S4: вкладки формы, таблица выбранных блюд и панель выбора */
@@ -216,12 +223,13 @@
   .aci .ds-chips-input__frame { width: 100%; box-sizing: border-box; min-height: var(--ds-size-12x, 48px); }
   /* пустое поле (без чипов) — высота 48 ВСЕГДА, и до и после фокуса: 20.10 заказчик заметил,
      что на фокусе селект подрастал (48 → 58) из-за всплывшего лейбла и «высокой» раскладки.
-     Сжимаем внутреннюю раскладку под 48: паддинги компонента 4/12/8 + лейбл 16 + ввод 20 = 48.
+     Текст поля — как у компонента Chips Input и как у всех остальных полей формы: Body M 16/24
+     (было 14/20 — отсюда расхождение шрифтов внутри одной формы); паддинги 12 + 24 = 48.
      «Высокая» раскладка (4/12/8 + лейбл + чипы) — только когда есть чипы (.aci--filled). */
   .aci:not(.aci--filled) .ds-chips-input__frame { height: var(--ds-size-12x, 48px); gap: 0; }
   .aci:not(.aci--filled):not(.is-open) .ds-chips-input__frame { padding: var(--ds-space-3x, 12px); }
   .aci:not(.aci--filled) .ds-chips-input__content { align-items: center; }
-  .aci:not(.aci--filled) .aci-input { font-size: var(--ds-font-body-s-14-normal-regular-size, 14px); line-height: var(--ds-font-body-s-14-normal-regular-line, 20px); height: var(--ds-font-body-s-14-normal-regular-line, 20px); }
+  .aci:not(.aci--filled) .aci-input { font-size: var(--ds-font-body-m-16-normal-regular-size, 16px); line-height: var(--ds-font-body-m-16-normal-regular-line, 24px); height: var(--ds-font-body-m-16-normal-regular-line, 24px); }
   .aci .ds-chips-input__content { flex-wrap: wrap; row-gap: var(--ds-size-2x, 8px); }   /* вертикаль = горизонтали (8), как gap группы чипов */
   .aci-caption { font: var(--ds-font-caption-l-12-normal-regular); color: var(--ds-color-form-field-filled-default-label-text-color, #616161); white-space: nowrap; }
   .aci-input { flex: 1 1 80px; min-width: 40px; border: 0; padding: 0; background: none; outline: 0; font-family: inherit;
@@ -440,7 +448,7 @@
 
         <!-- Группа 2: источник данных и действие в меню -->
         <div class="frm-group" data-group="menu">
-          <div class="frm-group__title">Внешнее меню</div>
+          <div class="frm-group__title">Меню и блюда</div>
           <div class="frm-grid">
 
         <!-- ВЕРСИЯ 2: Меню — Chips Input + подсказки (как mat-chip-grid + mat-autocomplete). -->
@@ -1036,7 +1044,16 @@
   /* список прижат к НИЗУ ПОЛЯ (а не обёртки): подсказка/предупреждение под полем
      не отодвигает выпадающий список (как в Material: панель привязана к триггеру) */
   function positionPop(p) {
-    if (p.pop && p.field) p.pop.style.top = (p.field.offsetHeight + 2) + 'px';
+    if (!p.pop || !p.field) return;
+    p.pop.classList.remove('fpop--up');
+    p.pop.style.top = (p.field.offsetHeight + 2) + 'px';
+    /* если внизу не хватает места — список раскрывается вверх (как Select в Material) */
+    var pr = p.pop.getBoundingClientRect();
+    var fr = p.field.getBoundingClientRect();
+    if (pr.bottom > window.innerHeight - 8 && fr.top - 2 - p.pop.offsetHeight > 8) {
+      p.pop.style.top = (-(p.pop.offsetHeight + 2)) + 'px';
+      p.pop.classList.add('fpop--up');
+    }
   }
   function refreshPops() {
     pops.forEach(function (p) {
@@ -1279,47 +1296,120 @@
 
   /* ── ВЕРСИЯ 2: Блюда для деактивации — подсказки автокомплита ─────────── */
   var dishPop = qs('#dishPop'), dishItems = qs('#dishItems');
-  /* пункты: сначала категория (medium), затем её блюда — в порядке групп меню */
-  function dishOptionList() {
-    var out = [];
-    dishGroups().forEach(function (g) {
-      out.push({ value: g.cat, cat: true });
-      g.dishes.forEach(function (d) { out.push({ value: d, cat: false }); });
+  /* Дерево — как в списке блюд «Нового баннера» (v1): «Все» + Divider, дальше категории
+     строками-группами (шеврон раскрытия + чекбокс + название medium), блюда — с отступом
+     под своей категорией. Ввод в поле фильтрует список; совпавшие категории раскрываются. */
+  var dishOpen = {};   /* раскрытые категории списка: { 'Супы': true } */
+  function dishSelectedIn(list) {
+    return list.filter(function (v) { return state.dish.indexOf(v) > -1; }).length;
+  }
+  function dishCatRow(cat, dishes, open) {
+    var catOn = state.dish.indexOf(cat) > -1;
+    var sel = dishSelectedIn(dishes);
+    var fully = catOn || (dishes.length > 0 && sel === dishes.length);
+    var item = document.createElement('div');
+    item.className = 'ds-select-item ds-select-item--false fpop__cat';
+    item.id = 'fpop-opt-' + (++autoOptSeq);
+    item.setAttribute('role', 'option');
+    item.setAttribute('tabindex', '-1');
+    item.setAttribute('data-value', cat);
+    item.setAttribute('aria-expanded', open ? 'true' : 'false');
+    item.setAttribute('aria-selected', fully ? 'true' : 'false');
+    item.innerHTML =
+      '<span class="ds-select-item__element-left">' +
+        '<span class="fpop__cat-chevron" role="button" aria-hidden="true">' +
+          '<span class="ds-icon-size ds-icon-size--5x"><span class="material-icons">' + (open ? 'expand_more' : 'chevron_right') + '</span></span>' +
+        '</span>' +
+        '<label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" tabindex="-1"><span class="ds-checkbox__box"></span></label>' +
+      '</span>' +
+      '<div class="ds-select-item__content"><span class="ds-select-item__label"></span></div>';
+    item.querySelector('.ds-select-item__label').textContent = cat;
+    var input = item.querySelector('.ds-checkbox__input');
+    input.checked = fully;
+    input.indeterminate = !fully && sel > 0;
+    input.addEventListener('change', function () {
+      if (input.checked) { setCatValue(cat, true); dishOpen[cat] = true; }
+      else setCatValue(cat, false);
+      buildDishList();
     });
-    return out;
+    /* клик по строке (кроме чекбокса) раскрывает/сворачивает группу — выбор только чекбоксом */
+    item.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (e.target.closest('.ds-checkbox')) return;
+      dishOpen[cat] = !open;
+      buildDishList();
+    });
+    return item;
+  }
+  /* снятие блюда внутри выбранной категории раскладывает категорию на блюда
+     (категория снимается, остальные блюда остаются выбранными по отдельности) */
+  function toggleDishInCat(cat, dishes, dish, on) {
+    var catOn = state.dish.indexOf(cat) > -1;
+    if (on) {
+      if (state.dish.indexOf(dish) < 0) state.dish.push(dish);
+    } else if (catOn) {
+      state.dish = state.dish.filter(function (x) { return x !== cat; });
+      dishes.forEach(function (x) { if (x !== dish && state.dish.indexOf(x) < 0) state.dish.push(x); });
+    } else {
+      state.dish = state.dish.filter(function (x) { return x !== dish; });
+    }
+    touched.dish = true;
+    updateForm();
   }
   function buildDishList() {
     dishItems.innerHTML = '';
-    var src = dishSource();
-    if (!src.length) {
-      dishItems.appendChild(emptyItem(state.menu.length ? 'В выбранном внешнем меню нет блюд' : 'Сначала выберите внешнее меню'));
+    if (!state.menu.length) {
+      dishItems.appendChild(emptyItem('Сначала выберите внешнее меню'));
+      return;
+    }
+    var groups = dishGroups();
+    if (!groups.length) {
+      dishItems.appendChild(emptyItem('В выбранном внешнем меню нет блюд'));
       return;
     }
     var q = dishInput.value.trim().toLowerCase();
-    var opts = dishOptionList().filter(function (o) { return !q || o.value.toLowerCase().indexOf(q) > -1; });
-    if (!opts.length) {
+    /* под запрос: категория совпала — показываем её целиком, иначе только подходящие блюда */
+    var shown = [];
+    groups.forEach(function (g) {
+      var catHit = !!q && g.cat.toLowerCase().indexOf(q) > -1;
+      var dishes = catHit ? g.dishes.slice() : g.dishes.filter(function (d) { return !q || d.toLowerCase().indexOf(q) > -1; });
+      if (q && !catHit && !dishes.length) return;
+      shown.push({ cat: g.cat, dishes: dishes });
+    });
+    if (!shown.length) {
       dishItems.appendChild(emptyItem('Ничего не найдено'));
       return;
     }
-    var vals = opts.map(function (o) { return o.value; });
-    var allOn = vals.every(function (v) { return state.dish.indexOf(v) > -1; });
-    var someOn = vals.some(function (v) { return state.dish.indexOf(v) > -1; });
+    var cats = groups.map(function (g) { return g.cat; });
+    var catsOn = cats.filter(function (c) { return state.dish.indexOf(c) > -1; }).length;
+    var allOn = catsOn === cats.length;
+    var someOn = catsOn > 0 || dishSelectedIn(dishSource()) > 0;
     dishItems.appendChild(checkboxItem('__all', 'Все', allOn, function (on) {
-      vals.forEach(function (v) {
-        if (on) { if (state.dish.indexOf(v) < 0) state.dish.push(v); }
-        else state.dish = state.dish.filter(function (x) { return x !== v; });
-      });
       touched.dish = true;
+      /* категория покрывает свои блюда — достаточно отметить все категории */
+      if (on) { state.dish = cats.slice(); dishOpen = {}; }
+      else state.dish = [];
       updateForm();
+      buildDishList();
     }, { indeterminate: someOn && !allOn }));
     var div = document.createElement('div');
     div.className = 'ds-divider';
     dishItems.appendChild(div);
-    opts.forEach(function (o) {
-      dishItems.appendChild(checkboxItem(o.value, o.value, state.dish.indexOf(o.value) > -1,
-        function (on) { if (o.cat) setCatValue(o.value, on); else setDishValue(o.value, on); },
-        { itemClass: o.cat ? 'fpop__cat' : '' }));
+    shown.forEach(function (g) {
+      var catOn = state.dish.indexOf(g.cat) > -1;
+      var sel = dishSelectedIn(g.dishes);
+      var open = q ? true : (dishOpen[g.cat] !== undefined ? dishOpen[g.cat] : (catOn || sel > 0));
+      dishItems.appendChild(dishCatRow(g.cat, g.dishes, open));
+      if (!open) return;
+      g.dishes.forEach(function (d) {
+        var on = catOn || state.dish.indexOf(d) > -1;
+        dishItems.appendChild(checkboxItem(d, d, on, function (checked) {
+          toggleDishInCat(g.cat, g.dishes, d, checked);
+          buildDishList();
+        }, { itemClass: 'fpop__opt--child' }));
+      });
     });
+    syncPopScroll(dishPop);
   }
   function removeDishValue(v) {
     if (catsOfMenus().indexOf(v) > -1) setCatValue(v, false); else setDishValue(v, false);
@@ -1740,10 +1830,13 @@
     showField('link', cats);
     showField('size', cats);
     showField('menu', hasType);
+    showField('dish', hasType);
     syncGroups();
 
     /* поле — всегда внешнее (киоск) меню: и в «Категориях меню», и в сценариях 1/3 */
     var menuName = 'Внешнее меню *';
+    /* блюда обязательны только для сценариев 1/3 — в «Категориях меню» звёздочки нет (как в v1) */
+    var dishName = dishRequired() ? 'Блюда для деактивации *' : 'Блюда для деактивации';
 
     renderSelect(typeField, typeLabel, typeValue, 'Тип расположения *', state.type ? [state.type] : [], false);
     renderSelect(sizeField, sizeLabel, sizeValue, 'Размер *', state.size ? [state.size] : [], false);
@@ -1753,6 +1846,7 @@
     /* версия 2: значения — чипами в поле, вводимый текст — в поле, подсказки — в списке */
     renderAutoValue(menuField, menuChips, menuInput, menuLabel, menuName, state.menu, function (id) { toggleMenu(id, false); }, formatMenu);
     renderAutoValue(placeField, placeChips, placeInput, placeLabel, 'Место расположения *', state.place, function (v) { togglePlace(v, false); }, function (v) { return v; });
+    renderAutoValue(dishField, dishChips, dishInput, dishLabel, dishName, state.dish, removeDishValue, function (v) { return v; });
 
     /* крестики сброса в полях видны всегда — как в образце оформления */
 
@@ -1795,11 +1889,10 @@
   }
   /* тултип у «Создать»: перечисление незаполненного (по вкладкам) */
   function saveTipText(e) {
-    var names = { name: 'название', type: 'тип расположения', menu: 'внешнее меню', place: 'место расположения', size: 'размер', photo: 'изображение/видео' };
+    var names = { name: 'название', type: 'тип расположения', menu: 'внешнее меню', place: 'место расположения', size: 'размер', dish: 'блюда для деактивации', photo: 'изображение/видео' };
     var parts = [];
-    var det = ['name', 'type', 'menu', 'place', 'size', 'photo'].filter(function (k) { return e[k]; });
+    var det = ['name', 'type', 'menu', 'place', 'size', 'dish', 'photo'].filter(function (k) { return e[k]; });
     if (det.length) parts.push('Не заполнено: ' + det.map(function (k) { return names[k]; }).join(', '));
-    if (e.dish) parts.push('Выберите блюда для деактивации на вкладке «Блюда»');
     return parts.length ? parts.join('. ') + '.' : '';
   }
   function runValidation() {
@@ -1808,11 +1901,9 @@
     ['name', 'type', 'menu', 'place', 'size', 'photo'].forEach(function (key) {
       setFieldError(key, (attempted || touched[key]) ? (e[key] || '') : '');
     });
-    /* обязательный выбор блюд живёт на табе «Блюда» — ошибка у таба */
+    /* обязательный выбор блюд — поле «Блюда для деактивации» в форме (табы скрыты) */
     var dishMsg = (attempted || touched.dish) ? (e.dish || '') : '';
-    dishesTabErr.textContent = dishMsg;
-    dishesTabErr.hidden = !dishMsg;
-    dishesTabBtn.classList.toggle('is-error', !!dishMsg);
+    setFieldError('dish', dishMsg);
     /* 19.10: «Создать» неактивна, пока не заполнены ВСЕ обязательные поля
        (название, тип, меню, место/блюда по типу, файл). Кликнуть по неактивной
        кнопке нельзя — ошибки полей показываем по мере заполнения/по blur. */
@@ -1831,7 +1922,7 @@
     var key = null;
     for (var i = 0; i < order.length; i++) { if (e[order[i]]) { key = order[i]; break; } }
     if (!key) return;
-    var el = key === 'dish' ? dishesTabBtn : (key === 'name' ? nameInput : (key === 'photo' ? upBox : (FIELD_UI[key].input || FIELD_UI[key].field)));
+    var el = key === 'dish' ? dishInput : (key === 'name' ? nameInput : (key === 'photo' ? upBox : (FIELD_UI[key].input || FIELD_UI[key].field)));
     if (!el) return;
     el.focus();
     if (el.scrollIntoView) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -1869,8 +1960,10 @@
   bindPop(typeField, typePop, buildTypeList);
   bindPop(menuField, menuPop, buildMenuList, menuInput);
   bindPop(placeField, placePop, buildPlaceList, placeInput);
+  bindPop(dishField, dishPop, buildDishList, dishInput);
   bindInputKeys(menuInput, function () { return state.menu; }, function (id) { toggleMenu(id, false); });
   bindInputKeys(placeInput, function () { return state.place; }, function (v) { togglePlace(v, false); });
+  bindInputKeys(dishInput, function () { return state.dish; }, removeDishValue);
   bindPop(sizeField, sizePop, buildSizeList);
   bindPop(linkField, linkPop, buildLinkList);
 

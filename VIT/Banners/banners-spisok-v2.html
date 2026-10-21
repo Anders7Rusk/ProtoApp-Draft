@@ -325,19 +325,14 @@
   #stripMass { display: flex; align-items: center; gap: var(--ds-space-2x, 8px); }
   .mass-anchor { position: relative; display: inline-flex; }
   .mass-edit { position: absolute; top: calc(100% + 4px); right: 0; z-index: 40; width: 300px; }
-  .mass-edit.ds-menu-container { min-height: 0; }
+  .mass-edit.fpop { min-height: 0; }
+  .mass-edit .fpop__title { white-space: normal; }
   .mass-edit__note { display: block; padding: 0 var(--ds-space-4x, 16px) var(--ds-space-2x, 8px); font: var(--ds-font-caption-l-12-normal-regular); color: var(--ds-color-text-secondary, #616161); }
-  .mass-edit .ds-menu-container__title { padding: var(--ds-space-3x, 12px) var(--ds-space-4x, 16px) var(--ds-space-1x, 4px); }
-  .mass-edit .ds-menu-container__label { white-space: normal; }
-  .mass-edit .ds-menu-item { width: 100%; min-height: 36px; align-items: flex-start; cursor: pointer; }
-  /* 20.10: подпись пункта в компоненте — nowrap, из-за этого появлялся ГОРИЗОНТАЛЬНЫЙ скролл */
-  .mass-edit .ds-menu-item__label { white-space: normal; word-break: break-word; }
-  .mass-edit__body { display: flex; flex-direction: row; align-items: flex-start; min-height: 0; }
-  .mass-edit__list { flex: 1 1 auto; min-width: 0; max-height: 264px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
-  .mass-edit__list::-webkit-scrollbar { display: none; }
-  /* скролл списка — инстанс Scroll ДС (ds-scroll--v), стоит рядом со списком, как на стендах Menu/Select */
+  /* список — тот же Select container, что в фильтрах и списках формы: только ограничиваем высоту */
+  .mass-edit .fpop__scroll { max-height: 264px; }
+  .mass-edit .fpop__scroll > .ds-select-item { flex: none; }
+  .mass-edit .ds-select-item__label { white-space: normal; word-break: break-word; }
   .mass-edit .fscroll { flex: none; align-self: stretch; }
-  .mass-edit .ds-menu-container__button-group { height: auto; justify-content: flex-end; padding: var(--ds-space-2x, 8px) var(--ds-space-4x, 16px) var(--ds-space-4x, 16px); }
   .filter-dot { position: absolute; top: 0; right: 0; }
   /* удалённая строка — вид «удалено» (замечание заказчика 16.10: «показывается всё в дизейбле,
      а текст перечёркнутый»): тексты перечёркнуты и приглушены до Disable; состояния Deleted в ДС
@@ -634,18 +629,22 @@
           <!-- «Изменить внешнее меню» — постановка: «редактирование — изменение внешнего меню».
                Панель на компоненте Menu (ds-menu-container), пункты — ds-menu-item с чекбоксами;
                мультивыбор меню + «Применить» (с предупреждением) — ко всем выбранным баннерам. -->
-          <div class="ds-menu-container mass-edit" id="massEditPanel" role="dialog" aria-label="Изменить внешнее меню" hidden>
-            <div class="ds-menu-container__title"><span class="ds-menu-container__label" id="massEditTitle">Изменить внешнее меню</span></div>
+          <div class="ds-select-container fpop mass-edit" id="massEditPanel" role="dialog" aria-label="Изменить внешнее меню" hidden>
+            <div class="ds-select-container__title"><span class="fpop__title" id="massEditTitle">Изменить внешнее меню</span></div>
             <span class="mass-edit__note">Текущие меню будут заменены выбранными</span>
-            <div class="mass-edit__body">
-              <div class="mass-edit__list" id="massEditList" role="menu" aria-label="Внешнее меню"></div>
+            <div class="ds-divider"></div>
+            <div class="fpop__wrap">
+              <div class="ds-select-container__content fpop__scroll" id="massEditList" aria-label="Внешнее меню"></div>
               <div class="ds-scroll ds-scroll--v ds-scroll--middle fscroll" aria-hidden="true" hidden>
                 <div class="ds-scroll__background"><div class="ds-scroll__knob"></div></div>
               </div>
             </div>
-            <div class="ds-menu-container__button-group">
-              <button type="button" class="ds-btn ds-btn--s ds-btn--neutral ds-btn--outlined" id="massEditCancel"><span class="ds-btn__label">Отменить</span></button>
-              <button type="button" class="ds-btn ds-btn--s ds-btn--accent ds-btn--filled" id="massEditApply" disabled><span class="ds-btn__label">Применить</span></button>
+            <div class="ds-divider"></div>
+            <div class="ds-select-container__button-group">
+              <div class="ds-btn-group ds-btn-group--horizontal">
+                <button type="button" class="ds-btn ds-btn--s ds-btn--neutral ds-btn--outlined" id="massEditCancel"><span class="ds-btn__label">Отменить</span></button>
+                <button type="button" class="ds-btn ds-btn--s ds-btn--accent ds-btn--filled" id="massEditApply" disabled><span class="ds-btn__label">Применить</span></button>
+              </div>
             </div>
           </div>
         </span>
@@ -1196,32 +1195,6 @@
   /* ── пункты меню (компонент Menu: ds-menu-item) ─────────────────────
      Пункт фильтра — чекбокс в слоте __checkbox + подпись; пункт панели массового меню — без чекбокса.
      Клик по строке переключает чекбокс (механика стенда Menu_DS) */
-  function buildMenuItem(list, value, checked, onChange, withCheckbox) {
-    var item = document.createElement('div');
-    item.className = 'ds-menu-item' + (checked ? ' is-checked' : '');
-    item.setAttribute('data-value', value);
-    if (withCheckbox === false) {
-      item.innerHTML = '<span class="ds-menu-item__label"></span>';
-      item.querySelector('.ds-menu-item__label').textContent = value;
-      item.addEventListener('click', function () { onChange(true); });
-    } else {
-      item.innerHTML = '<span class="ds-menu-item__checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox"' + (checked ? ' checked' : '') + '><span class="ds-checkbox__box"></span></label></span><span class="ds-menu-item__label"></span>';
-      item.querySelector('.ds-menu-item__label').textContent = value;
-      var input = item.querySelector('.ds-checkbox__input');
-      input.addEventListener('change', function () {
-        item.classList.toggle('is-checked', input.checked);
-        onChange(input.checked);
-      });
-      item.addEventListener('click', function (e) {
-        if (e.target.closest('.ds-checkbox')) return;
-        input.checked = !input.checked;
-        item.classList.toggle('is-checked', input.checked);
-        onChange(input.checked);
-      });
-    }
-    list.appendChild(item);
-    return item;
-  }
   function uniqChipValues() {
     var out = [];
     qsa('.tbl [data-group-rows] .t-c-menu .ds-text-ui__list-item').forEach(function (c) {
@@ -2200,7 +2173,7 @@
     massEditList.innerHTML = '';
     massEditChoice = [];
     uniqChipValues().forEach(function (v) {
-      buildMenuItem(massEditList, v, false, function (checked) {
+      buildSelectItem(massEditList, v, false, function (checked) {
         if (checked) { if (massEditChoice.indexOf(v) < 0) massEditChoice.push(v); }
         else massEditChoice = massEditChoice.filter(function (x) { return x !== v; });
         massEditApply.disabled = massEditChoice.length === 0;
