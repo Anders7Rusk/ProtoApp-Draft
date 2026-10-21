@@ -1201,7 +1201,17 @@
   /* Связь с группами: группы хранят ссылки на баннеры (bannerId). Баннер, входящий в
      не удалённую группу, удалять нельзя (E-01/B-17); при массовом удалении остальные удаляются. */
   function readGroups() {
-    try { return JSON.parse(__store.getItem('vitGroups') || '[]'); } catch (e) { return []; }
+    var raw = null;
+    try { raw = __store.getItem('vitGroups'); } catch (e) {}
+    /* список баннеров можно открыть раньше «Групп» — тогда сид групп ещё не создан.
+       Чтобы E-01/B-17 работали с первого экрана, берём тот же состав групп (только чтение). */
+    if (!raw) return [
+      { id: 'grp-1', name: 'Баннеров-1', deleted: false, banners: [{ bannerId: 'bb2' }, { bannerId: 'new' }] },
+      { id: 'grp-2', name: 'Осенняя акция', deleted: false, banners: [{ bannerId: 'lunch' }] },
+      { id: 'grp-3', name: 'Аллергены сети', deleted: false, banners: [{ bannerId: 'allhead' }, { bannerId: 'alltable' }] },
+      { id: 'grp-4', name: 'Старая группа', deleted: true, banners: [{ bannerId: 'banner1' }] }
+    ];
+    try { return JSON.parse(raw); } catch (e) { return []; }
   }
   function groupsUsingBanner(id) {
     return readGroups().filter(function (g) {
