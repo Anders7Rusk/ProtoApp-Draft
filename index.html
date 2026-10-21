@@ -4,27 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Киоски · Баннеры — прототип</title>
-  <meta http-equiv="refresh" content="0; url=VIT/Banners/banners-vit.standalone.html">
   <style>
-    html, body { height: 100%; margin: 0; }
-    body {
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-      color: #333; background: #F5F5F5;
-    }
-    .wrap { text-align: center; padding: 24px; }
-    a { color: #0F62FE; text-decoration: none; font-size: 16px; }
-    a:hover { text-decoration: underline; }
-    .hint { margin-top: 8px; font-size: 14px; color: #616161; }
-    .hint--small { margin-top: 16px; font-size: 12px; color: #9E9E9E; max-width: 460px; }
+    body { margin: 0; padding: 40px 24px; font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif; color: #333; background: #F5F5F5; }
+    h1 { font-size: 20px; font-weight: 500; margin: 0 0 4px; }
+    p.note { font-size: 13px; color: #616161; margin: 0 0 24px; }
+    ul { list-style: none; padding: 0; margin: 0; max-width: 560px; }
+    li { background: #fff; border: 1px solid #E0E0E0; border-radius: 12px; margin-bottom: 8px; }
+    a { display: block; padding: 12px 16px; color: #0F62FE; text-decoration: none; font-size: 14px; }
+    a:hover { background: #F2F7FF; }
+    span.d { display: block; color: #757575; font-size: 12px; margin-top: 2px; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <a href="VIT/Banners/banners-vit.standalone.html">Открыть прототип: Киоски · Баннеры (6 экранов)</a>
-    <div class="hint">Файл самодостаточный: шрифты, иконки и стили внутри, интернет не нужен.</div>
-    <div class="hint hint--small">Исходные страницы <code>VIT/Banners/*.html</code> — рабочие черновики для правок в VS Code:
-      им нужен локальный <code>Design-System</code>, поэтому по ссылке из GitHub они не открываются.</div>
-  </div>
+  <h1>Киоски · Баннеры — прототип</h1>
+  <p class="note">6 экранов на компонентах ДС. Открывается прямо из GitHub Pages, локальная папка не нужна.</p>
+  <ul>
+    <li><a href="VIT/Banners/banners-spisok.html">Баннеры · список<span class="d">группировка «Тип / Место», фильтры, массовые действия</span></a></li>
+    <li><a href="VIT/Banners/banners-spisok-v2.html">Баннеры · список (аккордеон)<span class="d">группы — Expansion panel</span></a></li>
+    <li><a href="VIT/Banners/banners-spisok-v3.html">Баннеры · список (иконки)<span class="d">вариант оформления</span></a></li>
+    <li><a href="VIT/Banners/banner-new.html">Новый баннер<span class="d">поля-селекты, дерево блюд</span></a></li>
+    <li><a href="VIT/Banners/banner-new-v2.html">Новый баннер · автокомплит<span class="d">Chips Input + подсказки</span></a></li>
+    <li><a href="VIT/Banners/groups.html?state=list">Группы<span class="d">список групп, поиск, массовые действия</span></a></li>
+    <li><a href="VIT/Banners/groups.html?state=form">Группа<span class="d">форма: детали и баннеры</span></a></li>
+  </ul>
 </body>
 </html>
