@@ -656,6 +656,13 @@
 <script>
 (function () {
   'use strict';
+  /* Демо-данные в sessionStorage: одинаковое состояние во всех окнах и на всех адресах
+     (localStorage у file:// и GitHub Pages — разные хранилища, из-за этого данные расходились) */
+  var __store = (function () {
+    try { window.sessionStorage.setItem('__t', '1'); window.sessionStorage.removeItem('__t'); return window.sessionStorage; }
+    catch (e) { return window.localStorage; }
+  })();
+
 
   var qs = function (s, r) { return (r || document).querySelector(s); };
   var qsa = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
@@ -686,17 +693,17 @@
   var GROUPS_SEED_VERSION = 3;   /* 3: 8 баннеров — 6 в группах (включая удалённый), 2 без группы */
   function readGroups() {
     try {
-      var ver = Number(localStorage.getItem(GROUPS_KEY + 'Seed') || 0);
-      var raw = localStorage.getItem(GROUPS_KEY);
+      var ver = Number(__store.getItem(GROUPS_KEY + 'Seed') || 0);
+      var raw = __store.getItem(GROUPS_KEY);
       if (raw && ver >= GROUPS_SEED_VERSION) return JSON.parse(raw);
     } catch (e) {}
     var seed = makeSeed();
     writeGroups(seed);
-    try { localStorage.setItem(GROUPS_KEY + 'Seed', String(GROUPS_SEED_VERSION)); } catch (e) {}
+    try { __store.setItem(GROUPS_KEY + 'Seed', String(GROUPS_SEED_VERSION)); } catch (e) {}
     return seed;
   }
-  function writeGroups(list) { try { localStorage.setItem(GROUPS_KEY, JSON.stringify(list)); } catch (e) {} }
-  function readCreatedBanners() { try { return JSON.parse(localStorage.getItem(BANNERS_KEY) || '[]'); } catch (e) { return []; } }
+  function writeGroups(list) { try { __store.setItem(GROUPS_KEY, JSON.stringify(list)); } catch (e) {} }
+  function readCreatedBanners() { try { return JSON.parse(__store.getItem(BANNERS_KEY) || '[]'); } catch (e) { return []; } }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function fmtDate(iso) {
     if (!iso) return '—';

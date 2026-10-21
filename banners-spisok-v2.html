@@ -925,6 +925,13 @@
    одного баннера в двух видах таблицы связаны атрибутом data-banner. */
 (function () {
   'use strict';
+  /* Демо-данные в sessionStorage: одинаковое состояние во всех окнах и на всех адресах
+     (localStorage у file:// и GitHub Pages — разные хранилища, из-за этого данные расходились) */
+  var __store = (function () {
+    try { window.sessionStorage.setItem('__t', '1'); window.sessionStorage.removeItem('__t'); return window.sessionStorage; }
+    catch (e) { return window.localStorage; }
+  })();
+
 
   var qsa = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
   var ALL = 'Все';
@@ -1222,15 +1229,15 @@
   var justCreatedId = '';
   try { justCreatedId = sessionStorage.getItem(JUST_CREATED_KEY) || ''; } catch (e) {}
   function readCreated() {
-    try { return JSON.parse(localStorage.getItem(CREATED_KEY) || '[]'); } catch (e) { return []; }
+    try { return JSON.parse(__store.getItem(CREATED_KEY) || '[]'); } catch (e) { return []; }
   }
   function writeCreated(list) {
-    try { localStorage.setItem(CREATED_KEY, JSON.stringify(list)); } catch (e) {}
+    try { __store.setItem(CREATED_KEY, JSON.stringify(list)); } catch (e) {}
   }
   /* правки статических (демо) строк из карточки редактирования: id → данные */
   var STATIC_EDITS_KEY = 'vitStaticBannerEdits';
   function readStaticEdits() {
-    try { return JSON.parse(localStorage.getItem(STATIC_EDITS_KEY) || '{}') || {}; } catch (e) { return {}; }
+    try { return JSON.parse(__store.getItem(STATIC_EDITS_KEY) || '{}') || {}; } catch (e) { return {}; }
   }
   function persistCreatedDeleted(ids, deleted) {
     var list = readCreated(), changed = false;
@@ -1255,7 +1262,7 @@
   /* Связь с группами: группы хранят ссылки на баннеры (bannerId). Баннер, входящий в
      не удалённую группу, удалять нельзя (E-01/B-17); при массовом удалении остальные удаляются. */
   function readGroups() {
-    try { return JSON.parse(localStorage.getItem('vitGroups') || '[]'); } catch (e) { return []; }
+    try { return JSON.parse(__store.getItem('vitGroups') || '[]'); } catch (e) { return []; }
   }
   function groupsUsingBanner(id) {
     return readGroups().filter(function (g) {

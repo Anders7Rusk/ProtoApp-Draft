@@ -659,6 +659,13 @@
 <script>
 (function () {
   'use strict';
+  /* Демо-данные в sessionStorage: одинаковое состояние во всех окнах и на всех адресах
+     (localStorage у file:// и GitHub Pages — разные хранилища, из-за этого данные расходились) */
+  var __store = (function () {
+    try { window.sessionStorage.setItem('__t', '1'); window.sessionStorage.removeItem('__t'); return window.sessionStorage; }
+    catch (e) { return window.localStorage; }
+  })();
+
   var qs = function (s, r) { return (r || document).querySelector(s); };
   var qsa = function (s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
 
@@ -744,10 +751,10 @@
   var CREATED_KEY = 'vitBannersCreated';
   var JUST_CREATED_KEY = 'vitBannerJustCreated';
   var STATIC_EDITS_KEY = 'vitStaticBannerEdits';
-  function readCreated() { try { return JSON.parse(localStorage.getItem(CREATED_KEY) || '[]'); } catch (e) { return []; } }
-  function writeCreated(list) { try { localStorage.setItem(CREATED_KEY, JSON.stringify(list)); } catch (e) {} }
-  function readStaticEdits() { try { return JSON.parse(localStorage.getItem(STATIC_EDITS_KEY) || '{}') || {}; } catch (e) { return {}; } }
-  function writeStaticEdits(map) { try { localStorage.setItem(STATIC_EDITS_KEY, JSON.stringify(map)); } catch (e) {} }
+  function readCreated() { try { return JSON.parse(__store.getItem(CREATED_KEY) || '[]'); } catch (e) { return []; } }
+  function writeCreated(list) { try { __store.setItem(CREATED_KEY, JSON.stringify(list)); } catch (e) {} }
+  function readStaticEdits() { try { return JSON.parse(__store.getItem(STATIC_EDITS_KEY) || '{}') || {}; } catch (e) { return {}; } }
+  function writeStaticEdits(map) { try { __store.setItem(STATIC_EDITS_KEY, JSON.stringify(map)); } catch (e) {} }
   var attempted = false;
   var touched = {};   /* поле трогали — показываем его ошибку сразу (валидация на месте) */
   var currentErrors = {};
