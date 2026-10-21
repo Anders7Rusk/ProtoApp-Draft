@@ -2329,7 +2329,10 @@
       places: placeEl ? cellValues(placeEl).filter(function (v) { return v !== '—'; }) : [],
       fileName: fileName === '—' ? '' : fileName,
       fileType: /\.(mp4|mov|webm|avi|mkv)$/i.test(fileName) ? 'video' : 'image',
-      size: '', link: '', createdAt: Date.now(), deleted: false
+      /* у «Категорий меню» размер обязателен (F-1): в демо-строках размера нет —
+         подставляем допустимое значение, иначе форма правки/копии не сохраняется */
+      size: /Категории меню/.test(typeLabelOf(typeKeyOf(id))) ? 'Нет размера' : '',
+      link: '', createdAt: Date.now(), deleted: false
     };
   }
   document.addEventListener('click', function (e) {
