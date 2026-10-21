@@ -74,6 +74,7 @@
       файл — чипом с удалением.
 -->
 <script src="sidenav-menu.js"></script>
+<script>window.DSR_NO_CHROME = true;</script>
 <script src="../../Design-System/connect.js" defer></script>
 <link rel="stylesheet" href="../../Design-System/organisms/app-header-content/header-content.css?v=1">
 <script src="../../Design-System/organisms/app-header-content/header-content.js?v=1" defer></script>
@@ -392,7 +393,7 @@
        текст — сводка по вкладкам. 20.10: крестика НЕТ — сообщение привязано к состоянию формы. -->
   <div class="ds-banner ds-banner--horizontal ds-banner--warning frm-warn" id="warnBar">
     <span class="ds-banner__icon" aria-hidden="true"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons">warning</span></span></span>
-    <span class="ds-banner__text">Чтобы создать баннер, заполните обязательные поля и выберите блюда для деактивации</span>
+    <span class="ds-banner__text">Чтобы создать баннер, заполните обязательные поля</span>
   </div>
 
   <!-- Пояснение — компонент ДС Banners (Accent); текст ставится в .ds-banner__text -->
@@ -481,7 +482,7 @@
           <div class="aci" id="dishField">
             <div class="ds-chips-input">
               <div class="ds-chips-input__frame">
-                <span class="aci-caption" id="dishLabel" hidden>Блюда для деактивации *</span>
+                <span class="aci-caption" id="dishLabel" hidden>Блюда для деактивации</span>
                 <div class="ds-chips-input__content" id="dishChips">
                   <input class="aci-input" id="dishInput" type="text" placeholder="Выберите блюда для деактивации" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dishPop" aria-label="Блюда для деактивации">
                 </div>
@@ -1843,7 +1844,7 @@
     /* поле — всегда внешнее (киоск) меню: и в «Категориях меню», и в сценариях 1/3 */
     var menuName = 'Внешнее меню *';
     /* блюда обязательны только для сценариев 1/3 — в «Категориях меню» звёздочки нет (как в v1) */
-    var dishName = dishRequired() ? 'Блюда для деактивации *' : 'Блюда для деактивации';
+    var dishName = 'Блюда для деактивации';
 
     renderSelect(typeField, typeLabel, typeValue, 'Тип расположения *', state.type ? [state.type] : [], false);
     renderSelect(sizeField, sizeLabel, sizeValue, 'Размер *', state.size ? [state.size] : [], false);
@@ -1888,7 +1889,7 @@
         if (!state.size) e.size = 'Выберите размер';
       } else {
         if (!dishSource().length) e.dish = 'В выбранном внешнем меню нет блюд — выберите другое внешнее меню';
-        else if (!state.dish.length) e.dish = 'Выберите блюда для деактивации';
+        /* «Блюда для деактивации» — необязательное поле (F-1, B-07, B-09): сохранение не блокирует */
       }
     }
     if (!state.photo) e.photo = 'Загрузите изображение или видео';

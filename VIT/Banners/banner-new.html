@@ -56,6 +56,7 @@
       файл — чипом с удалением.
 -->
 <script src="sidenav-menu.js"></script>
+<script>window.DSR_NO_CHROME = true;</script>
 <script src="../../Design-System/connect.js" defer></script>
 <link rel="stylesheet" href="../../Design-System/organisms/app-header-content/header-content.css?v=1">
 <script src="../../Design-System/organisms/app-header-content/header-content.js?v=1" defer></script>
@@ -337,7 +338,7 @@
        ручное закрытие убирало единственную подсказку о том, что осталось. -->
   <div class="ds-banner ds-banner--horizontal ds-banner--warning frm-warn" id="warnBar">
     <span class="ds-banner__icon" aria-hidden="true"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons">warning</span></span></span>
-    <span class="ds-banner__text">Чтобы создать баннер, заполните обязательные поля и выберите блюда для деактивации</span>
+    <span class="ds-banner__text">Чтобы создать баннер, заполните обязательные поля</span>
   </div>
 
   <!-- Пояснение — компонент ДС Banners (Accent); текст ставится в .ds-banner__text -->
@@ -1708,7 +1709,7 @@
 
     /* подпись поля — ВСЕГДА «Внешнее меню» (это внешнее меню киоска, в т.ч. для «Категорий меню») */
     var menuName = 'Внешнее меню *';
-    var dishName = dishRequired() ? 'Блюда для деактивации *' : 'Блюда для деактивации';
+    var dishName = 'Блюда для деактивации';
 
     renderSelect(typeField, typeLabel, typeValue, 'Тип расположения *', state.type ? [state.type] : [], false);
     renderSelect(menuField, menuLabel, menuValue, menuName,
@@ -1753,7 +1754,7 @@
         if (!state.size) e.size = 'Выберите размер';
       } else {
         if (!dishSource().length) e.dish = 'В выбранном внешнем меню нет блюд — выберите другое внешнее меню';
-        else if (!state.dish.length) e.dish = 'Выберите блюда для деактивации';
+        /* «Блюда для деактивации» — необязательное поле (F-1, B-07, B-09): сохранение не блокирует */
       }
     }
     if (!state.photo) e.photo = 'Загрузите изображение или видео';
