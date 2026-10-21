@@ -3,13 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Киоски · Баннеры (версия 3 · иконки) — прототип на ДС</title>
+<title>Киоски · Баннеры (версия 2 · аккордеон) — прототип на ДС</title>
 <!--
-  ЭКРАН «Управление киосками → Баннеры» (kiosk-management/index.html#/banners) — ВЕРСИЯ 3 (иконки):
-  по мотивам версии 1 (таблица без Expansion panel). Отличия: группировка списка — Button toggle ДС
-  (ds-button-toggle, размер S; текстовые сегменты «Тип» / «Место», полные названия — в тултипах);
-  фильтры «Файл»/«Внешнее меню» — иконки filter у колонок в шапке таблицы (как на стенде
-  Table_DS: иконка filter_list + точка Badge на активном фильтре), попап значений раскрывается под иконкой.
+  ЭКРАН «Управление киосками → Баннеры» (kiosk-management/index.html#/banners) после доработки.
   ОТКУДА ЧТО ВЗЯТО:
     • постановка — вики VIT «Киоски: оптимизация управления баннерами» (стр. 181774290),
       задача 1 — Jira PB-8074 / WEB-22902; подписи в разметке — из постановки и вайрфреймов
@@ -19,7 +15,7 @@
       «Выберите внешнее меню» / «Выберите файл»;
     • каркас — собственный, по конвенции страниц раздела (подключение одной строкой,
       статичная разметка, свой скрипт только на клики);
-    • плашка ревью, шапка и боковое меню приложения — из `../../Design-System/connect.js` (сами, не собираются);
+    • плашка ревью, шапка и боковое меню приложения — из `Design-System/connect.js` (сами, не собираются);
     • организмы подключаются вручную по своим readme (через connect.js они не приходят):
       `app-header-content` — шапка раздела: заголовок, поиск и действия (постановка: поиск и «Добавить»
       в верхней панели справа); `app-table-header-actions` — полоса таблицы: заголовок
@@ -94,11 +90,11 @@
   взяты из них, данные строк — из примеров постановки.
 -->
 <script src="sidenav-menu.js"></script>
-<script src="../../Design-System/connect.js" defer></script>
-<link rel="stylesheet" href="../../Design-System/organisms/app-header-content/header-content.css?v=1">
-<script src="../../Design-System/organisms/app-header-content/header-content.js?v=1" defer></script>
-<link rel="stylesheet" href="../../Design-System/organisms/app-table-header-actions/table-header-actions.css?v=3">
-<script src="../../Design-System/organisms/app-table-header-actions/table-header-actions.js?v=3" defer></script>
+<script src="Design-System/connect.js" defer></script>
+<link rel="stylesheet" href="Design-System/organisms/app-header-content/header-content.css?v=1">
+<script src="Design-System/organisms/app-header-content/header-content.js?v=1" defer></script>
+<link rel="stylesheet" href="Design-System/organisms/app-table-header-actions/table-header-actions.css?v=3">
+<script src="Design-System/organisms/app-table-header-actions/table-header-actions.js?v=3" defer></script>
 <style>
   html, body { margin: 0; font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif; }
 
@@ -127,10 +123,6 @@
      (заказчик 16.10: «отступы между селектами давай тоже 8… только между селектами»);
      зазоры «счётчик → поля» и «поля → тумблер» — родные 16 полосы */
   .filter-fields { display: flex; align-items: center; gap: var(--ds-size-2x, 8px); min-width: 0; }
-  /* попапы вынесены из полосы: обёртки не участвуют в потоке (иначе flex-gap .page даёт лишние отступы) */
-  .page > .filter-anchor { display: contents; }
-  /* ВЕРСИЯ 3: без выделения счётчик «Выбрано: N» скрыт — иначе пустой tha__sel оставляет фантомный зазор 16 */
-  .tha__sel.is-off { display: none; }
 
   /* косяк выгрузки ДС: у полос таблицы артбордный width: fit-content — полосы не тянутся на всю
      ширину (видно на строках групп: линия обрывается по тексту). В прототипе полосы — по контейнеру */
@@ -148,7 +140,7 @@
   /* Иконка в ячейке-фото — по центру ячейки (правило 19.10: иконки в ячейках — по центру) */
   .tbl .ds-table-content-cell.t-c-photo { justify-content: center; align-items: center; }
   .t-c-file { width: 184px; }   /* самое длинное имя файла 168 + 16 */
-  .t-c-name { width: 188px; }   /* самое длинное название «Таблица аллергенов» 171.7 + 16 (шапка 123.9) */
+  .t-c-name { width: 216px; }   /* гуттер под иконку 28 + название 171.7 + 16 (шапка 123.9) */
   .t-c-menu { width: 243px; }   /* самая длинная строка меню 226.8 + 16 */
   .t-c-dish { width: 146px; }   /* «Капучино, Салаты…» 129.9 + 16 */
   .t-c-place { flex: 1 1 201px; min-width: 201px; }   /* шапка 194.4 / контент 201 — забирает остаток */
@@ -158,11 +150,38 @@
   .tbl .ds-table-content-cell { align-items: flex-start; }
   /* ячейка группы — на всю ширину после чекбокса */
   .t-c-group { flex: 1 1 auto; min-width: 0; }
-  /* название группы + счётчик + статус — в ОДНУ строку; статус 12-м шрифтом
-     (как подпись типа у названия баннера): Маркетинговые / Технические */
-  .t-c-group .grp-main { display: flex; flex-direction: row; align-items: baseline; gap: var(--ds-size-2x, 8px); min-width: 0; }
-  .t-c-group .grp-type { color: var(--ds-color-text-secondary, #616161); }
-  .t-c-group .grp-type[hidden] { display: none; }
+
+  /* ── ВЕРСИЯ 2: группы списка — компонент Expansion panel ─────────────────
+     Шапка панели — прежняя строка группы (чекбокс + название + счётчик), строки баннеров —
+     в слоте контента панели (padding off), клик по шапке раскрывает/сворачивает.
+     Ширину панели равняем строкам (.exp-group min-width из syncTableWidths), чтобы
+     горизонтальная прокрутка таблицы работала целиком. */
+  .exp-group { position: relative; overflow: clip; margin: 0 0 var(--ds-space-2x, 8px); }
+  .exp-group:last-child { margin-bottom: 0; }
+  /* рамка панели поверх контента: в ДС она — inset-тень у самого .ds-expansion, а строки
+     (белый фон, при наведении — серый) идут в PNG-потоке и перекрывают её. Свой слой-ring
+     повторяет рамку компонента и лежит НАД строками (клики проходят — pointer-events:none). */
+  .exp-group::after {
+    content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    border-radius: inherit; box-shadow: inset 0 0 0 1px var(--ds-color-stroke-default, #e0e0e0);
+  }
+  /* отступ от шапки таблицы до первой панели — такой же, как между панелями (8) */
+  .tbl .ds-table-header-row { margin-bottom: var(--ds-space-2x, 8px); }
+  .exp-group .ds-expansion__content { display: flex; flex-direction: column; }
+  .exp-group > .group-row { background: transparent; cursor: pointer; min-height: 44px; }
+  /* только для этого макета: у раскрытой панели шапка остаётся с фоном Default (Off) — #F8F9FC,
+     контент при этом белый (в компоненте открытая панель целиком становится белой) */
+  .exp-group.ds-expansion--open > .group-row { background: var(--ds-color-brand-accent-super-lightest, #f8f9fc); }
+  .exp-group > .group-row:hover { background: var(--ds-color-shapes-hover, #f5f5f5); }
+  .exp-group > .group-row:active { background: var(--ds-color-shapes-press, #e0e0e0); }
+  .exp-group .group-row .t-c-check { width: 36px; flex: none; }
+  .exp-group .group-row .t-c-group { display: flex; align-items: center; gap: var(--ds-space-2x, 8px); }
+  /* шапка панели: чекбокс, название и стрелка — по центру 44px (в строках ячейки выровнены по верху) */
+  .exp-group > .group-row .ds-table-content-cell { align-items: center; }
+  /* колонка «Название»: гуттер 28px = 20 иконки + 8 зазора — под иконку групп/сортировки шапки,
+     чтобы текст строк, заголовок группы и подпись колонки стояли на одной вертикали (x=72) */
+  .exp-group .exp-rows .t-c-name .ds-text-ui__content { padding-left: 28px; }
+  .exp-group[hidden] { display: none !important; }
   .t-c-photo .material-icons { color: var(--ds-color-icon-primary, #616161); }
   /* разделители шапки (fixes.css №183): после чекбокс-ячейки линии нет (как на стенде Table) */
   .tbl .ds-table-header-cell.t-c-check + .ds-table-header-cell::before { content: none; }
@@ -212,7 +231,6 @@
     background: var(--ds-palette-accent-5, #f8f9fc);
   }
   .t-row-actions { display: inline-flex; align-items: center; gap: 4px; opacity: 0; transition: opacity .12s ease; }
-  .t-row-actions [hidden] { display: none !important; }   /* у .ds-btn-icon display:inline-flex перебивает [hidden] */
   .ds-table-content-row:hover .t-row-actions, .ds-table-content-row:focus-within .t-row-actions { opacity: 1; }
   .t-row-actions .ds-btn-icon { cursor: pointer; }
   .t-row-actions .row-copy { color: var(--ds-color-icon-primary, #616161); }
@@ -234,19 +252,6 @@
      все группы» в левом слоте остаётся нейтральной */
   .ds-table-header-cell.th-active .ds-text-ui__element-right .ds-icon-size { color: var(--ds-color-icon-accent, #448aff); }
   .ds-table-header-cell.th-active .ds-text-ui__element-left .ds-icon-size { color: var(--ds-color-icon-primary, #616161); }
-  /* ВЕРСИЯ 3: иконки-фильтры в шапке таблицы (как на стенде Table_DS: filter_list + точка Badge
-     на активном фильтре) + Button toggle группировки (компонент ДС, размер S) с тултипами */
-  .h-filter { position: relative; cursor: pointer; }
-  .h-filter-dot { position: absolute; top: -2px; right: -2px; }
-  .h-filter-dot[hidden] { display: none; }
-  .bt-seg { position: relative; }
-  .icon-tip { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); z-index: 70;
-    width: max-content; max-width: 240px; padding: 4px 8px; border-radius: var(--ds-radius-2x, 8px);
-    background: #333333; color: #ffffff; font: var(--ds-font-caption-l-12-normal-regular); line-height: 16px;
-    visibility: hidden; opacity: 0; transition: opacity .15s ease; pointer-events: none; }
-  .bt-seg:hover .icon-tip, .bt-seg:focus-visible .icon-tip { visibility: visible; opacity: 1; }
-  /* попапы фильтров — фиксированно под иконкой шапки (позицию задаёт скрипт) */
-  #bannerFilterPop, #menuFilterPop { position: fixed; top: 0; left: 0; width: 320px; z-index: 80; }
 
   /* выбранная строка — Accent/5: основная механика таблицы (fixes.css п. 42, журнал №195) — классом ds-table-content-row--selected */
 
@@ -282,15 +287,16 @@
      фильтр относится только к таблице → место в полосе таблицы, не в шапке страницы):
      поля — компонент Select form, выпадающие списки — компонент Select container */
   .filter-anchor { position: relative; display: inline-flex; }
-  /* поле фильтра — ФИКСИРОВАННАЯ ширина НА КАЖДОЕ ПОЛЕ под максимум содержимого (S, 16px);
-     селект НЕ дёргается при смене значений/группировки; ширина списка задаётся независимо (.fpop) */
+  /* поле фильтра — ФИКСИРОВАННАЯ ширина под максимум содержимого (селект НЕ дёргается при смене
+     значений и группировки); ширина списка задаётся независимо (см. .fpop).
+     Ширины — компактнее прежних 240, с запасом под двузначные счётчики */
   .fsel { cursor: pointer; }
-  .fsel--group { width: 226px; }   /* «Тип расположения» / «Место расположения» (224.2) */
-  .fsel--banner { width: 168px; }  /* «Баннер: 99» + ✕ + ▾ (167.2) */
-  .fsel--menu { width: 230px; }    /* «Внешнее меню: 99» + ✕ + ▾ (228.9) */
+  .fsel--group { width: 196px; }   /* «Тип расположения» / «Место расположения» */
+  .fsel--banner { width: 152px; }  /* «Баннер: 99» + ✕ + ▾ */
+  .fsel--menu { width: 206px; }    /* «Внешнее меню: 99» + ✕ + ▾ */
   .fsel .ds-input__field { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  /* выпадающий список — часть того же компонента Select (форма + список — одно целое, как на стенде):
-     ширина по полю, зазор 2 (из макета стенда); косяки выгрузки (min-height 406, ширина 240) сняты */
+  /* выпадающий список: ширина НЕ обязана совпадать с Select-формой (правило 19.10) —
+     поле компактное, список держим 240, чтобы значения пунктов читались; зазор 2 (как на стенде) */
   .fpop { position: absolute; top: calc(100% + 2px); left: 0; z-index: 40; width: 100%; min-width: 240px; min-height: 0; }
   .fpop .ds-select-item { cursor: pointer; }
   .fpop .ds-select-item__label { white-space: normal; }
@@ -332,7 +338,7 @@
      а текст перечёркнутый»): тексты перечёркнуты и приглушены до Disable; состояния Deleted в ДС
      нет (пробел) — цвета из токенов Disable, зачёркивание — паттерн списка удалённых; чекбокс
      строки остаётся живым (нужен для массового восстановления) */
-  .is-deleted .ds-text-ui__list-item, .is-deleted .ds-text-ui__label-down, .is-deleted .ds-table-content-cell__label { color: var(--ds-color-text-ui-disable-text-color, #9e9e9e); text-decoration: line-through; }
+  .is-deleted .ds-text-ui__list-item, .is-deleted .ds-table-content-cell__label { color: var(--ds-color-text-ui-disable-text-color, #9e9e9e); text-decoration: line-through; }
   .is-deleted .t-c-photo .material-icons { color: var(--ds-color-icon-disable, #9e9e9e); }
 
   /* счётчик в нижней части экрана (требование постановки) */
@@ -367,10 +373,8 @@
   .sb--run .ds-snackbar__progress { animation: sb-count 5s linear forwards; }
   @keyframes sb-count { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 
-  /* 3) статус типа под названием (компонент Status — Text, 19.10): «Маркетинговый» — accent,
-     «Технический» — contrast-1 (цвета по решению заказчика);
-     чип «Удалён» в ячейке названия убран 19.10 (замечание заказчика) — удалённые строки видны
-     только по виду disable + зачёркиванию, отметка — тумблер «Удалённые: N» */
+  /* 3) статусы типа под названием убраны в версии 2 (19.10): тип виден в шапке панели группы
+     и в группировке, дублировать его в каждой строке не нужно */
 
   /* 4) пустое состояние — объясняет ситуацию и даёт действие (E1 UX-памятки) */
   .t-empty { display: flex; flex-direction: column; align-items: center; gap: var(--ds-space-2x, 8px); padding: var(--ds-space-8x, 32px) var(--ds-space-4x, 16px) var(--ds-space-10x, 40px); }
@@ -414,11 +418,9 @@
 
 <!-- Иконки наборов организмов подставляются их модулями по data-hc-icon / data-tha-icon
      из точных SVG Figma (шапка: search, close, search-off, add; полоса: filter_list, edit,
-     delete-negative, close). Инлайн-спрайт — стрелка сортировки и иконка фильтра шапки таблицы
-     (фильтр — как на стенде Table_DS, журнал №177) -->
+     delete-negative, close). Инлайн-спрайт — только стрелка сортировки таблицы (не из набора) -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-sort" viewBox="0 0 20 20"><path transform="translate(5 4.58333)" d="M5 10.8333L0 5.83333L1.16667 4.66667L4.16667 7.66667V0H5.83333V7.66667L8.83333 4.66667L10 5.83333L5 10.8333Z"/></symbol>
-  <symbol id="ic-filter-list" viewBox="0 0 20 20"><path transform="scale(0.833333)" d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></symbol>
 </svg>
 <style>/* спрайтовые иконки: fill ставится на сам svg — селектор «svg path» не доходит до содержимого
    use (теневое дерево), из-за чего иконки рендерились чёрными (0,0,0) */
@@ -462,7 +464,7 @@
   </header>
 
   <!-- Полоса над таблицей — организм table-header-actions.
-       ВЕРСИЯ 3: слева — Button toggle группировки (компонент ДС, размер S; две иконки с тултипами),
+       Слева — «Фильтр:» и три поля-селекта (порядок заказчика 16.10: тип расположения, баннер, меню),
        затем разделитель и тумблер «Удалённые: N» — со счётчиком (только текст, 16.10); справа — массовые
        действия, показываются только при выборе строк: «Изменить внешнее меню» и «Удалить» — для обычных
        баннеров, «Восстановить» — для удалённых (постановка: «при отображении удаленных баннеров должна
@@ -478,32 +480,125 @@
            (заказчик 16.10: «сделать 8 только между N и X»; остальные зазоры полосы — родные).
            Крестик — сразу за счётчиком («Выбрано: N ✕»); текст «Очистить выбор» убран 16.10.
            Иконка close — из набора организма (data-tha-icon); клик снимает всё выделение -->
-      <span class="tha__sel is-off" id="stripSel">
-        <span class="tha__title" id="stripTitle"></span>
+      <span class="tha__sel">
+        <span class="tha__title" id="stripTitle">Фильтр:</span>
         <div class="tha__after" id="stripAfterSel" hidden>
           <button type="button" class="tha__text-action" id="stripClear" aria-label="Очистить выбор"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><img data-tha-icon="close" width="20" height="20" alt=""></span></button>
         </div>
       </span>
-      <!-- Подпись группировки — в полосе (организм table header actions), как «Фильтр:» в версии 1 -->
-      <span class="tha__title" id="grpLabel">Группировка:</span>
-      <!-- Группировка — ВЕРСИЯ 3: компонент Button toggle ДС (ds-button-toggle, размер S),
-           Type=Outlined — видимый контейнер с рамкой, выбранный сегмент — с акцентной заливкой
-           (как на стенде Button-Toggle_DS); сегменты — текстовые Button «Тип» / «Место»
-           (вариант 7, выбран заказчиком 20.10), полные названия — в тултипах.
-           Фильтры «Файл»/«Внешнее меню» уехали в шапку таблицы (иконка filter у колонки) -->
+      <!-- Группировка — тоже поле-селект (16.10, заказчик: «селекты — тип, баннер, меню» после «Фильтр:»;
+           раньше — Button toggle). Список — Select container: Title → Divider → пункты с РАДИОКНОПКАМИ
+           (одиночный выбор — группировка одна из двух); выбор применяется сразу по клику;
+           поле показывает текущую группировку (всегда заполнено) -->
       <!-- Поля-селекты — группой .filter-fields: зазор 8 ТОЛЬКО между полями (заказчик 16.10:
            «отступы между селектами давай тоже 8… только между селектами»); остальные зазоры — 16 -->
       <span class="filter-fields">
-        <div class="ds-button-toggle ds-button-toggle--s ds-button-toggle--outlined ds-button-toggle--text" role="group" aria-label="Группировка списка">
-          <button type="button" class="ds-btn ds-btn--s ds-btn--accent ds-btn--filled bt-seg" id="grpType" aria-label="Группировка по типу расположения" aria-pressed="true">
-            <span class="ds-btn__label">Тип</span>
-            <span class="icon-tip" role="tooltip">Тип расположения</span>
-          </button>
-          <button type="button" class="ds-btn ds-btn--s ds-btn--neutral ds-btn--text bt-seg" id="grpPlace" aria-label="Группировка по месту расположения" aria-pressed="false">
-            <span class="ds-btn__label">Место</span>
-            <span class="icon-tip" role="tooltip">Место расположения</span>
-          </button>
+      <span class="filter-anchor">
+        <div class="ds-select-form ds-select-form--xs ds-select-form--populated fsel fsel--group" id="groupField" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="Группировка списка">
+          <div class="ds-input ds-input--xs">
+            <div class="ds-input__frame">
+              <div class="ds-input__content">
+                <span class="ds-input__field" id="groupValue">Тип расположения</span>
+              </div>
+              <span class="ds-input__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">arrow_drop_down</span></span></span>
+            </div>
+          </div>
         </div>
+        <div class="ds-select-container fpop fpop--group" id="groupPop" role="listbox" aria-label="Группировка списка" hidden>
+          <div class="ds-select-container__title"><span class="fpop__title">Группировка списка</span></div>
+          <div class="ds-divider"></div>
+          <div class="ds-select-container__content fpop__scroll" id="groupItems"></div>
+        </div>
+      </span>
+      <!-- Фильтр — ПОЛЯ-СЕЛЕКТЫ (Select form) + списки (Select container), размер S (36); порядок
+           заказчика 16.10 после «Фильтр:»: тип (группировка, см. выше), БАННЕР, МЕНЮ.
+           16.10, замечания заказчика: (1) поля в ЛЕВОЙ зоне — «справа только кнопки и иконки действий»;
+           (2) при незаданном фильтре поле показывает НАЗВАНИЕ («Баннер»/«Внешнее меню»); при заданном
+           название остаётся и добавляется состав — «Внешнее меню: значение/N» (замечание 16.10: «Выбрано
+           чего??? Название должно оставаться»); в размере S подпись поля в ДС не выводится — название
+           работает как Empty-текст; (3) структура списков — как на стенде Select (контейнер): Search → Title →
+           Divider → пункты с чекбоксами → Divider → футер [Сбросить | Применить] в ОБОИХ списках;
+           поиск — в обоих; список — по ширине поля, зазор 2 -->
+      <span class="filter-anchor">
+        <div class="ds-select-form ds-select-form--xs ds-select-form--empty fsel fsel--banner" id="bannerFilterField" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="Фильтр по файлу">
+          <div class="ds-input ds-input--xs">
+            <div class="ds-input__frame">
+              <div class="ds-input__content">
+                <span class="ds-input__field" id="bannerFilterValue">Файл</span>
+              </div>
+              <!-- при непустом фильтре — крестик «сбросить» (16.10): слева от стрелки,
+                   иконки группой (компонент Icon group: крестик + стрелка) -->
+              <span class="ds-input__icon ds-icon-group">
+                <span class="ds-icon-group__icon" id="bannerFilterClear" role="button" tabindex="0" aria-label="Сбросить фильтр по файлу" hidden><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><span class="material-icons" aria-hidden="true">close</span></span></span>
+                <span class="ds-icon-group__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">arrow_drop_down</span></span></span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="ds-select-container fpop fpop--banner" id="bannerFilterPop" role="listbox" aria-label="Выберите файл" hidden>
+          <div class="ds-select-container__search">
+            <span class="ds-search ds-search--s fpop__sfield">
+              <span class="ds-search__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">search</span></span></span>
+              <input class="ds-search__label" type="text" id="bannerFilterSearch" placeholder="Поиск по названию" aria-label="Поиск по названию файла">
+            </span>
+          </div>
+          <div class="ds-select-container__title"><span class="fpop__title">Выберите файл</span></div>
+          <div class="ds-divider"></div>
+          <div class="fpop__wrap">
+            <div class="ds-select-container__content fpop__scroll" id="bannerFilterItems"></div>
+            <div class="ds-scroll ds-scroll--v ds-scroll--middle fscroll" aria-hidden="true" hidden>
+              <div class="ds-scroll__background"><div class="ds-scroll__knob"></div></div>
+            </div>
+          </div>
+          <div class="ds-divider"></div>
+          <div class="ds-select-container__button-group">
+            <div class="ds-btn-group ds-btn-group--horizontal">
+              <button class="ds-btn ds-btn--s ds-btn--neutral ds-btn--outlined" type="button" id="bannerFilterReset"><span class="ds-btn__label">Сбросить</span></button>
+              <button class="ds-btn ds-btn--s ds-btn--accent ds-btn--filled" type="button" id="bannerFilterApply"><span class="ds-btn__label">Применить</span></button>
+            </div>
+          </div>
+        </div>
+      </span>
+      <span class="filter-anchor">
+        <div class="ds-select-form ds-select-form--xs ds-select-form--empty fsel fsel--menu" id="menuFilterField" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="Фильтр по внешнему меню">
+          <div class="ds-input ds-input--xs">
+            <div class="ds-input__frame">
+              <div class="ds-input__content">
+                <span class="ds-input__field" id="menuFilterValue">Внешнее меню</span>
+              </div>
+              <!-- при непустом фильтре — крестик «сбросить» (16.10): слева от стрелки,
+                   иконки группой (компонент Icon group: крестик + стрелка) -->
+              <span class="ds-input__icon ds-icon-group">
+                <span class="ds-icon-group__icon" id="menuFilterClear" role="button" tabindex="0" aria-label="Сбросить фильтр по внешнему меню" hidden><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><span class="material-icons" aria-hidden="true">close</span></span></span>
+                <span class="ds-icon-group__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">arrow_drop_down</span></span></span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="ds-select-container fpop fpop--menu" id="menuFilterPop" role="listbox" aria-label="Выберите внешнее меню" hidden>
+          <div class="ds-select-container__search">
+            <span class="ds-search ds-search--s fpop__sfield">
+              <span class="ds-search__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">search</span></span></span>
+              <input class="ds-search__label" type="text" id="menuFilterSearch" placeholder="Поиск по названию" aria-label="Поиск по названию внешнего меню">
+            </span>
+          </div>
+          <div class="ds-select-container__title"><span class="fpop__title">Выберите внешнее меню</span></div>
+          <div class="ds-divider"></div>
+          <div class="fpop__wrap">
+            <div class="ds-select-container__content fpop__scroll" id="menuFilterItems"></div>
+            <div class="ds-scroll ds-scroll--v ds-scroll--middle fscroll" aria-hidden="true" hidden>
+              <div class="ds-scroll__background"><div class="ds-scroll__knob"></div></div>
+            </div>
+          </div>
+          <div class="ds-divider"></div>
+          <div class="ds-select-container__button-group">
+            <div class="ds-btn-group ds-btn-group--horizontal">
+              <button class="ds-btn ds-btn--s ds-btn--neutral ds-btn--outlined" type="button" id="menuFilterReset"><span class="ds-btn__label">Сбросить</span></button>
+              <button class="ds-btn ds-btn--s ds-btn--accent ds-btn--filled" type="button" id="menuFilterApply"><span class="ds-btn__label">Применить</span></button>
+            </div>
+          </div>
+        </div>
+      </span>
       </span><!-- /.filter-fields -->
       <!-- Слот «После заголовка» — разделитель + тумблер удалённых, ПОСЛЕ фильтр-селектов.
            Тумблер (16.10, как в варианте 1 — замечание заказчика: «сделай как в первой версии…
@@ -566,60 +661,6 @@
     </div>
   </div>
 
-  <!-- ВЕРСИЯ 3: попапы фильтров «Файл»/«Внешнее меню» — открываются по иконке в шапке таблицы
-       (position: fixed — позицию задаёт скрипт под иконкой; вне полосы, чтобы не давали зазоров).
-       Активный фильтр — точка Badge на иконке (как на стенде Table_DS) -->
-  <span class="filter-anchor">
-    <div class="ds-select-container fpop fpop--banner" id="bannerFilterPop" role="listbox" aria-label="Выберите файл" hidden>
-      <div class="ds-select-container__search">
-        <span class="ds-search ds-search--s fpop__sfield">
-          <span class="ds-search__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">search</span></span></span>
-          <input class="ds-search__label" type="text" id="bannerFilterSearch" placeholder="Поиск по названию" aria-label="Поиск по названию файла">
-        </span>
-      </div>
-      <div class="ds-select-container__title"><span class="fpop__title">Выберите файл</span></div>
-      <div class="ds-divider"></div>
-      <div class="fpop__wrap">
-        <div class="ds-select-container__content fpop__scroll" id="bannerFilterItems"></div>
-        <div class="ds-scroll ds-scroll--v ds-scroll--middle fscroll" aria-hidden="true" hidden>
-          <div class="ds-scroll__background"><div class="ds-scroll__knob"></div></div>
-        </div>
-      </div>
-      <div class="ds-divider"></div>
-      <div class="ds-select-container__button-group">
-        <div class="ds-btn-group ds-btn-group--horizontal">
-          <button class="ds-btn ds-btn--s ds-btn--neutral ds-btn--outlined" type="button" id="bannerFilterReset"><span class="ds-btn__label">Сбросить</span></button>
-          <button class="ds-btn ds-btn--s ds-btn--accent ds-btn--filled" type="button" id="bannerFilterApply"><span class="ds-btn__label">Применить</span></button>
-        </div>
-      </div>
-    </div>
-  </span>
-  <span class="filter-anchor">
-    <div class="ds-select-container fpop fpop--menu" id="menuFilterPop" role="listbox" aria-label="Выберите внешнее меню" hidden>
-      <div class="ds-select-container__search">
-        <span class="ds-search ds-search--s fpop__sfield">
-          <span class="ds-search__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">search</span></span></span>
-          <input class="ds-search__label" type="text" id="menuFilterSearch" placeholder="Поиск по названию" aria-label="Поиск по названию внешнего меню">
-        </span>
-      </div>
-      <div class="ds-select-container__title"><span class="fpop__title">Выберите внешнее меню</span></div>
-      <div class="ds-divider"></div>
-      <div class="fpop__wrap">
-        <div class="ds-select-container__content fpop__scroll" id="menuFilterItems"></div>
-        <div class="ds-scroll ds-scroll--v ds-scroll--middle fscroll" aria-hidden="true" hidden>
-          <div class="ds-scroll__background"><div class="ds-scroll__knob"></div></div>
-        </div>
-      </div>
-      <div class="ds-divider"></div>
-      <div class="ds-select-container__button-group">
-        <div class="ds-btn-group ds-btn-group--horizontal">
-          <button class="ds-btn ds-btn--s ds-btn--neutral ds-btn--outlined" type="button" id="menuFilterReset"><span class="ds-btn__label">Сбросить</span></button>
-          <button class="ds-btn ds-btn--s ds-btn--accent ds-btn--filled" type="button" id="menuFilterApply"><span class="ds-btn__label">Применить</span></button>
-        </div>
-      </div>
-    </div>
-  </span>
-
   <!-- ═══ Группировка по типу расположения ═══
        Постановка: «Группировка по Типу расположения. Могут 2 типов: Маркетинговые: Экран ожидания
        *Заставки* (WAITING_SCREEN), Категории меню *Баннеры категорий* (MENU_CATEGORIES);
@@ -632,9 +673,9 @@
     <div class="ds-table-header-row">
       <div class="ds-table-header-cell t-c-check"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-check-all><span class="ds-checkbox__box"></span></label></div></div>
       <div class="ds-table-header-cell t-c-photo"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Фото</span></div></div></div></div>
-      <div class="ds-table-header-cell t-c-file" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Файл</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state h-filter" data-filter="file" role="button" tabindex="0" aria-label="Фильтр по файлу" aria-expanded="false"><svg width="20" height="20" aria-hidden="true"><use href="#ic-filter-list"/></svg><span class="ds-badge ds-badge--point ds-badge--accent h-filter-dot" hidden aria-hidden="true"></span></span></span></div></div></div>
+      <div class="ds-table-header-cell t-c-file" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Файл</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span></span></div></div></div>
       <div class="ds-table-header-cell t-c-name" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><span class="ds-text-ui__element-left"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state" role="button" tabindex="0" data-toggle-all-groups="" aria-label="Раскрыть все группы" aria-expanded="false" title="Раскрыть все группы"><span class="material-icons" aria-hidden="true">unfold_more</span></span></span><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Название</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span></span></div></div></div>
-      <div class="ds-table-header-cell t-c-menu" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Внешнее меню</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state h-filter" data-filter="menu" role="button" tabindex="0" aria-label="Фильтр по внешнему меню" aria-expanded="false"><svg width="20" height="20" aria-hidden="true"><use href="#ic-filter-list"/></svg><span class="ds-badge ds-badge--point ds-badge--accent h-filter-dot" hidden aria-hidden="true"></span></span></span></div></div></div>
+      <div class="ds-table-header-cell t-c-menu" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Внешнее меню</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span></span></div></div></div>
       <div class="ds-table-header-cell t-c-dish" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Блюда</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span></span></div></div></div>
       <div class="ds-table-header-cell t-c-place" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Место расположения</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span></span></div></div></div>
     </div>
@@ -644,7 +685,7 @@
       <div class="ds-table-content-cell t-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-check-group="g-mkt"><span class="ds-checkbox__box"></span></label></div></div></div>
       <div class="ds-table-content-cell t-c-group">
         <span class="ds-table-content-cell__icon"><span class="material-icons" aria-hidden="true">chevron_right</span></span>
-        <span class="grp-main"><span class="ds-text-body-s-14-normal-medium" data-group-label="Маркетинговые">Маркетинговые</span><span class="grp-type ds-text-ui__label-down">Маркетинговые</span></span>
+        <span class="ds-text-body-s-14-normal-medium" data-group-label="Маркетинговые">Маркетинговые</span>
       </div>
     </div>
 
@@ -652,7 +693,7 @@
       <div class="ds-table-content-cell t-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-row="brk"><span class="ds-checkbox__box"></span></label></div></div></div>
       <div class="ds-table-content-cell t-c-photo"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">image</span></span></div>
       <div class="ds-table-content-cell t-c-file"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Завтраки.png</span></div></div></div></div>
-      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Картинка для завтраков</span><span class="ds-text-ui__label-down">Маркетинговый</span></div></div></div></div>
+      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Картинка для завтраков</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-menu"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Завтраки · v3|Основное · v12|Новое меню · v2|Delivery: Основное меню · v1">Завтраки · v3, Основное · v12, Новое меню · v2, Delivery: Основное меню · v1</span></div></div></div></div></div>
       <div class="ds-table-content-cell t-c-dish"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Бургеры</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-place"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">—</span></div></div></div></div>
@@ -661,7 +702,7 @@
       <div class="ds-table-content-cell t-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-row="lunch"><span class="ds-checkbox__box"></span></label></div></div></div>
       <div class="ds-table-content-cell t-c-photo"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">image</span></span></div>
       <div class="ds-table-content-cell t-c-file"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Обеды.png</span></div></div></div></div>
-      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Картинка для обедов</span><span class="ds-text-ui__label-down">Маркетинговый</span></div></div></div></div>
+      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Картинка для обедов</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-menu"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Основное · v12">Основное · v12</span></div></div></div></div></div>
       <div class="ds-table-content-cell t-c-dish"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Роллы</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-place"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">—</span></div></div></div></div>
@@ -671,7 +712,7 @@
       <div class="ds-table-content-cell t-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-row="bb2"><span class="ds-checkbox__box"></span></label></div></div></div>
       <div class="ds-table-content-cell t-c-photo"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">image</span></span></div>
       <div class="ds-table-content-cell t-c-file"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">bb2.png</span></div></div></div></div>
-      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">bb2</span><span class="ds-text-ui__label-down">Маркетинговый</span></div></div></div></div>
+      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">bb2</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-menu"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Delivery: Основное меню · v1">Delivery: Основное меню · v1</span></div></div></div></div></div>
       <div class="ds-table-content-cell t-c-dish"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">2000 Гамбургер</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-place"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Бургеры|Роллы">Бургеры, Роллы</span></div></div></div></div></div>
@@ -680,7 +721,7 @@
       <div class="ds-table-content-cell t-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-row="new"><span class="ds-checkbox__box"></span></label></div></div></div>
       <div class="ds-table-content-cell t-c-photo"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">image</span></span></div>
       <div class="ds-table-content-cell t-c-file"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Новая.png</span></div></div></div></div>
-      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Новая</span><span class="ds-text-ui__label-down">Маркетинговый</span></div></div></div></div>
+      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Новая</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-menu"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Основное · v12|Новое меню · v2">Основное · v12, Новое меню · v2</span></div></div></div></div></div>
       <div class="ds-table-content-cell t-c-dish"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">2104 Пара Биг Хит</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-place"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Бургеры|Роллы|Напитки|Капучино|Салаты|Супы|Пицца|Паста|Десерты|Гриль|Завтраки|Бизнес-ланч|Детское меню|Банкеты">Бургеры, Роллы, Напитки, Капучино, Салаты, Супы, Пицца, Паста, Десерты, Гриль, Завтраки, Бизнес-ланч, Детское меню, Банкеты</span></div></div></div></div></div>
@@ -689,7 +730,7 @@
       <div class="ds-table-content-cell t-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-row="newmenu"><span class="ds-checkbox__box"></span></label></div></div></div>
       <div class="ds-table-content-cell t-c-photo"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">image</span></span></div>
       <div class="ds-table-content-cell t-c-file"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Новое меню.png</span></div></div></div></div>
-      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Новое меню</span><span class="ds-text-ui__label-down">Маркетинговый</span></div></div></div></div>
+      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Новое меню</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-menu"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Завтраки · v3">Завтраки · v3</span></div></div></div></div></div>
       <div class="ds-table-content-cell t-c-dish"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Капучино 300 мл</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-place"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Капучино">Капучино</span></div></div></div></div></div>
@@ -700,7 +741,7 @@
       <div class="ds-table-content-cell t-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-row="banner1"><span class="ds-checkbox__box"></span></label></div></div></div>
       <div class="ds-table-content-cell t-c-photo"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">image</span></span></div>
       <div class="ds-table-content-cell t-c-file"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Баннер_1.mp4</span></div></div></div></div>
-      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Баннер_1</span><span class="ds-text-ui__label-down">Маркетинговый</span></div></div></div></div>
+      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Баннер_1</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-menu"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Завтраки · v3">Завтраки · v3</span></div></div></div></div></div>
       <div class="ds-table-content-cell t-c-dish"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">2000 Гамбургер</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-place"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Бургеры">Бургеры</span></div></div></div></div></div>
@@ -711,7 +752,7 @@
       <div class="ds-table-content-cell t-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-check-group="g-tech"><span class="ds-checkbox__box"></span></label></div></div></div>
       <div class="ds-table-content-cell t-c-group">
         <span class="ds-table-content-cell__icon"><span class="material-icons" aria-hidden="true">chevron_right</span></span>
-        <span class="grp-main"><span class="ds-text-body-s-14-normal-medium" data-group-label="Технические">Технические</span><span class="grp-type ds-text-ui__label-down">Технические</span></span>
+        <span class="ds-text-body-s-14-normal-medium" data-group-label="Технические">Технические</span>
       </div>
     </div>
 
@@ -719,7 +760,7 @@
       <div class="ds-table-content-cell t-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-row="allhead"><span class="ds-checkbox__box"></span></label></div></div></div>
       <div class="ds-table-content-cell t-c-photo"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">image</span></span></div>
       <div class="ds-table-content-cell t-c-file"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Аллергены шапка.png</span></div></div></div></div>
-      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Заголовок аллергенов</span><span class="ds-text-ui__label-down">Технический</span></div></div></div></div>
+      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Заголовок аллергенов</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-menu"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Основное · v12">Основное · v12</span></div></div></div></div></div>
       <div class="ds-table-content-cell t-c-dish"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Салат Цезарь</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-place"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">—</span></div></div></div></div>
@@ -729,7 +770,7 @@
       <div class="ds-table-content-cell t-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-row="alltable"><span class="ds-checkbox__box"></span></label></div></div></div>
       <div class="ds-table-content-cell t-c-photo"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">image</span></span></div>
       <div class="ds-table-content-cell t-c-file"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Аллергены таблица.png</span></div></div></div></div>
-      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Таблица аллергенов</span><span class="ds-text-ui__label-down">Технический</span></div></div></div></div>
+      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Таблица аллергенов</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-menu"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Основное · v12">Основное · v12</span></div></div></div></div></div>
       <div class="ds-table-content-cell t-c-dish"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Салат Цезарь</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-place"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">—</span></div></div></div></div>
@@ -744,9 +785,9 @@
     <div class="ds-table-header-row">
       <div class="ds-table-header-cell t-c-check"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-check-all-place><span class="ds-checkbox__box"></span></label></div></div>
       <div class="ds-table-header-cell t-c-photo"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Фото</span></div></div></div></div>
-      <div class="ds-table-header-cell t-c-file" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Файл</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state h-filter" data-filter="file" role="button" tabindex="0" aria-label="Фильтр по файлу" aria-expanded="false"><svg width="20" height="20" aria-hidden="true"><use href="#ic-filter-list"/></svg><span class="ds-badge ds-badge--point ds-badge--accent h-filter-dot" hidden aria-hidden="true"></span></span></span></div></div></div>
+      <div class="ds-table-header-cell t-c-file" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Файл</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span></span></div></div></div>
       <div class="ds-table-header-cell t-c-name" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><span class="ds-text-ui__element-left"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state" role="button" tabindex="0" data-toggle-all-groups="" aria-label="Раскрыть все группы" aria-expanded="false" title="Раскрыть все группы"><span class="material-icons" aria-hidden="true">unfold_more</span></span></span><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Название</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span></span></div></div></div>
-      <div class="ds-table-header-cell t-c-menu" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Внешнее меню</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state h-filter" data-filter="menu" role="button" tabindex="0" aria-label="Фильтр по внешнему меню" aria-expanded="false"><svg width="20" height="20" aria-hidden="true"><use href="#ic-filter-list"/></svg><span class="ds-badge ds-badge--point ds-badge--accent h-filter-dot" hidden aria-hidden="true"></span></span></span></div></div></div>
+      <div class="ds-table-header-cell t-c-menu" data-sort><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Внешнее меню</span></div><span class="ds-text-ui__element-right"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><svg width="20" height="20" aria-hidden="true"><use href="#i-sort"/></svg></span></span></div></div></div>
     </div>
 
     <div class="ds-table-content-row group-row" data-group="p-burgers" role="button" tabindex="0" aria-expanded="false">
@@ -760,14 +801,14 @@
       <div class="ds-table-content-cell t-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-row="bb2-p"><span class="ds-checkbox__box"></span></label></div></div></div>
       <div class="ds-table-content-cell t-c-photo"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">image</span></span></div>
       <div class="ds-table-content-cell t-c-file"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">bb2.png</span></div></div></div></div>
-      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">bb2</span><span class="ds-text-ui__label-down">Маркетинговый</span></div></div></div></div>
+      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">bb2</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-menu"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Delivery: Основное меню · v1">Delivery: Основное меню · v1</span></div></div></div></div></div>
     </div>
     <div class="ds-table-content-row" data-group-rows="p-burgers" data-banner="banner1" hidden>
       <div class="ds-table-content-cell t-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-row="banner1-p"><span class="ds-checkbox__box"></span></label></div></div></div>
       <div class="ds-table-content-cell t-c-photo"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">image</span></span></div>
       <div class="ds-table-content-cell t-c-file"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Баннер_1.mp4</span></div></div></div></div>
-      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Баннер_1</span><span class="ds-text-ui__label-down">Маркетинговый</span></div></div></div></div>
+      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Баннер_1</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-menu"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Завтраки · v3">Завтраки · v3</span></div></div></div></div></div>
     </div>
 
@@ -782,7 +823,7 @@
       <div class="ds-table-content-cell t-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-row="bb2-r"><span class="ds-checkbox__box"></span></label></div></div></div>
       <div class="ds-table-content-cell t-c-photo"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">image</span></span></div>
       <div class="ds-table-content-cell t-c-file"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">bb2.png</span></div></div></div></div>
-      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">bb2</span><span class="ds-text-ui__label-down">Маркетинговый</span></div></div></div></div>
+      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">bb2</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-menu"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Delivery: Основное меню · v1">Delivery: Основное меню · v1</span></div></div></div></div></div>
     </div>
 
@@ -797,7 +838,7 @@
       <div class="ds-table-content-cell t-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-row="new-d"><span class="ds-checkbox__box"></span></label></div></div></div>
       <div class="ds-table-content-cell t-c-photo"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">image</span></span></div>
       <div class="ds-table-content-cell t-c-file"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Новая.png</span></div></div></div></div>
-      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Новая</span><span class="ds-text-ui__label-down">Маркетинговый</span></div></div></div></div>
+      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Новая</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-menu"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Основное · v12|Новое меню · v2">Основное · v12, Новое меню · v2</span></div></div></div></div></div>
     </div>
 
@@ -812,7 +853,7 @@
       <div class="ds-table-content-cell t-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-row="newmenu-c"><span class="ds-checkbox__box"></span></label></div></div></div>
       <div class="ds-table-content-cell t-c-photo"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">image</span></span></div>
       <div class="ds-table-content-cell t-c-file"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Новое меню.png</span></div></div></div></div>
-      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Новое меню</span><span class="ds-text-ui__label-down">Маркетинговый</span></div></div></div></div>
+      <div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Новое меню</span></div></div></div></div>
       <div class="ds-table-content-cell t-c-menu"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item" data-values="Завтраки · v3">Завтраки · v3</span></div></div></div></div></div>
     </div>
   </div>
@@ -875,7 +916,7 @@
   <div class="ds-snackbar__progress"></div>
 </div>
 
-<script src="../../Design-System/components-web/ds-patterns.js"></script>
+<script src="Design-System/components-web/ds-patterns.js"></script>
 <script>
 /* Свой код экрана: аккордеоны групп, группировка (селект), рабочий фильтр (поля-селекты + списки
    Select container: тип, баннер, меню), поиск по названию, сортировка, тумблер удалённых
@@ -894,8 +935,6 @@
   var currentView = 'type';   /* ВЕРСИЯ 2: активный вид таблицы — для счётчика и пустого состояния */
 
   var stripTitle = document.getElementById('stripTitle');
-  var stripSel = document.getElementById('stripSel');
-  var grpLabel = document.getElementById('grpLabel');
   var stripMass = document.getElementById('stripMass');
   var stripAfter = document.getElementById('stripAfter');
   var stripAfterSel = document.getElementById('stripAfterSel');
@@ -925,11 +964,6 @@
     var el = r.querySelector('.t-c-name .ds-text-ui__list-item');
     return el ? el.textContent.trim() : '';
   }
-  /* значение колонки «Файл» — по ней фильтрует иконка фильтра в шапке этой колонки */
-  function rowFile(r) {
-    var el = r.querySelector('.t-c-file .ds-text-ui__list-item');
-    return el ? el.textContent.trim() : '';
-  }
   function cellValues(el) {
     var d = el.getAttribute('data-values');
     return d ? d.split('|') : el.textContent.trim().split(/,\s*/);
@@ -947,7 +981,7 @@
   function rowMatches(r) {
     if (state.q && rowName(r).toLowerCase().indexOf(state.q) < 0) return false;
     if (state.menus && !rowMenus(r).some(function (m) { return state.menus.indexOf(m) >= 0; })) return false;
-    if (state.banners && state.banners.indexOf(rowFile(r)) < 0) return false;
+    if (state.banners && state.banners.indexOf(rowName(r)) < 0) return false;
     return true;
   }
   function anyFilterActive() { return state.q !== '' || !!state.menus || !!state.banners; }
@@ -978,7 +1012,33 @@
   function deletedCount() {
     return qsa('.tbl[data-view="type"] [data-group-rows]').filter(isDeleted).length;
   }
+  /* ВЕРСИЯ 2: оборачиваем группу и её строки в компонент Expansion panel.
+     Вызывается перед каждым render() (идемпотентно) — так же подхватываются группы/строки,
+     созданные динамически (созданные баннеры, перестройка группировки). */
+  function wrapGroups() {
+    qsa('.tbl').forEach(function (view) {
+      qsa('.group-row', view).forEach(function (g) {
+        var key = g.getAttribute('data-group');
+        ensureGroupCount(g);   /* счётчик — у ВСЕХ групп всех видов, включая статические строки «по месту» */
+        var panel = g.closest('.exp-group');
+        if (!panel) {
+          panel = document.createElement('div');
+          panel.className = 'ds-expansion exp-group';
+          g.parentNode.insertBefore(panel, g);
+          panel.appendChild(g);          /* шапка панели — бывшая группа */
+          var content = document.createElement('div');
+          content.className = 'ds-expansion__content ds-expansion__content--no-padding exp-rows';
+          panel.appendChild(content);
+        }
+        var rows = panel.querySelector('.exp-rows');
+        qsa('[data-group-rows="' + key + '"]', view).forEach(function (r) {
+          if (r.parentElement !== rows) rows.appendChild(r);
+        });
+      });
+    });
+  }
   function render() {
+    wrapGroups();   /* версия 2: группы — панели Expansion panel (обёртка идемпотентная) */
     var showDel = showDeleted.checked;
     showDeletedTitle.textContent = 'Удалённые: ' + deletedCount();
     qsa('.tbl').forEach(function (view) {
@@ -987,17 +1047,15 @@
         var rows = qsa('[data-group-rows="' + key + '"]', view);
         var hits = rows.filter(function (r) { return filterVisible(r, showDel); });
         g.hidden = hits.length === 0;
-        /* счётчик баннеров в группе — единый паттерн на всех списках (как в v2) */
-        var gLabel = g.querySelector('[data-group-label]');
-        if (gLabel && !g.querySelector('.grp-count')) {
-          var gCnt = document.createElement('span');
-          gCnt.className = 'grp-count ds-text-body-s-14-normal-medium';
-          gLabel.insertAdjacentElement('afterend', gCnt);
-        }
         var cnt = g.querySelector('.grp-count');
         if (cnt) cnt.textContent = rows.filter(function (r) { return !isDeleted(r); }).length;
         var open = state.expanded[key] === true;
         g.setAttribute('aria-expanded', open ? 'true' : 'false');
+        var panel = g.closest('.exp-group');
+        if (panel) {
+          panel.classList.toggle('ds-expansion--open', open);
+          panel.hidden = g.hidden;
+        }
         var ic = g.querySelector('.ds-table-content-cell__icon .material-icons');
         if (ic) ic.textContent = open ? 'expand_more' : 'chevron_right';
         rows.forEach(function (r) {
@@ -1067,6 +1125,10 @@
       var width = Math.max(Math.ceil(total) + 2, tbl.clientWidth);   /* +2 — рамка строки */
       hrow.style.minWidth = width + 'px';
       qsa('.ds-table-content-row', tbl).forEach(function (r) { r.style.minWidth = width + 'px'; });
+      /* версия 2: панели групп тянутся вместе со строками (иначе шапка панели уже таблицы) */
+      qsa('.exp-group', tbl).forEach(function (p) {
+        p.style.minWidth = width + 'px';
+      });
     });
   }
 
@@ -1124,14 +1186,15 @@
     if (!hasNormal) closeMassEditPanel();
     stripAfter.hidden = banners.length > 0;                  /* в режиме выбора группировки не показываем */
     stripAfterSel.hidden = banners.length === 0;             /* в режиме выбора — разделитель + «Очистить выбор» */
-    /* в режиме выделения (строка / группа / «выбрать все») панель — контекстная:
-       фильтры и группировка скрыты, чтобы их смена не снимала часть выделения молча */
+    /* UX-правило (19.10): в режиме выделения панель — контекстная (счётчик + действия),
+       фильтры/группировка скрыты, чтобы смена фильтра не снимала выделение молча */
     if (filterFields) filterFields.hidden = banners.length > 0;
-    if (grpLabel) grpLabel.hidden = banners.length > 0;
-    stripTitle.textContent = banners.length ? selectedLabel(banners.length) : '';
-    if (stripSel) stripSel.classList.toggle('is-off', banners.length === 0);
+    stripTitle.textContent = banners.length ? selectedLabel(banners.length) : 'Фильтр:';
   }
 
+  /* ── пункты меню (компонент Menu: ds-menu-item) ─────────────────────
+     Пункт фильтра — чекбокс в слоте __checkbox + подпись; пункт панели массового меню — без чекбокса.
+     Клик по строке переключает чекбокс (механика стенда Menu_DS) */
   function uniqChipValues() {
     var out = [];
     qsa('.tbl [data-group-rows] .t-c-menu .ds-text-ui__list-item').forEach(function (c) {
@@ -1139,11 +1202,9 @@
     });
     return out;
   }
-  /* значения фильтра «Файл» — из колонки «Файл» (имена файлов), а не из «Названия»:
-     иконка фильтра стоит в шапке колонки «Файл» и должна фильтровать именно её */
-  function uniqFiles() {
+  function uniqNames() {
     var out = [];
-    qsa('.tbl [data-group-rows] .t-c-file .ds-text-ui__list-item').forEach(function (c) {
+    qsa('.tbl [data-group-rows] .t-c-name .ds-text-ui__list-item').forEach(function (c) {
       var v = c.textContent.trim();
       if (out.indexOf(v) < 0) out.push(v);
     });
@@ -1225,12 +1286,6 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
-  function createdStatus(item) {
-    var label = item.locationType || (item.group === 'g-tech' ? 'Аллерген шапка' : 'Категории меню');
-    /* статус (Маркетинговые / Технические) — вторая строка Text UI (Label down), обычный текст */
-    var status = (label === 'Аллерген шапка' || label === 'Аллерген основная таблица') ? 'Технические' : 'Маркетинговые';
-    return '<span class="ds-text-ui__label-down">' + escHtml(status) + '</span>';
-  }
   function createdPhoto(item) {
     return '<span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">' + (item.fileType === 'video' ? 'movie' : 'image') + '</span></span>';
   }
@@ -1242,7 +1297,7 @@
     return '<div class="ds-table-content-cell t-c-file"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">' + escHtml(item.fileName || '—') + '</span></div></div></div></div>';
   }
   function createdNameCell(item) {
-    return '<div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item"><button type="button" class="g-name-btn" data-edit-created="' + escHtml(item.id) + '">' + escHtml(item.name) + '</button></span>' + createdStatus(item) + '</div></div></div></div>';
+    return '<div class="ds-table-content-cell t-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item"><button type="button" class="g-name-btn" data-edit-created="' + escHtml(item.id) + '">' + escHtml(item.name) + '</button></span></div></div></div></div>';
   }
   function createdCheckCell(rowId) {
     return '<div class="ds-table-content-cell t-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" data-row="' + escHtml(rowId) + '"><span class="ds-checkbox__box"></span></label></div></div></div>';
@@ -1359,16 +1414,8 @@
     return STATIC_TYPE_KEY[id] || 'g-cats';
   }
   function typeLabelOf(key) { var g = TYPE_GROUPS.filter(function (x) { return x.key === key; })[0]; return g ? g.label : 'Категории меню'; }
-  function isTechType(key) { return key === 'g-ahead' || key === 'g-atable'; }
-  /* статус 12-м шрифтом — тот же, что у группы (Маркетинговые / Технические) */
-  function statusOfType(key) { return isTechType(key) ? 'Технические' : 'Маркетинговые'; }
-  function setTypeLabel(row, key) {
-    var label = row.querySelector('.t-c-name .ds-text-ui__label-down');
-    if (!label) return;
-    label.textContent = statusOfType(key);
-  }
   /* Правки статических строк (редактирование по названию): применяем сохранённые данные
-     к обоим видам таблицы (имя/файл/меню/места/блюда); тип — через typeKeyOf + setTypeLabel */
+     к обоим видам таблицы (имя/файл/меню/места/блюда); тип — через typeKeyOf (статусов в строках нет) */
   function setCellText(row, sel, text) {
     var el = row.querySelector(sel);
     if (el) el.textContent = text;
@@ -1420,7 +1467,7 @@
       label.insertAdjacentElement('afterend', count);
     }
   }
-  function makeGroupRow(template, key, label, status) {
+  function makeGroupRow(template, key, label) {
     var group = template.cloneNode(true);
     group.setAttribute('data-group', key);
     group.setAttribute('aria-expanded', 'false');
@@ -1428,12 +1475,6 @@
     if (cb) cb.setAttribute('data-check-group', key);
     var lab = group.querySelector('[data-group-label]');
     if (lab) { lab.textContent = label; lab.setAttribute('data-group-label', label); }
-    /* статус группы 12-м шрифтом: Маркетинговые / Технические (нет статуса — не показываем) */
-    var st = group.querySelector('.grp-type');
-    if (st) {
-      st.textContent = status || '';
-      st.hidden = !status;
-    }
     ensureGroupCount(group);
     return group;
   }
@@ -1452,10 +1493,9 @@
     qsa('.group-row', view).forEach(function (g) { g.remove(); });
     var frag = document.createDocumentFragment();
     TYPE_GROUPS.forEach(function (tg) {
-      frag.appendChild(makeGroupRow(template, tg.key, tg.label, isTechType(tg.key) ? 'Технические' : 'Маркетинговые'));
+      frag.appendChild(makeGroupRow(template, tg.key, tg.label));
       (byKey[tg.key] || []).forEach(function (r) {
         r.setAttribute('data-group-rows', tg.key);
-        setTypeLabel(r, tg.key);
         if (justCreatedId && r.getAttribute('data-banner') === justCreatedId) state.expanded[tg.key] = true;
         frag.appendChild(r);
       });
@@ -1486,13 +1526,6 @@
       var cb = row.querySelector('input[data-row]');
       if (cb) cb.setAttribute('data-row', id + '-pn');
       view.appendChild(row);
-    });
-    /* подпись под названием — тот же статус 12-м шрифтом, что в виде «Тип расположения» */
-    qsa('[data-banner]', view).forEach(function (r) {
-      var id = (r.getAttribute('data-banner') || '').replace(/-(p\d+|pn)$/, '');
-      var src = typeView.querySelector('[data-banner="' + id + '"] .t-c-name .ds-text-ui__label-down');
-      var dst = r.querySelector('.t-c-name .ds-text-ui__label-down');
-      if (src && dst) dst.textContent = src.textContent;
     });
   }
   restructureTypeGroups();
@@ -1528,7 +1561,7 @@
   }
   function rowActionsCell(id, deleted) {
     return '<div class="ds-table-content-cell t-c-actions"><span class="t-row-actions">' +
-      (deleted ? '' : '<button type="button" class="ds-btn-icon ds-btn-icon--s ds-btn-icon--neutral ds-btn-icon--text row-copy" data-row-copy="' + escHtml(id) + '" aria-label="Скопировать баннер" title="Скопировать баннер"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">content_copy</span></span></button>') +
+      '<button type="button" class="ds-btn-icon ds-btn-icon--s ds-btn-icon--neutral ds-btn-icon--text row-copy" data-row-copy="' + escHtml(id) + '" aria-label="Скопировать баннер" title="Скопировать баннер"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">content_copy</span></span></button>' +
       rowActionButton(id, deleted) +
       '</span></div>';
   }
@@ -1539,9 +1572,6 @@
       var cell = row.querySelector('.t-c-actions');
       if (!cell) return;
       var id = row.getAttribute('data-banner');
-      /* 20.10 (заказчик): удалённую строку копировать нельзя — только Восстановить */
-      var copy = cell.querySelector('[data-row-copy]');
-      if (copy) copy.hidden = isDeleted(row);
       var del = cell.querySelector('[data-row-delete]');
       var rest = cell.querySelector('[data-row-restore]');
       if (isDeleted(row) && del) {
@@ -1623,37 +1653,64 @@
   });
 
   /* Группировки: «Группировка может быть двух типов» — тип расположения / место расположения.
-     ВЕРСИЯ 3: компонент Button toggle ДС (размер S, Type=Outlined) — текстовые сегменты
-     «Тип» / «Место» (вариант 7); выбранный сегмент — с акцентной заливкой, выбор применяется сразу */
-  var grpTypeBtn = document.getElementById('grpType');
-  var grpPlaceBtn = document.getElementById('grpPlace');
-  function setGrpSeg(btn, on) {
-    btn.classList.toggle('ds-btn--accent', on);
-    btn.classList.toggle('ds-btn--filled', on);
-    btn.classList.toggle('ds-btn--neutral', !on);
-    btn.classList.toggle('ds-btn--text', !on);
-    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-  }
+     ВЕРСИЯ 2, пересборка 16.10: вместо Button toggle — поле-селект + список (Select form +
+     Select container), как у фильтров (заказчик: «селекты — тип, баннер, меню» после «Фильтр:»);
+     выбор применяется сразу по клику, кнопок и поиска в списке нет */
+  var groupField = document.getElementById('groupField');
+  var groupValue = document.getElementById('groupValue');
+  var groupPop = document.getElementById('groupPop');
+  var groupItems = document.getElementById('groupItems');
+  var GROUPINGS = [
+    { id: 'type', label: 'Тип расположения' },
+    { id: 'place', label: 'Место расположения' }
+  ];
   function applyGrouping(id) {
-    currentView = id;   /* активный вид — для счётчика и пустого состояния */
+    var g = GROUPINGS.filter(function (x) { return x.id === id; })[0];
+    if (!g) return;
+    groupValue.textContent = g.label;
+    currentView = id;   /* ВЕРСИЯ 2: вид для счётчика и пустого состояния */
     qsa('[data-view]').forEach(function (v) { v.hidden = v.getAttribute('data-view') !== id; });
-    setGrpSeg(grpTypeBtn, id === 'type');
-    setGrpSeg(grpPlaceBtn, id === 'place');
     closeFilters();
-    render();   /* пересчёт счётчика и пустого состояния под выбранный вид */
+    render();   /* ВЕРСИЯ 2: пересчёт счётчика и пустого состояния под выбранный вид */
   }
-  grpTypeBtn.addEventListener('click', function () { applyGrouping('type'); });
-  grpPlaceBtn.addEventListener('click', function () { applyGrouping('place'); });
+  /* пункты списка — с РАДИОКНОПКОЙ, не чекбоксом (замечание заказчика 16.10: «почему чекбоксами?»
+     — группировка одна из двух, это одиночный выбор; чекбоксы — у фильтров, где выбор множественный);
+     слот __element-left — компонент Radio button (как Checkbox в пунктах фильтров) */
+  function buildGroupList() {
+    groupItems.innerHTML = '';
+    GROUPINGS.forEach(function (g) {
+      var item = document.createElement('div');
+      item.className = 'ds-select-item ds-select-item--false';
+      item.setAttribute('data-value', g.id);
+      item.innerHTML = '<span class="ds-select-item__element-left"><label class="ds-radio"><input class="ds-radio__input" type="radio" name="groupChoice" tabindex="-1"' + (currentView === g.id ? ' checked' : '') + '><span class="ds-radio__box"></span></label></span><div class="ds-select-item__content"><span class="ds-select-item__label"></span></div>';
+      item.querySelector('.ds-select-item__label').textContent = g.label;
+      item.addEventListener('click', function () { applyGrouping(g.id); });
+      groupItems.appendChild(item);
+    });
+  }
+  groupField.addEventListener('click', function (e) {
+    e.stopPropagation();
+    toggleFilter(groupPop, groupField, buildGroupList);
+  });
+  groupPop.addEventListener('click', function (e) { e.stopPropagation(); });
 
-  /* Фильтры (ВЕРСИЯ 3): «Файл» и «Внешнее меню» — иконки filter у колонок в шапке таблицы;
-     попап (Select container: поиск → заголовок → чекбоксы → футер [Сбросить | Применить])
-     раскрывается под иконкой. Списки и футеры — как в версии 1 */
+  /* Фильтр (ВЕРСИЯ 2, пересборка 16.10: «сделать селектами и выпадающим списком»): два поля-селекта
+     на ПРАВОЙ стороне полосы таблицы (правило заказчика: фильтр относится только к таблице → место
+     в header table actions, все действия полосы — справа). Поля — компонент Select form, списки —
+     компонент Select container: «Внешнее меню» — чекбоксы + футер [Сбросить | Применить];
+     «Баннер» — поиск по названию, выбор пункта применяется сразу (кнопок нет) */
+  var menuFilterField = document.getElementById('menuFilterField');
+  var menuFilterValue = document.getElementById('menuFilterValue');
   var menuFilterPop = document.getElementById('menuFilterPop');
   var menuFilterItems = document.getElementById('menuFilterItems');
   var menuFilterSearch = document.getElementById('menuFilterSearch');
+  var bannerFilterField = document.getElementById('bannerFilterField');
+  var bannerFilterValue = document.getElementById('bannerFilterValue');
   var bannerFilterPop = document.getElementById('bannerFilterPop');
   var bannerFilterItems = document.getElementById('bannerFilterItems');
   var bannerFilterSearch = document.getElementById('bannerFilterSearch');
+  var menuFilterClear = document.getElementById('menuFilterClear');
+  var bannerFilterClear = document.getElementById('bannerFilterClear');
 
   /* скролл списка — компонент Scroll: системная полоса скрыта, ползунок показывает позицию
      (механика — общий файл ДС ds-patterns.js, в странице — только вызов) */
@@ -1667,34 +1724,23 @@
   function closeFilters() {
     menuFilterPop.hidden = true;
     bannerFilterPop.hidden = true;
-    qsa('.h-filter').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
+    groupPop.hidden = true;
+    menuFilterField.setAttribute('aria-expanded', 'false');
+    bannerFilterField.setAttribute('aria-expanded', 'false');
+    groupField.setAttribute('aria-expanded', 'false');
   }
-  /* открытие попапа — фиксированно под иконкой в шапке таблицы (ВЕРСИЯ 3, как на стенде Table_DS) */
-  function toggleHeaderFilter(pop, icon, rebuild) {
+  function toggleFilter(pop, field, rebuild) {
     var wasHidden = pop.hidden;
     closeFilters();
     if (wasHidden) {
-      var r = icon.getBoundingClientRect();
-      pop.style.left = Math.round(Math.min(r.left, window.innerWidth - 336)) + 'px';
-      pop.style.top = Math.round(r.bottom + 2) + 'px';
       pop.hidden = false;
-      icon.setAttribute('aria-expanded', 'true');
+      field.setAttribute('aria-expanded', 'true');
       rebuild();            /* при открытии — из применённого фильтра (правки без «Применить» отбрасываются) */
       syncPopScroll(pop);
     }
   }
-  qsa('.h-filter[data-filter="file"]').forEach(function (b) {
-    b.addEventListener('click', function (e) { e.stopPropagation(); toggleHeaderFilter(bannerFilterPop, b, buildBannerFilterList); });
-    b.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); b.click(); }
-    });
-  });
-  qsa('.h-filter[data-filter="menu"]').forEach(function (b) {
-    b.addEventListener('click', function (e) { e.stopPropagation(); toggleHeaderFilter(menuFilterPop, b, buildMenuFilterList); });
-    b.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); b.click(); }
-    });
-  });
+  menuFilterField.addEventListener('click', function (e) { e.stopPropagation(); toggleFilter(menuFilterPop, menuFilterField, buildMenuFilterList); });
+  bannerFilterField.addEventListener('click', function (e) { e.stopPropagation(); toggleFilter(bannerFilterPop, bannerFilterField, buildBannerFilterList); });
   menuFilterPop.addEventListener('click', function (e) { e.stopPropagation(); });
   bannerFilterPop.addEventListener('click', function (e) { e.stopPropagation(); });
   document.addEventListener('click', function () { closeFilters(); });
@@ -1773,7 +1819,7 @@
     applyMenuQuery();   /* поиск сохраняется при пересборке */
   }
   function buildBannerFilterList() {
-    buildFilterList(bannerFilterItems, uniqFiles(), state.banners);
+    buildFilterList(bannerFilterItems, uniqNames(), state.banners);
     applyBannerQuery();   /* поиск сохраняется при пересборке */
   }
   function applyFilterState() {
@@ -1800,7 +1846,19 @@
     applyFilterState();
   });
 
-  /* ВЕРСИЯ 3: крестика в поле больше нет — сброс фильтра кнопкой «Сбросить» в попапе */
+  /* крестик в поле — сброс фильтра (16.10): клик не должен открывать список (stopPropagation) */
+  menuFilterClear.addEventListener('click', function (e) {
+    e.stopPropagation();
+    state.menus = null;
+    buildMenuFilterList();
+    applyFilterState();
+  });
+  bannerFilterClear.addEventListener('click', function (e) {
+    e.stopPropagation();
+    state.banners = null;
+    buildBannerFilterList();
+    applyFilterState();
+  });
 
   /* Многозначные ячейки «Меню»/«Место расположения» — как было ранее:
      значения обычным текстом, ячейка показывает максимум 2 строки, в конце
@@ -1812,7 +1870,7 @@
       if (c.classList.contains('t-c-check') || c.classList.contains('t-c-photo') || c.classList.contains('t-c-actions')) return;
       var nameBtn = c.querySelector('.g-name-btn');
       if (nameBtn) { if (!nameBtn.textContent.trim()) nameBtn.textContent = '—'; return; }
-      if (c.querySelector('.ds-checkbox, .ds-btn-icon, input, button')) return;
+      if (c.querySelector('.ds-checkbox, .ds-btn-icon, .ds-status, input, button')) return;
       var host = c.querySelector('.ds-text-ui__list-item') || c;
       if (!host.textContent.trim()) host.textContent = '—';
     });
@@ -1879,13 +1937,21 @@
   }
   menuFilterSearch.addEventListener('input', applyMenuQuery);
 
-  /* точка Badge на иконке фильтра — есть применённые значения (компонент Badge: Point, Accent;
-     как на стенде Table_DS, журнал №177) */
+  /* поля: название при незаданном фильтре (Empty); при заданном название ОСТАЁТСЯ и показывается
+     состав — «Внешнее меню: значение» / «Внешнее меню: N» (замечание заказчика 16.10:
+     «Выбрано чего??? Название должно оставаться. Внешнее меню: 3») */
   function updateFilterFields() {
     var menuOn = !!state.menus;
     var bannerOn = !!state.banners;
-    qsa('.h-filter[data-filter="menu"] .h-filter-dot').forEach(function (d) { d.hidden = !menuOn; });
-    qsa('.h-filter[data-filter="file"] .h-filter-dot').forEach(function (d) { d.hidden = !bannerOn; });
+    menuFilterValue.textContent = menuOn ? 'Внешнее меню: ' + (state.menus.length === 1 ? state.menus[0] : state.menus.length) : 'Внешнее меню';
+    bannerFilterValue.textContent = bannerOn ? 'Файл: ' + (state.banners.length === 1 ? state.banners[0] : state.banners.length) : 'Файл';
+    menuFilterField.classList.toggle('ds-select-form--empty', !menuOn);
+    menuFilterField.classList.toggle('ds-select-form--populated', menuOn);
+    bannerFilterField.classList.toggle('ds-select-form--empty', !bannerOn);
+    bannerFilterField.classList.toggle('ds-select-form--populated', bannerOn);
+    /* крестик «сбросить» — только при непустом фильтре (16.10) */
+    menuFilterClear.hidden = !menuOn;
+    bannerFilterClear.hidden = !bannerOn;
   }
   /* пересборка обоих списков (снятие чипов, «Сбросить всё» в строке фильтров) */
   function syncFilterBoxes() {
@@ -1967,8 +2033,10 @@
           return dir === 'asc' ? r : -r;
         });
         var anchor = g;
-        rows.forEach(function (r) { anchor.parentNode.insertBefore(r, anchor.nextSibling); anchor = r; });
-      });
+        var host = (g.parentElement && g.parentElement.classList.contains('exp-group'))
+          ? g.parentElement.querySelector('.exp-rows') : null;
+        if (host) { rows.forEach(function (r) { host.appendChild(r); }); return; }
+        rows.forEach(function (r) { anchor.parentNode.insertBefore(r, anchor.nextSibling); anchor = r; });      });
     });
   });
 
@@ -2111,11 +2179,13 @@
         massEditApply.disabled = massEditChoice.length === 0;
       }, true);
     });
+    syncMassEditScroll();
+  }
+  /* скролл списка меню — компонент Scroll (механика — ds-patterns.js) */
+  function syncMassEditScroll() {
     DSPatterns.scrollSync(massEditList, massEditPanel.querySelector('.fscroll'));
   }
-  massEditList.addEventListener('scroll', function () {
-    DSPatterns.scrollSync(massEditList, massEditPanel.querySelector('.fscroll'));
-  });
+  massEditList.addEventListener('scroll', syncMassEditScroll);
   massEdit.addEventListener('click', function (e) {
     e.stopPropagation();
     if (massEditPanel.hidden) {
@@ -2123,8 +2193,8 @@
       buildMassEditList();
       massEditApply.disabled = true;
       massEditPanel.hidden = false;
-      DSPatterns.scrollSync(massEditList, massEditPanel.querySelector('.fscroll'));
       massEdit.setAttribute('aria-expanded', 'true');
+      syncMassEditScroll();
     } else {
       closeMassEditPanel();
     }
@@ -2223,7 +2293,7 @@
   function draftFromRow(row) {
     var id = row.getAttribute('data-banner');
     var source = document.querySelector('.tbl[data-view="type"] [data-banner="' + id + '"]') || row;
-    var typeEl = source.querySelector('.t-c-name .ds-text-ui__label-down');
+    var locationType = typeLabelOf(typeKeyOf(id));   /* тип берём из группировки — статусов в строках нет */
     var menuEl = source.querySelector('.t-c-menu .ds-text-ui__list-item');
     var dishEl = source.querySelector('.t-c-dish .ds-text-ui__list-item');
     var placeEl = source.querySelector('.t-c-place .ds-text-ui__list-item');
@@ -2232,8 +2302,7 @@
     return {
       id: 'draft-' + id,
       name: rowName(source),
-      /* подпись под названием — это статус (Маркетинговые/Технические); тип берём из группы строки */
-      locationType: typeLabelOf(typeKeyOf(id)),
+      locationType: locationType,
       menus: menuEl ? cellValues(menuEl) : [],
       dishes: dishEl && dishEl.textContent.trim() !== '—' ? [dishEl.textContent.trim()] : [],
       places: placeEl ? cellValues(placeEl).filter(function (v) { return v !== '—'; }) : [],

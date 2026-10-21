@@ -3,14 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Киоски · Баннеры — Новый баннер (прототип на ДС)</title>
+<title>Киоски · Баннеры — Новый баннер · автокомплит (прототип на ДС)</title>
 <!--
-  ЭКРАН «Управление киосками → Баннеры → Новый баннер» (переход по «Добавить»).
+  ЭКРАН «Управление киосками → Баннеры → Новый баннер» — ВЕРСИЯ 2 (для сравнения с версией 1).
+  ОТЛИЧИЕ ОТ ВЕРСИИ 1: поля «Меню»/«Внешнее меню», «Место расположения» и «Блюда для деактивации»
+  сделаны АВТОКОМПЛИТОМ вместо Select:
+    • поле — Chips Input ДС (ds-chips-input): чипы выбранных значений + живой ввод текста;
+    • подсказки — Select container с пунктами Select item; список с чекбоксами: первый пункт «Все»
+      (переключает все видимые) + разделитель, затем значения; выбранное — чипом в поле; поиск
+      фильтрует список;
+    • клавиатура: ↓/↑ — активная подсказка, Enter — выбрать, Esc / клик мимо — закрыть,
+      Backspace/Delete в пустом вводе — снять последний чип;
+    • композиция как в Angular Material: mat-chip-grid (+ mat-chip-row) в mat-form-field +
+      mat-autocomplete (свойства multiple у mat-autocomplete нет — мультибор делается чипами);
+    • ограничение композиции: чекбоксы и «Все» в списке — по общему правилу фильтров (16.10):
+      «Все» — три состояния, под ним разделитель; «Тип расположения», «Ссылка», «Размер» —
+      остаются Select (одиночный выбор).
+  ОСТАЛЬНОЕ (постановка, компоновка, валидация, превью, создание/редактирование, вкладка «БЛЮДА»,
+  правая панель выбора блюд) — как в версии 1.
+
   ОТКУДА ЧТО ВЗЯТО:
     • постановка — вики VIT «Киоски: оптимизация управления баннерами» (стр. 181774290),
       задача 1 — Jira PB-8074 / WEB-22902. Сценарии создания:
       сц.1 «Экран ожидания» — доступны «Внешнее меню» и «Блюдо для деактивации» (мульти);
-      сц.2 «Категории меню» — доступны ВСЕ поля: «Внешнее меню» (мульти, с версиями), «Место расположения»
+      сц.2 «Категории меню» — доступны ВСЕ поля: «Меню» (мульти, с версиями), «Место расположения»
       (мульти; постановка: «сейчас поле называется Расположение — добавить слово Место»),
       «Ссылка для перехода», «Блюдо для деактивации» (мульти, из блюд выбранного меню),
       «Размер» — если выбрано размерное блюдо; «если внешнее меню не настроено корректно
@@ -26,14 +42,14 @@
       app-header-content (стрелка назад + заголовок + действия);
     • ВСЕ ФОРМЫ РАБОЧИЕ (16.10, «все формы рабочие» — у полей нет состояния Disable): ввод и
       float-label, открытие списков, выбор значения (у выбранного — галочка; одиночные списки без
-      поиска и заголовков «Выберите…»), мультиселекты как Select (multiple) — текст в поле,
-      чекбоксы в списке, чип файла с удалением, загрузка изображения/видео
+      поиска и заголовков «Выберите…»), мультизначные поля — Chips Input с подсказками
+      (чипы значений + ввод), чип файла с удалением, загрузка изображения/видео
       (файл → превью + чип файла), «Создать» активна только когда заполнены обязательные
       (название + тип + меню + место/размер для категорий + блюдо для сценариев 1/3 + файл);
       пока не заполнено — кнопка disabled, ошибки показываются в полях по мере заполнения;
       зависимости сценариев 1–3 — составом полей и списков: «Место/Блюдо» — только из выбранного
-      меню (без меню список пуст: «Сначала выберите внешнее меню»), подпись поля — ВСЕГДА
-      «Внешнее меню *» (это внешнее меню киоска), при смене типа неприменимые значения сбрасываются; «Новое меню · v2»
+      внешнее меню (без него список пуст: «Сначала выберите внешнее меню»), подпись поля — ВСЕГДА «Внешнее меню *»
+      (это киоск-меню во всех сценариях), при смене типа неприменимые значения сбрасываются; «Новое меню · v2»
       (без данных) — пустые списки: «если внешнее меню не настроено корректно — пользователь
       не сможет заполнить поля»;
     • вне ДС — только раскладка (классы .frm/.field-anchor/.fsel/.fpop/.up-*), помечено в <style>.
@@ -41,14 +57,16 @@
   19.10.2026 — доработка ВИТ (7 пунктов; оформление — по образцу владельца):
     • компоновка — две зоны в ряд: «Основная информация» в карточке с обводкой (поля в 2 колонки)
       и «Загрузка изображения/видео» справа отдельной карточкой (в категориях — одной высоты);
-    • «Меню», «Место расположения» и «Блюда для деактивации» — Select (multiple), как mat-select
-      Material: в поле — значения текстом (выбранные через запятую, как в mat-select multiple), в списке — чекбоксы у каждого пункта,
-      выбранные остаются отмеченными, выбор применяется сразу, панель остаётся открытой; ввода текста нет;
-      в поле нет; в «Месте расположения» дополнительно общий чек «Все»
-      (indeterminate);
+    • «Меню», «Место расположения» и «Блюда для деактивации» — ВЕРСИЯ 2: Chips Input + подсказки
+      (автокомплит, как в Angular: mat-chip-grid + mat-autocomplete); чипы в поле, ввод фильтрует
+      подсказки; выбранное из списка сразу становится чипом; в обоих списках — чекбоксы и пункт
+      «Все» с разделителем (общее правило оформления списков);
     • версия меню — в подписи: «Киоск: основное меню · v3 (01.02–28.02)»; устаревшая версия
       помечается статусом «Устарела» в списке и предупреждением под полем;
     • «Блюдо для деактивации» — видимый мультиселект блюд ВЫБРАННОГО меню (сценарии 1 и 3);
+    • вкладка «Блюда» — один экран без промежуточной панели: обычная таблица «как список баннеров»
+      (шапка с «выбрать все», строка-группа категории с чекбоксом, chevron и счётчиком блюд,
+      строки блюд внутри), поиск, «Выбрано: N» и очистка в шапке; выбор пишется сразу;
     • состав полей зависит от типа: «Экран ожидания»/«Аллергены» — меню + блюда;
       «Категории меню» — полный набор (меню, место, ссылка, размер, блюда);
     • ошибки валидации — в полях (состояние Error + Support text), плашка сверху — только сводка;
@@ -56,11 +74,11 @@
       файл — чипом с удалением.
 -->
 <script src="sidenav-menu.js"></script>
-<script src="../../Design-System/connect.js" defer></script>
-<link rel="stylesheet" href="../../Design-System/organisms/app-header-content/header-content.css?v=1">
-<script src="../../Design-System/organisms/app-header-content/header-content.js?v=1" defer></script>
-<link rel="stylesheet" href="../../Design-System/organisms/app-table-header-actions/table-header-actions.css?v=3">
-<script src="../../Design-System/organisms/app-table-header-actions/table-header-actions.js?v=3" defer></script>
+<script src="Design-System/connect.js" defer></script>
+<link rel="stylesheet" href="Design-System/organisms/app-header-content/header-content.css?v=1">
+<script src="Design-System/organisms/app-header-content/header-content.js?v=1" defer></script>
+<link rel="stylesheet" href="Design-System/organisms/app-table-header-actions/table-header-actions.css?v=3">
+<script src="Design-System/organisms/app-table-header-actions/table-header-actions.js?v=3" defer></script>
 <style>
   html, body { margin: 0; font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif; }
 
@@ -88,53 +106,75 @@
   /* карточки — компонент Card ДС (ds-card--outlined + ds-card--custom):
      рамка, радиус 8 и паддинги 12/16 берутся у компонента (fixes №21), своё — только размер */
   .frm-card { box-sizing: border-box; }
-  /* заголовок внутри карточки (например «Выбранные блюда») — 16/24 medium */
+  /* заголовок внутри карточки — 16/24 medium */
   .sec-title { font: var(--ds-font-body-m-16-normal-medium); letter-spacing: var(--ds-font-body-m-16-normal-medium-spacing); color: var(--ds-color-text-primary, #333333); }
   /* сетка полей: 2 колонки, 16 между строками и 16 в строке (гайд: инпуты 16/16) */
   .frm-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--ds-space-4x, 16px); }
+  /* Если в группе осталось одно поле — оно всегда на всю ширину блока (заказчик, 19.10.2026) */
+  .frm-grid > .field-anchor:only-child,
+  .frm-grid > .field-anchor--full { grid-column: 1 / -1; }
   /* смысловые группы полей: 1 тема = 1 блок; 16 — между группами в одном блоке, 8 — от заголовка группы */
   .frm-groups { display: flex; flex-direction: column; gap: var(--ds-space-4x, 16px); }
   .frm-group__title { font: var(--ds-font-body-s-14-normal-medium); letter-spacing: var(--ds-font-body-s-14-normal-medium-spacing); color: var(--ds-color-text-primary, #333333); margin: 0 0 var(--ds-space-2x, 8px); }
   .frm-group[hidden] { display: none !important; }
-  /* порядок в группе «Показ на киоске»: Место → Размер → Ссылка (на всю ширину) */
-  .frm-grid .field-anchor[data-field="place"] { order: 1; }
+  /* порядок в группе «Показ на киоске»: Место (одно, на всю ширину) → Размер + Ссылка в одной строке */
+  .frm-grid .field-anchor[data-field="place"] { order: 1; grid-column: 1 / -1; }
   .frm-grid .field-anchor[data-field="size"] { order: 2; }
-  .frm-grid .field-anchor[data-field="link"] { order: 3; grid-column: 1 / -1; }
+  .frm-grid .field-anchor[data-field="link"] { order: 3; }
   /* 20.10: «Внешнее меню» и «Блюда для деактивации» — каждое на всю ширину, в 2 строки */
   .frm-grid .field-anchor[data-field="menu"],
   .frm-grid .field-anchor[data-field="dish"] { grid-column: 1 / -1; }
-  /* стили таблицы выбранных блюд и панели выбора (вкладки убраны 20.10 — остались неиспользуемыми) */
+  /* названия категорий в подсказках блюд — Body S medium (как в дереве блюд формы v1) */
+  .fpop__cat { align-items: center; }
+  .fpop__cat .ds-select-item__label { font-weight: var(--ds-font-body-s-14-normal-medium-weight, 500); }
+  /* иерархия — как в списке блюд «Нового баннера» (v1): категория = строка-группа
+     (шеврон раскрытия + чекбокс + название), блюда — с отступом под своей категорией */
+  .fpop__cat .ds-select-item__element-left { align-self: center; display: flex; align-items: center; gap: var(--ds-space-1x, 4px); }
+  .fpop__cat-chevron { display: inline-flex; align-items: center; justify-content: center; width: var(--ds-size-5x, 20px); height: var(--ds-size-5x, 20px); border-radius: var(--ds-radius-1x, 4px); color: var(--ds-color-icon-primary, #616161); }
+  .fpop__cat-chevron:hover { background: var(--ds-color-select-item-hover-background, #f5f5f5); }
+  .fpop__opt--child { padding-left: calc(var(--ds-select-item-pad-left, 16px) + var(--ds-size-5x, 20px) + 4px); }
+  /* вкладки формы скрыты (20.10), но элемент остаётся в разметке */
+  .frm-tabs[hidden] { display: none !important; }
+  /* S2/S3/S4: вкладки формы, таблица выбранных блюд и панель выбора */
   .frm-tabs { margin: 0; }
+  .frm-tabnote { display: block; margin-top: 4px; font: var(--ds-font-caption-l-12-normal-regular); color: var(--ds-color-text-negative, #ff5252); }
+  .frm-tabnote[hidden] { display: none !important; }
+  .ds-tab.is-error { color: var(--ds-color-text-negative, #ff5252); }
   /* Пояснение — компонент ДС Banners (Accent), без самодельной пунктирной рамки */
   .frm-edit-note[hidden] { display: none !important; }
-  .dishes-card { display: flex; flex-direction: column; gap: var(--ds-space-2x, 8px); }
-  .dishes-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  /* S3 «Блюда для деактивации» — один экран: шапка (заголовок, счётчик, очистка), поиск, таблица.
+     Табличный блок собирается с шагом 8 (правило: полоса действий → таблица — 8). */
+  /* одиночная таблица в контенте — фиксированная ширина (19.10: 720 → 920 по команде владельца):
+     1328 на всю ширину — «слишком широкая» */
+  .dishes-card { display: flex; flex-direction: column; gap: var(--ds-space-2x, 8px); width: 920px; max-width: 100%; }
+  /* поиск — компонент Search S прямо в слоте полосы (высота 36, фиксированная ширина) */
+  .dishes-strip .tha__right .ds-search { flex: none; }
+  /* полоса действий — организм: высота 36, до таблицы 8 (правило табличного блока) */
   .dishes-strip { min-height: 36px; padding: 0; }
   .dishes-strip .tha__sel { display: flex; align-items: center; gap: var(--ds-size-2x, 8px); min-width: 0; }
   .dishes-strip .tha__sel[hidden] { display: none !important; }
+  .dishes-strip .tha__title[hidden] { display: none !important; }
   .dishes-table { display: flex; flex-direction: column; overflow-x: auto; }
-  .dishes-table .ds-table-header-row, .dishes-table .ds-table-content-row { display: flex; flex-direction: row; align-items: center; width: 100%; }
+  /* категории и блюда — двумя уровнями в обычной таблице: строка-группа категории + строки блюд */
+  .dishes-table { display: flex; flex-direction: column; overflow-x: auto; }
+  .dishes-table .ds-table-header-row,
+  .dishes-table .ds-table-content-row { display: flex; flex-direction: row; align-items: center; width: 100%; }
+  .dishes-table .ds-table-content-row { cursor: pointer; }
   .d-c-check { width: 36px; flex: none; }
   .d-c-name { flex: 1 1 auto; min-width: 220px; }
-  .d-c-type { width: 120px; flex: none; }
-  .d-c-actions { width: 96px; flex: none; justify-content: flex-end; }
-  .dishes-table .d-c-actions.ds-table-content-cell { display: flex; justify-content: flex-end; }
+  .d-c-menu { width: 124px; flex: none; }
+  /* строка-группа категории — как group-row в списке баннеров */
+  .dishes-table .group-row { cursor: pointer; }
+  .dishes-table .group-row .d-c-name { display: flex; align-items: center; gap: var(--ds-size-2x, 8px); }
+  .dishes-table .group-row .material-icons { color: var(--ds-color-icon-primary, #616161); }
+  /* счётчик категории — как в таблицах списка баннеров: число, body-s-14 secondary */
+  /* счётчик = тот же текст, что рядом: шрифт и цвет наследуются (класс названия), своё — только flex */
+  .dishes-table .group-row .grp-count { flex: none; }
+  .dishes-table .group-row .d-c-name__label { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* строки блюд — с отступом под chevron категории */
+  .dishes-table .d-c-dish { padding-left: 36px; }
+  .dishes-menu { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ds-color-text-secondary, #616161); font: var(--ds-font-caption-l-12-normal-regular); }
   .dishes-empty { padding: 24px 16px 32px; text-align: center; font: var(--ds-font-body-s-14-normal-regular); color: var(--ds-color-text-secondary, #616161); }
-  /* S4. Правая панель выбора блюд/категорий (организм app-right-panel): только раскладка контента. */
-  .rp-dish { display: flex; flex-direction: column; gap: var(--ds-space-4x, 16px); }
-  .rp-dish__tabs { margin: 0; }
-  .rp-dish__tools { display: flex; align-items: center; gap: var(--ds-space-4x, 16px); }
-  .rp-dish__search { flex: 1 1 auto; min-width: 0; }
-  .rp-dish__input { flex: 1 0 0; min-width: 1px; width: 100%; border: 0; outline: 0; background: transparent; padding: 0; font: var(--ds-font-body-s-14-normal-regular); color: var(--ds-color-text-primary, #333333); }
-  .rp-dish__input::placeholder { color: var(--ds-color-search-focus-text-color, #d6d6d6); opacity: 1; }
-  .rp-dish__count { flex: none; color: var(--ds-color-text-secondary, #616161); }
-  .rp-dish__list { display: flex; flex-direction: column; }
-  .dp-row { display: flex; align-items: center; gap: 12px; padding: 8px 4px; border-bottom: 1px solid var(--ds-color-stroke-default, #e0e0e0); cursor: pointer; font: var(--ds-font-body-s-14-normal-regular); }
-  .dp-row:hover { background: var(--ds-color-surface-hover, #f5f5f5); }
-  .dp-row__name { flex: 1 1 auto; min-width: 0; }
-  .dp-row__meta { color: var(--ds-color-text-secondary, #616161); font: var(--ds-font-caption-l-12-normal-regular); }
-  .dp__empty { padding: 24px; text-align: center; color: var(--ds-color-text-secondary, #616161); font: var(--ds-font-body-s-14-normal-regular); }
-  .dishes-type { color: var(--ds-color-text-secondary, #616161); font: var(--ds-font-caption-l-12-normal-regular); }
 
   /* порядок — по разметке: Название | Тип; Меню | Место; Ссылка | Размер; Блюда */
 
@@ -175,6 +215,36 @@
 
   /* Значения мультиселекта — текстом в поле (как в mat-select multiple: выбранные значения
      через запятую, в одну строку с обрезкой); чипов в Select нет. */
+  /* ── ВЕРСИЯ 2: «Меню»/«Место расположения»/«Блюда для деактивации» — Chips Input + подсказки ──
+     Композиция как в Angular: mat-chip-grid (+ mat-chip-row) в mat-form-field + mat-autocomplete:
+     текст вводится, выбранное становится чипом, подсказки фильтруются по вводу. */
+  .aci { width: 100%; }
+  .aci .ds-chips-input { width: 100%; cursor: text; }
+  .aci .ds-chips-input__frame { width: 100%; box-sizing: border-box; min-height: var(--ds-size-12x, 48px); }
+  /* пустое поле (без чипов) — высота 48 ВСЕГДА, и до и после фокуса: 20.10 заказчик заметил,
+     что на фокусе селект подрастал (48 → 58) из-за всплывшего лейбла и «высокой» раскладки.
+     Текст поля — как у компонента Chips Input и как у всех остальных полей формы: Body M 16/24
+     (было 14/20 — отсюда расхождение шрифтов внутри одной формы); паддинги 12 + 24 = 48.
+     «Высокая» раскладка (4/12/8 + лейбл + чипы) — только когда есть чипы (.aci--filled). */
+  .aci:not(.aci--filled) .ds-chips-input__frame { height: var(--ds-size-12x, 48px); gap: 0; }
+  .aci:not(.aci--filled):not(.is-open) .ds-chips-input__frame { padding: var(--ds-space-3x, 12px); }
+  .aci:not(.aci--filled) .ds-chips-input__content { align-items: center; }
+  .aci:not(.aci--filled) .aci-input { font-size: var(--ds-font-body-m-16-normal-regular-size, 16px); line-height: var(--ds-font-body-m-16-normal-regular-line, 24px); height: var(--ds-font-body-m-16-normal-regular-line, 24px); }
+  .aci .ds-chips-input__content { flex-wrap: wrap; row-gap: var(--ds-size-2x, 8px); }   /* вертикаль = горизонтали (8), как gap группы чипов */
+  .aci-caption { font: var(--ds-font-caption-l-12-normal-regular); color: var(--ds-color-form-field-filled-default-label-text-color, #616161); white-space: nowrap; }
+  .aci-input { flex: 1 1 80px; min-width: 40px; border: 0; padding: 0; background: none; outline: 0; font-family: inherit;
+    font-size: var(--ds-font-body-m-16-normal-regular-size, 16px); line-height: var(--ds-font-body-m-16-normal-regular-line, 24px); color: #333333; }
+  .aci-input::placeholder { color: var(--ds-color-form-field-input-label-text-color, #616161); opacity: 1; }
+  .aci.is-open .ds-chips-input__frame { border-color: var(--ds-color-form-field-filled-focus-border-color, #448aff); }
+  .aci.is-open .aci-caption { color: var(--ds-color-form-field-filled-focus-label-text-color, #448aff); }
+  .aci.is-error .ds-chips-input__frame { border-color: var(--ds-color-stroke-negative, #ff5252); }
+  .aci.is-error .aci-caption { color: var(--ds-color-text-negative, #ff5252); }
+  .aci.is-error + .ds-input__support { color: var(--ds-color-text-negative, #ff5252); }
+  .aci .ds-chips { max-width: 100%; }
+  .aci .ds-chips__chip-container { min-width: 0; }
+  .aci .ds-chips__chip-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .aci .ds-chips__close { cursor: pointer; }
+
   .fsel-note { margin-top: var(--ds-space-2x, 8px); font: var(--ds-font-caption-l-12-normal-regular); color: var(--ds-color-text-secondary, #616161); }
   .fsel-note--warning { color: var(--ds-color-status-warning-text-text-color, #ea7806); }
   .fsel-note[hidden] { display: none !important; }
@@ -200,25 +270,8 @@
   .fpop__empty { cursor: default; }
   .fpop__empty .ds-select-item__label { color: var(--ds-color-text-disable, #9e9e9e); }
   .fpop__wrap { display: flex; flex-direction: row; align-items: flex-start; width: 100%; min-height: 0; }
-  /* поле поиска в списке — на всю ширину списка (у .ds-search--s width 243 из ДС) */
-  .fpop .ds-select-container__search .fpop__sfield { width: 100%; }
-  /* отступы списка блюд (20.10): поиск — 8 со всех сторон (в ДС у строки поиска 0 по вертикали
-     и разделитель липнет к полю); список — 8 снизу, чтобы последняя строка не прилипала к краю */
-  #dishPop .ds-select-container__search { padding: var(--ds-space-2x, 8px); }
-  #dishPop .fpop__scroll { padding-bottom: var(--ds-space-2x, 8px); }
   .fpop__scroll { flex: 1 1 auto; min-width: 0; max-height: 320px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
   .fpop__scroll > .ds-divider { flex: none; }   /* в списке разделитель не сжимается — иначе схлопывается в 0 (нашли 16.10) */
-  /* иерархия в списке блюд (20.10, как в примере заказчика): строка категории = шеврон
-     раскрытия + чекбокс (три состояния) + название; блюда — с отступом под категорией */
-  .fpop__cat { align-items: center; }
-  /* 20.10 (заказчик): названия групп (категорий) — жирные (Body S medium 500), блюда остаются regular */
-  .fpop__cat .ds-select-item__label { font-weight: var(--ds-font-body-s-14-normal-medium-weight, 500); }
-  .fpop__cat .ds-select-item__element-left { align-self: center; display: flex; align-items: center; gap: 4px; }
-  .fpop__cat-chevron { display: inline-flex; align-items: center; justify-content: center; width: var(--ds-size-5x, 20px); height: var(--ds-size-5x, 20px); border-radius: var(--ds-radius-1x, 4px); color: var(--ds-color-icon-primary, #616161); }
-  .fpop__cat-chevron:hover { background: var(--ds-color-select-item-hover-background, #f5f5f5); }
-  /* блюдо в дереве: отступ самой строки — чекбокс блюда встаёт ровно под чекбокс категории
-     (16 паддинг + 20 шеврон + 4 зазор = 40), заголовки блюд и категорий на одной линии */
-  .fpop__opt--child { padding-left: calc(var(--ds-select-item-pad-left, 16px) + var(--ds-size-5x, 20px) + 4px); }
   .fpop__scroll::-webkit-scrollbar { display: none; }
   /* скролл списка — инстанс Scroll ДС, как на стендах Menu (Container) / Select: полоса 12
      (ds-scroll--v, fixes №253), дорожка во всю высоту, ползунок 8; длину/позицию считает ds-patterns.js */
@@ -278,17 +331,15 @@
   .sb .ds-snackbar__icon .material-icons { font-size: var(--ds-size-5x, 20px); line-height: var(--ds-size-5x, 20px); }
   .sb .ds-snackbar__progress { display: none; }   /* без действия «Отменить» прогресс не нужен */
 
-  /* диалог подтверждения выхода — КОМПОНЕНТ Dialog ДС + Backdrop;
-     сборка классами: ds-dialog-view → ds-dialog-header (__label/__description) →
-     ds-dialog-view__footer → __action + Button; высота — по контенту (min-height 364 — холст компонента) */
+  /* диалог подтверждения выхода — КОМПОНЕНТ Dialog ДС + Backdrop (тот же паттерн, что в v1);
+     высота — по контенту (min-height 364 — холст компонента), паддинги — токенами */
   .dlg-dim { position: fixed; inset: 0; z-index: 100; opacity: .15; }
   .dlg { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 110; min-height: 0; max-width: calc(100vw - 32px); max-height: calc(100vh - 64px); overflow: hidden; }
   .dlg.ds-dialog-view { min-height: 0; }
   .dlg[hidden], .dlg-dim[hidden] { display: none !important; }
-  /* паддинги шапки/подвала и гэпы в css компонента не выгружены — токенами ДС (как на стенде Dialog) */
   .dlg .ds-dialog-header { width: 100%; gap: var(--ds-dialog-header-gap, 8px); padding: var(--ds-dialog-header-pad-top, 24px) var(--ds-dialog-header-pad-right, 24px) var(--ds-dialog-header-pad-bottom, 8px) var(--ds-dialog-header-pad-left, 24px); }
   .dlg .ds-dialog-header__label { white-space: normal; }
-  .dlg .ds-dialog-header__description { background: none; }   /* артефакт выгрузки: фон = цвет текста */
+  .dlg .ds-dialog-header__description { background: none; }
   .dlg .ds-dialog-view__action { height: auto; flex-direction: row; justify-content: flex-end; gap: var(--ds-space-2x, 8px); padding: var(--ds-dialog-footer-pad-top, 16px) var(--ds-dialog-footer-pad-right, 24px) var(--ds-dialog-footer-pad-bottom, 16px) var(--ds-dialog-footer-pad-left, 24px); }
 
   /* hidden поверх авторских display у ds-* классов (как на страницах списка) */
@@ -329,12 +380,16 @@
       </div>
     </header>
 
-  <!-- 20.10 (заказчик): вкладки «Детали / Блюда» УБРАНЫ — блюда выбираются в селекте
-       «Блюда для деактивации» в блоке «Меню и блюда» -->
+  <!-- S2: вкладки формы скрыты (решение 20.10: «скрыть табы пока») — всё в одной форме, как в «Новом баннере» -->
+  <div class="ds-tabs frm-tabs" role="tablist" aria-label="Баннер" hidden>
+    <button type="button" class="ds-tab ds-tab--active" data-ftab="details" role="tab" aria-selected="true">Детали</button>
+    <button type="button" class="ds-tab" data-ftab="dishes" role="tab" aria-selected="false">Блюда<span class="ds-tab__counter" id="dishesCount" hidden></span></button>
+  </div>
+  <!-- Ошибка обязательного выбора блюд — у таба (поля в «Деталях» больше нет) -->
+  <span class="frm-tabnote" id="dishesTabErr" hidden>Выберите блюда для деактивации</span>
 
-  <!-- Плашка-предупреждение — компонент Banners (Warning): иконка предупреждения в слоте.
-       20.10: крестика НЕТ — сообщение привязано к состоянию формы (само скрывается, когда всё заполнено);
-       ручное закрытие убирало единственную подсказку о том, что осталось. -->
+  <!-- Плашка-предупреждение — компонент Banners (Warning): иконка предупреждения в слоте,
+       текст — сводка по вкладкам. 20.10: крестика НЕТ — сообщение привязано к состоянию формы. -->
   <div class="ds-banner ds-banner--horizontal ds-banner--warning frm-warn" id="warnBar">
     <span class="ds-banner__icon" aria-hidden="true"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons">warning</span></span></span>
     <span class="ds-banner__text">Чтобы создать баннер, заполните обязательные поля и выберите блюда для деактивации</span>
@@ -396,22 +451,21 @@
           <div class="frm-group__title">Меню и блюда</div>
           <div class="frm-grid">
 
-        <!-- Меню — Select (multiple), как mat-select: значения текстом в поле, список с чекбоксами. -->
+        <!-- ВЕРСИЯ 2: Меню — Chips Input + подсказки (как mat-chip-grid + mat-autocomplete). -->
         <div class="field-anchor" data-field="menu" hidden>
-          <div class="ds-select-form ds-select-form--m ds-select-form--empty fsel" id="menuField" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="Внешнее меню">
-            <div class="ds-input ds-input--m ds-input--empty">
-              <div class="ds-input__frame">
-                <div class="ds-input__content">
-                  <span class="ds-input__label" id="menuLabel" hidden>Внешнее меню *</span>
-                  <span class="ds-input__field" id="menuValue">Выберите внешнее меню</span>
+          <div class="aci" id="menuField">
+            <div class="ds-chips-input">
+              <div class="ds-chips-input__frame">
+                <span class="aci-caption" id="menuLabel" hidden>Внешнее меню *</span>
+                <div class="ds-chips-input__content" id="menuChips">
+                  <input class="aci-input" id="menuInput" type="text" placeholder="Выберите внешнее меню" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="menuPop" aria-label="Внешнее меню">
                 </div>
-                <span class="ds-input__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">arrow_drop_down</span></span></span>
               </div>
             </div>
           </div>
           <span class="ds-input__support" id="menuErr" hidden></span>
           <div class="fsel-note fsel-note--warning" id="menuNote" hidden></div>
-          <div class="ds-select-container fpop" id="menuPop" role="listbox" aria-multiselectable="true" aria-label="Выберите внешнее меню" hidden>
+          <div class="ds-select-container fpop" id="menuPop" role="listbox" aria-label="Подсказки внешнего меню" hidden>
             <div class="fpop__wrap">
               <div class="ds-select-container__content fpop__scroll" id="menuItems"></div>
               <div class="ds-scroll ds-scroll--v ds-scroll--middle fscroll" aria-hidden="true" hidden>
@@ -421,29 +475,21 @@
           </div>
         </div>
 
-        <!-- Блюда для деактивации — Select (multiple): значения текстом в поле, список с чекбоксами. -->
+        <!-- Блюда для деактивации — Chips Input + подсказки (как меню/место);
+             источник — выбранные меню: категории (medium) и блюда, поиск внутри списка. -->
         <div class="field-anchor" data-field="dish" hidden>
-          <div class="ds-select-form ds-select-form--m ds-select-form--empty fsel" id="dishField" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="Блюда для деактивации">
-            <div class="ds-input ds-input--m ds-input--empty">
-              <div class="ds-input__frame">
-                <div class="ds-input__content">
-                  <span class="ds-input__label" id="dishLabel" hidden>Блюда для деактивации</span>
-                  <span class="ds-input__field" id="dishValue">Выберите блюда</span>
+          <div class="aci" id="dishField">
+            <div class="ds-chips-input">
+              <div class="ds-chips-input__frame">
+                <span class="aci-caption" id="dishLabel" hidden>Блюда для деактивации *</span>
+                <div class="ds-chips-input__content" id="dishChips">
+                  <input class="aci-input" id="dishInput" type="text" placeholder="Выберите блюда для деактивации" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dishPop" aria-label="Блюда для деактивации">
                 </div>
-                <span class="ds-input__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">arrow_drop_down</span></span></span>
               </div>
             </div>
           </div>
           <span class="ds-input__support" id="dishErr" hidden></span>
-          <div class="ds-select-container fpop" id="dishPop" role="listbox" aria-multiselectable="true" aria-label="Выберите блюда" hidden>
-            <!-- поиск по блюдам (как в примере заказчика: «Введите…») -->
-            <div class="ds-select-container__search">
-              <span class="ds-search ds-search--s fpop__sfield">
-                <span class="ds-search__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">search</span></span></span>
-                <input class="ds-search__label" type="text" id="dishSearch" placeholder="Введите…" aria-label="Поиск по блюдам">
-              </span>
-            </div>
-            <div class="ds-divider"></div>
+          <div class="ds-select-container fpop" id="dishPop" role="listbox" aria-label="Подсказки блюд" hidden>
             <div class="fpop__wrap">
               <div class="ds-select-container__content fpop__scroll" id="dishItems"></div>
               <div class="ds-scroll ds-scroll--v ds-scroll--middle fscroll" aria-hidden="true" hidden>
@@ -461,46 +507,26 @@
           <div class="frm-group__title">Показ на киоске</div>
           <div class="frm-grid">
 
-        <!-- Место расположения — Select (multiple): значения текстом в поле, список с чекбоксами. -->
+        <!-- ВЕРСИЯ 2: Место расположения — Chips Input + подсказки. -->
         <div class="field-anchor" data-field="place" hidden>
-          <div class="ds-select-form ds-select-form--m ds-select-form--empty fsel" id="placeField" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="Место расположения">
-            <div class="ds-input ds-input--m ds-input--empty">
-              <div class="ds-input__frame">
-                <div class="ds-input__content">
-                  <span class="ds-input__label" id="placeLabel" hidden>Место расположения *</span>
-                  <span class="ds-input__field" id="placeValue">Выберите места расположения</span>
+          <div class="aci" id="placeField">
+            <div class="ds-chips-input">
+              <div class="ds-chips-input__frame">
+                <span class="aci-caption" id="placeLabel" hidden>Место расположения *</span>
+                <div class="ds-chips-input__content" id="placeChips">
+                  <input class="aci-input" id="placeInput" type="text" placeholder="Выберите места расположения" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="placePop" aria-label="Место расположения">
                 </div>
-                <span class="ds-input__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">arrow_drop_down</span></span></span>
               </div>
             </div>
           </div>
           <span class="ds-input__support" id="placeErr" hidden></span>
-          <div class="ds-select-container fpop" id="placePop" role="listbox" aria-multiselectable="true" aria-label="Выберите место расположения" hidden>
+          <div class="ds-select-container fpop" id="placePop" role="listbox" aria-label="Подсказки мест расположения" hidden>
             <div class="fpop__wrap">
               <div class="ds-select-container__content fpop__scroll" id="placeItems"></div>
               <div class="ds-scroll ds-scroll--v ds-scroll--middle fscroll" aria-hidden="true" hidden>
                 <div class="ds-scroll__background"><div class="ds-scroll__knob"></div></div>
               </div>
             </div>
-          </div>
-        </div>
-
-        <!-- Размер — одиночный выбор (только «Категории меню»); значения условные -->
-        <div class="field-anchor" data-field="size" hidden>
-          <div class="ds-select-form ds-select-form--m ds-select-form--empty fsel" id="sizeField" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="Размер">
-            <div class="ds-input ds-input--m ds-input--empty">
-              <div class="ds-input__frame">
-                <div class="ds-input__content">
-                  <span class="ds-input__label" id="sizeLabel" hidden>Размер *</span>
-                  <span class="ds-input__field" id="sizeValue">Размер *</span>
-                </div>
-                <span class="ds-input__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">arrow_drop_down</span></span></span>
-              </div>
-              <span class="ds-input__support" id="sizeErr" hidden></span>
-            </div>
-          </div>
-          <div class="ds-select-container fpop" id="sizePop" role="listbox" aria-label="Размер" hidden>
-            <div class="ds-select-container__content fpop__scroll" id="sizeItems"></div>
           </div>
         </div>
 
@@ -523,6 +549,25 @@
           </div>
           <div class="ds-select-container fpop" id="linkPop" role="listbox" aria-label="Ссылка на блюдо или категорию" hidden>
             <div class="ds-select-container__content fpop__scroll" id="linkItems"></div>
+          </div>
+        </div>
+
+        <!-- Размер — одиночный выбор (только «Категории меню»); значения условные -->
+        <div class="field-anchor" data-field="size" hidden>
+          <div class="ds-select-form ds-select-form--m ds-select-form--empty fsel" id="sizeField" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="Размер">
+            <div class="ds-input ds-input--m ds-input--empty">
+              <div class="ds-input__frame">
+                <div class="ds-input__content">
+                  <span class="ds-input__label" id="sizeLabel" hidden>Размер *</span>
+                  <span class="ds-input__field" id="sizeValue">Размер *</span>
+                </div>
+                <span class="ds-input__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">arrow_drop_down</span></span></span>
+              </div>
+              <span class="ds-input__support" id="sizeErr" hidden></span>
+            </div>
+          </div>
+          <div class="ds-select-container fpop" id="sizePop" role="listbox" aria-label="Размер" hidden>
+            <div class="ds-select-container__content fpop__scroll" id="sizeItems"></div>
           </div>
         </div>
 
@@ -554,82 +599,54 @@
   </div>
   </div><!-- /detailsPanel -->
 
-  <!-- S3: выбранные блюда; «Добавить» открывает S4 -->
+  <!-- S3: блюда для деактивации — всё на одной вкладке: поиск, полный список блюд и категорий,
+       выбор чекбоксами, «выбрать все», счётчик выбранного. Без промежуточной панели. -->
   <div id="dishesPanel" hidden>
     <div class="frm-card dishes-card ds-card ds-card--outlined ds-card--custom">
-      <div class="dishes-head">
-        <span class="sec-title">Выбранные блюда</span>
-        <button type="button" class="ds-btn ds-btn--m ds-btn--accent ds-btn--outlined" id="addDishes"><span class="ds-btn__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">add</span></span></span><span class="ds-btn__label">Добавить</span></button>
-      </div>
-      <!-- Полоса массовых действий — организм app-table-header-actions; в обычном режиме скрыта (удалять
-           нечего), появляется при отмеченных строках: слева «Выбрано: N» + ✕, справа — иконка удаления -->
+      <!-- Полоса над таблицей — организм app-table-header-actions: заголовок + слот «После заголовка»
+           (разделитель + тумблер «Показать выбранные»), при выборе — «Выбрано: N» + ✕ слева, поиск — справа -->
       <div class="tha dishes-strip" id="dishesStrip">
         <div class="tha__left">
+          <span class="tha__title" id="dishesStripTitle">Блюда для деактивации</span>
           <span class="tha__sel" id="dishesStripSel" hidden>
-            <span class="tha__title" id="dishesMassCount">Выбрано: 0</span>
+            <span class="tha__title" id="dishesSelCount">Выбрано: 0</span>
             <div class="tha__after">
               <button type="button" class="tha__text-action" id="dishesClear" aria-label="Очистить выбор"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><img data-tha-icon="close" width="20" height="20" alt=""></span></button>
             </div>
           </span>
+          <div class="tha__after" id="dishesShowAfter">
+            <span class="ds-divider tha__divider"></span>
+            <label class="ds-slide-toggle tha__toggle">
+              <span class="ds-slide-toggle__row">
+                <input class="ds-slide-toggle__input" type="checkbox" id="dishesShowSelected">
+                <span class="ds-slide-toggle__track"></span>
+                <span class="ds-slide-toggle__title">Показать выбранные</span>
+              </span>
+            </label>
+          </div>
         </div>
         <div class="tha__right">
-          <button type="button" class="ds-btn-icon ds-btn-icon--m ds-btn-icon--neutral ds-btn-icon--text" id="dishesDelete" aria-label="Удалить"><span class="ds-btn-icon__icon"><img data-tha-icon="delete-negative" width="20" height="20" alt=""></span></button>
+          <div class="ds-search ds-search--s">
+            <span class="ds-search__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">search</span></span></span>
+            <input class="ds-search__label" type="text" id="dishesSearch" placeholder="Поиск" aria-label="Поиск" autocomplete="off">
+          </div>
         </div>
       </div>
       <div class="tbl dishes-table" id="dishesTable">
         <div class="ds-table-header-row">
           <div class="ds-table-header-cell d-c-check"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" id="dishesAll"><span class="ds-checkbox__box"></span></label></div></div>
-          <div class="ds-table-header-cell d-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Блюдо</span></div></div></div></div>
-          <div class="ds-table-header-cell d-c-type"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Тип</span></div></div></div></div>
-          <div class="ds-table-header-cell d-c-actions"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Действие</span></div></div></div></div>
+          <div class="ds-table-header-cell d-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Блюдо или категория</span></div></div></div></div>
+          <div class="ds-table-header-cell d-c-menu"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item">Внешнее меню</span></div></div></div></div>
         </div>
-        <div id="dishesRows"></div>
+        <div id="dishesGroups"></div>
       </div>
-      <div class="dishes-empty" id="dishesEmpty" hidden>Блюда не выбраны. Нажмите «Добавить», чтобы выбрать блюда или категории.</div>
+      <div class="dishes-empty" id="dishesEmpty" hidden>Сначала выберите внешнее меню</div>
     </div>
   </div>
 
   </div><!-- /page -->
 
-  <!-- S4. Правая панель выбора блюд/категорий: шаблон, при открытии клонируется в .panel
-       (абсолютное позиционирование app-rp считается от .panel, а не от .frame). -->
-  <template id="dpPanelTpl">
-    <div class="app-rp-scrim ds-backdrop" data-rp-scrim="chooseDishes" hidden></div>
-    <aside class="app-rp" data-rp="chooseDishes" hidden aria-label="Выберите блюда" style="--app-rp-width: 560px">
-      <div class="ds-card ds-card--shadow app-rp__frame">
-        <div class="ds-card__header">
-          <p class="ds-card__title app-rp__title">Выберите блюда</p>
-          <span class="app-rp__close" role="button" tabindex="0" aria-label="Закрыть"><span class="ds-icon-size ds-icon-size--5x ds-icon-size--state"><span class="material-icons" aria-hidden="true">close</span></span></span>
-        </div>
-        <div class="ds-card__content">
-          <div class="rp-dish">
-            <div class="ds-tabs rp-dish__tabs" role="tablist">
-              <button type="button" class="ds-tab ds-tab--active" data-dptab="dishes" role="tab" aria-selected="true">Блюда</button>
-              <button type="button" class="ds-tab" data-dptab="cats" role="tab" aria-selected="false">Категории</button>
-            </div>
-            <div class="rp-dish__tools">
-              <div class="ds-search ds-search--s rp-dish__search">
-                <span class="ds-search__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">search</span></span></span>
-                <input class="ds-search__label rp-dish__input" type="text" id="dpSearch" placeholder="Поиск" aria-label="Поиск" autocomplete="off">
-              </div>
-              <span class="ds-text-body-s-14-normal-regular rp-dish__count" id="dpCount">Выбрано: 0</span>
-            </div>
-            <div class="rp-dish__list" id="dpList"></div>
-          </div>
-        </div>
-        <div class="ds-card__footer ds-card__footer--right">
-          <div class="ds-card__footer__action">
-            <button type="button" class="ds-btn ds-btn--m ds-btn--neutral ds-btn--outlined" id="dpCancel"><span class="ds-btn__label">Отменить</span></button>
-            <button type="button" class="ds-btn ds-btn--m ds-btn--accent ds-btn--filled" id="dpAdd" disabled><span class="ds-btn__label">Добавить</span></button>
-          </div>
-        </div>
-      </div>
-    </aside>
-  </template>
-
-  <!-- Диалог подтверждения выхода — Dialog ДС + Backdrop (требование 20.10: при возврате назад — предупреждение
-       о несохранённых данных). Сборка классами компонента: ds-dialog-view → ds-dialog-header
-       (__label/__description) → ds-dialog-view__footer/__action, кнопки — Button ДС. -->
+  <!-- Диалог подтверждения выхода — Dialog ДС + Backdrop (паттерн 20.10: назад — предупреждение) -->
   <div class="ds-backdrop dlg-dim" id="dlgDim" hidden></div>
   <div class="ds-dialog-view dlg" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle" hidden>
     <div class="ds-dialog-header">
@@ -655,7 +672,7 @@
     <div class="ds-snackbar__progress"></div>
   </div>
 
-<script src="../../Design-System/components-web/ds-patterns.js"></script>
+<script src="Design-System/components-web/ds-patterns.js"></script>
 <script>
 (function () {
   'use strict';
@@ -671,63 +688,53 @@
       id: 'kiosk-main-v3',
       label: 'Киоск: основное меню · v3 (01.02–28.02)',
       outdated: false,
-      cats: ['Гриль', 'Бургеры', 'Напитки', 'Супы', 'Пицца', 'Паста', 'Десерты'],
-      dishes: [
-        '2104 Пара Биг Хит', '2105 Биг Хит', '2106 Чизбургер',
-        '2000 Гамбургер', '2001 Чикен Бургер',
-        'Капучино 300 мл', 'Латте 300 мл', 'Американо 250 мл', 'Чай чёрный 400 мл',
-        'Том Ям 350 г', 'Борщ 350 г',
-        'Пепперони 30 см', 'Маргарита 30 см',
-        'Карбонара 320 г',
-        'Чизкейк 120 г', 'Тирамису 110 г'
-      ],
-      /* иерархия: блюдо → категория (для дерева в выпадающем списке) */
-      dishCats: {
-        '2104 Пара Биг Хит': 'Гриль', '2105 Биг Хит': 'Гриль', '2106 Чизбургер': 'Гриль',
-        '2000 Гамбургер': 'Бургеры', '2001 Чикен Бургер': 'Бургеры',
-        'Капучино 300 мл': 'Напитки', 'Латте 300 мл': 'Напитки', 'Американо 250 мл': 'Напитки', 'Чай чёрный 400 мл': 'Напитки',
-        'Том Ям 350 г': 'Супы', 'Борщ 350 г': 'Супы',
-        'Пепперони 30 см': 'Пицца', 'Маргарита 30 см': 'Пицца',
-        'Карбонара 320 г': 'Паста',
-        'Чизкейк 120 г': 'Десерты', 'Тирамису 110 г': 'Десерты'
-      }
+      cats: ['Напитки', 'Супы', 'Пицца', 'Паста', 'Десерты', 'Гриль'],
+      dishes: ['2104 Пара Биг Хит', '2000 Гамбургер', 'Капучино 300 мл'],
+      groups: [
+        { cat: 'Напитки', dishes: ['Капучино 300 мл'] },
+        { cat: 'Супы', dishes: [] },
+        { cat: 'Пицца', dishes: [] },
+        { cat: 'Паста', dishes: [] },
+        { cat: 'Десерты', dishes: [] },
+        { cat: 'Гриль', dishes: ['2104 Пара Биг Хит', '2000 Гамбургер'] }
+      ]
     },
     {
       id: 'kiosk-main-v2',
       label: 'Киоск: основное меню · v2 (01.01–31.01)',
       outdated: true,
-      cats: ['Гриль', 'Напитки', 'Супы', 'Пицца'],
-      dishes: ['2000 Гамбургер', '2104 Пара Биг Хит', 'Капучино 300 мл', 'Латте 300 мл', 'Том Ям 350 г', 'Пепперони 30 см'],
-      dishCats: {
-        '2000 Гамбургер': 'Гриль', '2104 Пара Биг Хит': 'Гриль',
-        'Капучино 300 мл': 'Напитки', 'Латте 300 мл': 'Напитки',
-        'Том Ям 350 г': 'Супы', 'Пепперони 30 см': 'Пицца'
-      }
+      cats: ['Напитки', 'Супы', 'Пицца', 'Паста'],
+      dishes: ['2000 Гамбургер', 'Капучино 300 мл'],
+      groups: [
+        { cat: 'Напитки', dishes: ['Капучино 300 мл'] },
+        { cat: 'Супы', dishes: ['2000 Гамбургер'] },
+        { cat: 'Пицца', dishes: [] },
+        { cat: 'Паста', dishes: [] }
+      ]
     },
     {
       id: 'kiosk-breakfast-v3',
       label: 'Киоск: завтраки · v3 (01.02–28.02)',
       outdated: false,
       cats: ['Бургеры', 'Роллы', 'Салаты'],
-      dishes: ['2000 Гамбургер', '2001 Чикен Бургер', 'Филадельфия 8 шт', 'Калифорния 8 шт', 'Цезарь 250 г', 'Капучино 300 мл'],
-      dishCats: {
-        '2000 Гамбургер': 'Бургеры', '2001 Чикен Бургер': 'Бургеры',
-        'Филадельфия 8 шт': 'Роллы', 'Калифорния 8 шт': 'Роллы',
-        'Цезарь 250 г': 'Салаты'
-      }
+      dishes: ['2000 Гамбургер', 'Капучино 300 мл'],
+      groups: [
+        { cat: 'Бургеры', dishes: ['2000 Гамбургер'] },
+        { cat: 'Роллы', dishes: [] },
+        { cat: 'Салаты', dishes: ['Капучино 300 мл'] }
+      ]
     },
     {
       id: 'delivery-main-v1',
       label: 'Доставка: основное меню · v1 (01.02–28.02)',
       outdated: false,
       cats: ['Бургеры', 'Роллы', 'Напитки'],
-      dishes: ['2000 Гамбургер', '2104 Пара Биг Хит', '2106 Чизбургер', 'Филадельфия 8 шт', 'Латте 300 мл', 'Американо 250 мл'],
-      dishCats: {
-        '2000 Гамбургер': 'Бургеры', '2106 Чизбургер': 'Бургеры',
-        '2104 Пара Биг Хит': 'Бургеры',
-        'Филадельфия 8 шт': 'Роллы',
-        'Латте 300 мл': 'Напитки', 'Американо 250 мл': 'Напитки'
-      }
+      dishes: ['2000 Гамбургер', '2104 Пара Биг Хит'],
+      groups: [
+        { cat: 'Бургеры', dishes: ['2000 Гамбургер'] },
+        { cat: 'Роллы', dishes: [] },
+        { cat: 'Напитки', dishes: ['2104 Пара Биг Хит'] }
+      ]
     },
     {
       id: 'new-menu-v2',
@@ -789,13 +796,6 @@
   /* списки зависят от ВЫБРАННОГО меню; без меню — пусто (не «все значения»: иначе
      пользователь выбирает блюдо не из того меню и получает ошибку при сохранении) */
   function placeSource() { return state.menu.length ? catsOfMenus() : []; }
-  function dishCatOf(name) {
-    var out = '';
-    selectedMenus().forEach(function (m) {
-      if (!out && m.dishCats && m.dishCats[name]) out = m.dishCats[name];
-    });
-    return out;
-  }
   function dishSource() { return state.menu.length ? dishesOfMenus() : []; }
   function linkSource() { return uniq(placeSource().concat(dishSource())); }
 
@@ -805,7 +805,7 @@
   function pruneSelections() {
     var cats = placeSource(), dishes = dishSource(), links = linkSource();
     state.place = state.place.filter(function (v) { return cats.indexOf(v) > -1; });
-    state.dish = state.dish.filter(function (v) { return dishes.indexOf(v) > -1; });
+    state.dish = state.dish.filter(function (v) { return dishes.indexOf(v) > -1 || cats.indexOf(v) > -1; });
     if (state.link && links.indexOf(state.link) < 0) state.link = '';
   }
 
@@ -815,22 +815,23 @@
   var menuField = qs('#menuField'), menuLabel = qs('#menuLabel');
   var placeField = qs('#placeField'), placeLabel = qs('#placeLabel');
   var linkField = qs('#linkField'), linkValue = qs('#linkValue'), linkLabel = qs('#linkLabel');
-  var dishField = qs('#dishField'), dishLabel = qs('#dishLabel');
   var sizeField = qs('#sizeField'), sizeValue = qs('#sizeValue'), sizeLabel = qs('#sizeLabel');
-  var menuValue = qs('#menuValue'), placeValue = qs('#placeValue'), dishValue = qs('#dishValue');
+  var menuChips = qs('#menuChips'), placeChips = qs('#placeChips');
+  var menuInput = qs('#menuInput'), placeInput = qs('#placeInput');
+  var dishField = qs('#dishField'), dishLabel = qs('#dishLabel'), dishChips = qs('#dishChips'), dishInput = qs('#dishInput');
   var menuNote = qs('#menuNote');
   var linkClear = qs('#linkClear');
   var upBox = qs('#upBox'), upInput = qs('#upInput'), upCap = qs('#upCap');
   var upCard = qs('#upCard'), upFile = qs('#upFile'), upRatio = qs('#upRatio'), upErr = qs('#upErr');
   var saveBtn = qs('#saveBtn'), snackbar = qs('#snackbar'), sbLabel = qs('#sbLabel'), saveTip = qs('#saveTip');
   var detailsPanel = qs('#detailsPanel'), dishesPanel = qs('#dishesPanel');
-  var dishesRows = qs('#dishesRows'), dishesTable = qs('#dishesTable'), dishesEmpty = qs('#dishesEmpty');
-  var dishesStripSel = qs('#dishesStripSel'), dishesMassCount = qs('#dishesMassCount'), dishesAll = qs('#dishesAll'), dishesStrip = qs('#dishesStrip');
-  var dpList = null, dpSearch = null, dpCount = null, dpAdd = null;
+  var dishesRows = qs('#dishesGroups'), dishesTable = qs('#dishesTable'), dishesEmpty = qs('#dishesEmpty');
+  var dishesAll = qs('#dishesAll');
+  var dishesSearch = qs('#dishesSearch'), dishesSelCount = qs('#dishesSelCount'), dishesClear = qs('#dishesClear');
+  var dishesStripTitle = qs('#dishesStripTitle'), dishesStripSel = qs('#dishesStripSel');
+  var dishesShowSelected = qs('#dishesShowSelected');
+  var dishesCount = qs('#dishesCount'), dishesTabBtn = qs('[data-ftab="dishes"]'), dishesTabErr = qs('#dishesTabErr');
   var formTab = 'details';
-  var dishesTabSelected = [];
-  var dpSelected = [];
-  var dpTab = 'dishes';
   var editMode = '';          /* '' | 'edit' | 'copy' */
   var editItem = null;
   var editNotice = qs('#editNotice');
@@ -838,10 +839,10 @@
   var FIELD_UI = {
     name: { inner: nameWrap, support: qs('#nameErr') },
     type: { field: typeField, inner: qs('.ds-input', typeField), support: qs('#typeErr') },
-    menu: { field: menuField, inner: qs('.ds-input', menuField), support: qs('#menuErr') },
-    place: { field: placeField, inner: qs('.ds-input', placeField), support: qs('#placeErr') },
-    size: { field: sizeField, inner: qs('.ds-input', sizeField), support: qs('#sizeErr') },
-    dish: { field: dishField, inner: qs('.ds-input', dishField), support: qs('#dishErr') }
+    menu: { field: menuField, inner: menuField, input: menuInput, chipsInput: true, support: qs('#menuErr') },
+    place: { field: placeField, inner: placeField, input: placeInput, chipsInput: true, support: qs('#placeErr') },
+    dish: { field: dishField, inner: dishField, input: dishInput, chipsInput: true, support: qs('#dishErr') },
+    size: { field: sizeField, inner: qs('.ds-input', sizeField), support: qs('#sizeErr') }
   };
 
   function isFieldFilled(key) {
@@ -863,6 +864,11 @@
     }
     var ui = FIELD_UI[key];
     if (!ui) return;
+    if (ui.chipsInput) {
+      ui.field.classList.toggle('is-error', !!msg);
+      if (ui.support) { ui.support.textContent = msg || ''; ui.support.hidden = !msg; }
+      return;
+    }
     ui.inner.classList.toggle('ds-input--error', !!msg);
     if (ui.field) ui.field.classList.toggle('is-error', !!msg);
     if (ui.support) { ui.support.textContent = msg || ''; ui.support.hidden = !msg; }
@@ -890,6 +896,51 @@
     /* мульти — выбранные значения текстом через запятую (как mat-select multiple), в одну строку */
     valueEl.textContent = filled ? (multi ? rows.join(', ') : rows[0]) : name;
     field.setAttribute('aria-label', name.replace(/\s*\*$/, ''));
+  }
+
+  /* ── ВЕРСИЯ 2: чип значения в поле Chips Input + рендер значений ─────── */
+  function autoChip(label, onRemove) {
+    var chip = document.createElement('span');
+    chip.className = 'ds-chips ds-chips--outlined';
+    chip.innerHTML = '<span class="ds-chips__chip-container"><span class="ds-chips__chip-text"></span></span><span class="ds-chips__close" role="button" tabindex="0"><span class="ds-chips__icon"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><use href="#ic-close-16"></use></svg></span></span>';
+    chip.querySelector('.ds-chips__chip-text').textContent = label;
+    var close = chip.querySelector('.ds-chips__close');
+    close.setAttribute('aria-label', 'Удалить: ' + label);
+    close.addEventListener('mousedown', function (e) { e.preventDefault(); e.stopPropagation(); });
+    close.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); onRemove(); });
+    close.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onRemove(); }
+    });
+    return chip;
+  }
+  /* placeholder поля Chips Input: показываем только когда подпись скрыта (пусто и не фокус),
+     иначе текст подписи и placeholder дублируются */
+  function syncAutoPlaceholder(field, input) {
+    var label = qs('.aci-caption', field);
+    var show = label && !label.hidden;
+    input.placeholder = show ? '' : (field.getAttribute('data-auto-name') || '');
+  }
+  /* чипы выбранных — перед вводом (mat-chip-row внутри mat-chip-grid) */
+  function renderAutoValue(field, chipsEl, input, labelEl, name, values, onRemove, labelOf) {
+    Array.prototype.slice.call(chipsEl.querySelectorAll('.ds-chips')).forEach(function (n) { n.remove(); });
+    values.forEach(function (v) {
+      chipsEl.insertBefore(autoChip(labelOf(v), function () { onRemove(v); }), input);
+    });
+    field.setAttribute('data-auto-name', name);
+    input.setAttribute('aria-label', name.replace(/\s*\*$/, ''));
+    labelEl.textContent = name;
+    labelEl.hidden = !values.length && !field.classList.contains('is-open');
+    field.classList.toggle('aci--filled', values.length > 0);
+    syncAutoPlaceholder(field, input);
+  }
+  /* Backspace/Delete в пустом вводе убирает последний чип (как у mat-chip-grid) */
+  function bindInputKeys(input, values, remove) {
+    input.addEventListener('keydown', function (e) {
+      if ((e.key === 'Backspace' || e.key === 'Delete') && !input.value) {
+        var vals = values();
+        if (vals.length) { e.preventDefault(); remove(vals[vals.length - 1]); }
+      }
+    });
   }
 
   /* ── чипы значений (Chips / Chips group) — только файл (в Select чипов нет) ── */
@@ -925,6 +976,13 @@
   var pops = [];
   function setOpen(field, on) {
     field.classList.toggle('is-open', on);
+    var cap = qs('.aci-caption', field);
+    if (cap) {
+      cap.hidden = !on && !field.classList.contains('aci--filled');
+      var autoInp = qs('.aci-input', field);
+      if (autoInp) syncAutoPlaceholder(field, autoInp);
+      return;
+    }
     var lab = qs('.ds-input__label', field);
     if (lab) {
       var filled = field.classList.contains('ds-select-form--populated');
@@ -1006,10 +1064,9 @@
       syncPopScroll(p.pop);
     });
   }
-  function bindPop(field, pop, build) {
-    /* все поля — Select (без ввода текста): автокомплит-ветка больше не используется */
-    var input = null;
-    var p = { field: field, pop: pop, build: build, input: input, autocomplete: false, active: -1 };
+  function bindPop(field, pop, build, input) {
+    /* версия 2: поля «Меню»/«Место»/«Блюда» — Chips Input с подсказками (автокомплит) */
+    var p = { field: field, pop: pop, build: build, input: input || null, autocomplete: !!input, active: -1 };
     pops.push(p);
     if (input) {
       input.addEventListener('focus', function () {
@@ -1092,33 +1149,13 @@
           if (next >= items2.length) next = 0;
           setActive(p, next);
           if (items2[next] && items2[next].scrollIntoView) items2[next].scrollIntoView({ block: 'nearest' });
-          return;
-        }
-        /* группа-дерево: → раскрыть категорию, ← свернуть (паттерн WAI-ARIA tree) */
-        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-          if (pop.hidden) return;
-          var cur = getAutoItems(p)[p.active];
-          if (!cur || !cur.classList.contains('fpop__cat')) return;
-          e.preventDefault();
-          var catKey = cur.getAttribute('data-cat');
-          if (!catKey) return;
-          var openNow = !!dishOpen[catKey];
-          var want = e.key === 'ArrowRight';
-          if (openNow === want) return;
-          dishOpen[catKey] = want;
-          buildDishList();
-          setActive(p, p.active);
         }
       });
     }
     pop.addEventListener('click', function (e) { e.stopPropagation(); });
   }
   document.addEventListener('click', function () { closeAll(); });
-  document.addEventListener('keydown', function (e) {
-    if (e.key !== 'Escape') return;
-    closeAll();
-    if (qs('#dlg') && !qs('#dlg').hidden) { e.stopPropagation(); closeLeaveDlg(); }
-  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeAll(); });
 
   /* ── пункты списков ──────────────────────────────────────────────────── */
   function statusHtml(text) {
@@ -1128,6 +1165,9 @@
     opts = opts || {};
     var item = document.createElement('div');
     item.className = 'ds-select-item ds-select-item--false' + (opts.itemClass ? ' ' + opts.itemClass : '');
+    item.id = 'fpop-opt-' + (++autoOptSeq);
+    item.setAttribute('role', 'option');
+    item.setAttribute('tabindex', '-1');
     item.setAttribute('data-value', value);
     item.innerHTML = '<span class="ds-select-item__element-left"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox" tabindex="-1"' + (checked ? ' checked' : '') + '><span class="ds-checkbox__box"></span></label></span><div class="ds-select-item__content"><span class="ds-select-item__label"></span></div>' + (opts.right ? '<span class="ds-select-item__element-right">' + opts.right + '</span>' : '');
     item.querySelector('.ds-select-item__label').textContent = label;
@@ -1167,37 +1207,40 @@
     return item;
   }
 
-  /* ── Меню — Select (multiple), как mat-select; в поле — текст ─────────────
-     Первый пункт — «Все» (три состояния: все / частично / ничего) + Divider;
-     у КАЖДОГО пункта Checkbox (Element left), выбранные остаются отмеченными;
-     у устаревшей версии — Status в Element right. Клик/Enter переключает. */
+  /* ── ВЕРСИЯ 2: Меню — список с чекбоксами, выбранные — чипами в поле ── */
   var menuPop = qs('#menuPop'), menuItems = qs('#menuItems');
   function buildMenuList() {
     menuItems.innerHTML = '';
-    var ids = MENUS.map(function (m) { return m.id; });
-    var allOn = ids.length > 0 && state.menu.length === ids.length;
-    var all = checkboxItem('__all__', 'Все', allOn, function (on) {
-      state.menu = on ? ids.slice() : [];
-      touched.menu = true;
-      pruneSelections();
-      updateForm();
-    }, { indeterminate: state.menu.length > 0 && !allOn, itemClass: 'fpop__opt fpop__all' });
-    menuItems.appendChild(all);
-    var div = document.createElement('div');
-    div.className = 'ds-divider';
-    menuItems.appendChild(div);
-    MENUS.forEach(function (m) {
-      var on = state.menu.indexOf(m.id) >= 0;
-      var it = checkboxItem(m.id, m.label, on, function (checked) { toggleMenu(m.id, checked); }, {
-        right: m.outdated ? statusHtml('Устарела') : '',
-        itemClass: 'fpop__opt fpop__auto'
-      });
-      it.id = 'fpop-opt-' + (++autoOptSeq);
-      it.setAttribute('role', 'option');
-      it.setAttribute('tabindex', '-1');
-      it.setAttribute('aria-selected', on ? 'true' : 'false');
-      menuItems.appendChild(it);
+    var q = menuInput.value.trim().toLowerCase();
+    /* с чекбоксами: показываем ВСЕ меню, отмеченные — уже выбранные; список не закрывается */
+    var list = MENUS.filter(function (m) { return !q || m.label.toLowerCase().indexOf(q) > -1; });
+    if (!list.length) {
+      menuItems.appendChild(emptyItem('Ничего не найдено'));
+      return;
+    }
+    var ids = list.map(function (m) { return m.id; });
+    var allOn = ids.length > 0 && ids.every(function (id) { return state.menu.indexOf(id) > -1; });
+    var someOn = ids.some(function (id) { return state.menu.indexOf(id) > -1; });
+    menuItems.appendChild(checkboxItem('__all', 'Все', allOn,
+      function (on) { toggleMenuMany(ids, on); buildMenuList(); },
+      { indeterminate: someOn && !allOn }));
+    var allDiv = document.createElement('div');
+    allDiv.className = 'ds-divider';
+    menuItems.appendChild(allDiv);
+    list.forEach(function (m) {
+      menuItems.appendChild(checkboxItem(m.id, m.label, state.menu.indexOf(m.id) > -1,
+        function (on) { toggleMenu(m.id, on); buildMenuList(); },
+        { right: m.outdated ? statusHtml('Устарела') : '' }));
     });
+  }
+  function toggleMenuMany(ids, on) {
+    touched.menu = true;
+    ids.forEach(function (id) {
+      if (on) { if (state.menu.indexOf(id) < 0) state.menu.push(id); }
+      else state.menu = state.menu.filter(function (v) { return v !== id; });
+    });
+    pruneSelections();
+    updateForm();
   }
   function toggleMenu(id, on) {
     touched.menu = true;
@@ -1207,10 +1250,7 @@
     updateForm();
   }
 
-  /* ── Место расположения — Select (multiple) ────────────────────────────
-     У КАЖДОГО пункта Checkbox (Element left), выбранные остаются отмеченными;
-     первый пункт — общий чек «Все» (единое название общих чеков во ВСЕХ списках, 20.10);
-     он синхронизирует их (частичный выбор — indeterminate). */
+  /* ── ВЕРСИЯ 2: Место расположения — подсказки автокомплита ───────────── */
   var placePop = qs('#placePop'), placeItems = qs('#placeItems');
   function buildPlaceList() {
     placeItems.innerHTML = '';
@@ -1219,25 +1259,33 @@
       placeItems.appendChild(emptyItem(state.menu.length ? 'В выбранном внешнем меню нет мест' : 'Сначала выберите внешнее меню'));
       return;
     }
-    var allOn = state.place.length === src.length;
-    var all = checkboxItem('__all__', 'Все', allOn, function (on) {
-      state.place = on ? src.slice() : [];
-      touched.place = true;
-      updateForm();
-    }, { indeterminate: state.place.length > 0 && !allOn, itemClass: 'fpop__opt fpop__all' });
-    placeItems.appendChild(all);
-    var div = document.createElement('div');
-    div.className = 'ds-divider';
-    placeItems.appendChild(div);
-    src.forEach(function (v) {
-      var on = state.place.indexOf(v) >= 0;
-      var it = checkboxItem(v, v, on, function (checked) { togglePlace(v, checked); }, { itemClass: 'fpop__opt fpop__auto' });
-      it.id = 'fpop-opt-' + (++autoOptSeq);
-      it.setAttribute('role', 'option');
-      it.setAttribute('tabindex', '-1');
-      it.setAttribute('aria-selected', on ? 'true' : 'false');
-      placeItems.appendChild(it);
+    var q = placeInput.value.trim().toLowerCase();
+    /* с чекбоксами: все места, отмеченные — выбранные; список не закрывается */
+    var list = src.filter(function (v) { return !q || v.toLowerCase().indexOf(q) > -1; });
+    if (!list.length) {
+      placeItems.appendChild(emptyItem('Ничего не найдено'));
+      return;
+    }
+    var allOn = list.length > 0 && list.every(function (v) { return state.place.indexOf(v) > -1; });
+    var someOn = list.some(function (v) { return state.place.indexOf(v) > -1; });
+    placeItems.appendChild(checkboxItem('__all', 'Все', allOn,
+      function (on) { togglePlaceMany(list, on); buildPlaceList(); },
+      { indeterminate: someOn && !allOn }));
+    var allDiv2 = document.createElement('div');
+    allDiv2.className = 'ds-divider';
+    placeItems.appendChild(allDiv2);
+    list.forEach(function (v) {
+      placeItems.appendChild(checkboxItem(v, v, state.place.indexOf(v) > -1,
+        function (on) { togglePlace(v, on); buildPlaceList(); }));
     });
+  }
+  function togglePlaceMany(values, on) {
+    touched.place = true;
+    values.forEach(function (v) {
+      if (on) { if (state.place.indexOf(v) < 0) state.place.push(v); }
+      else state.place = state.place.filter(function (x) { return x !== v; });
+    });
+    updateForm();
   }
   function togglePlace(v, on) {
     touched.place = true;
@@ -1246,27 +1294,27 @@
     updateForm();
   }
 
-  /* ── Блюда для деактивации — Select (multiple), ДЕРЕВО ─────────────────
-     20.10 (пример заказчика): «Все» + Divider; ниже — поиск и дерево:
-     строка категории = шеврон раскрытия + чекбокс (три состояния) + название;
-     блюда — с отступом под своей категорией; блюда без категории — «Без категории»;
-     нет ни одной категории — плоский список */
-  var dishPop = qs('#dishPop'), dishItems = qs('#dishItems'), dishSearch = qs('#dishSearch');
-  var dishOpen = {};           /* раскрытые категории: { 'Гриль': true } */
-  var NO_CAT = '__no_cat__';
+  /* ── ВЕРСИЯ 2: Блюда для деактивации — подсказки автокомплита ─────────── */
+  var dishPop = qs('#dishPop'), dishItems = qs('#dishItems');
+  /* Дерево — как в списке блюд «Нового баннера» (v1): «Все» + Divider, дальше категории
+     строками-группами (шеврон раскрытия + чекбокс + название medium), блюда — с отступом
+     под своей категорией. Ввод в поле фильтрует список; совпавшие категории раскрываются. */
+  var dishOpen = {};   /* раскрытые категории списка: { 'Супы': true } */
   function dishSelectedIn(list) {
-    return list.filter(function (v) { return state.dish.indexOf(v) >= 0; }).length;
+    return list.filter(function (v) { return state.dish.indexOf(v) > -1; }).length;
   }
-  function dishCatItem(key, cat, dishes, open) {
+  function dishCatRow(cat, dishes, open) {
+    var catOn = state.dish.indexOf(cat) > -1;
     var sel = dishSelectedIn(dishes);
+    var fully = catOn || (dishes.length > 0 && sel === dishes.length);
     var item = document.createElement('div');
-    item.className = 'ds-select-item ds-select-item--false fpop__opt fpop__auto fpop__cat';
+    item.className = 'ds-select-item ds-select-item--false fpop__cat';
     item.id = 'fpop-opt-' + (++autoOptSeq);
-    item.setAttribute('data-cat', key);
     item.setAttribute('role', 'option');
     item.setAttribute('tabindex', '-1');
+    item.setAttribute('data-value', cat);
     item.setAttribute('aria-expanded', open ? 'true' : 'false');
-    item.setAttribute('aria-selected', (dishes.length > 0 && sel === dishes.length) ? 'true' : 'false');
+    item.setAttribute('aria-selected', fully ? 'true' : 'false');
     item.innerHTML =
       '<span class="ds-select-item__element-left">' +
         '<span class="fpop__cat-chevron" role="button" aria-hidden="true">' +
@@ -1277,127 +1325,99 @@
       '<div class="ds-select-item__content"><span class="ds-select-item__label"></span></div>';
     item.querySelector('.ds-select-item__label').textContent = cat;
     var input = item.querySelector('.ds-checkbox__input');
-    input.checked = dishes.length > 0 && sel === dishes.length;
-    input.indeterminate = sel > 0 && sel < dishes.length;
-    function applyCat(on) {
-      touched.dish = true;
-      if (on) {
-        dishes.forEach(function (v) { if (state.dish.indexOf(v) < 0) state.dish.push(v); });
-        dishOpen[key] = true;   /* выбранная категория раскрыта и после перерисовки */
-      } else {
-        state.dish = state.dish.filter(function (x) { return dishes.indexOf(x) < 0; });
-      }
-      updateForm();
-    }
-    input.addEventListener('change', function () { applyCat(input.checked); });
-    /* 20.10 (UX): строка-категория ведёт себя как заголовок раскрываемого списка —
-       клик по строке (кроме чекбокса) раскрывает/сворачивает группу; выбор всей
-       категории — ТОЛЬКО чекбоксом (никакого случайного массового выбора по пустому месту строки) */
+    input.checked = fully;
+    input.indeterminate = !fully && sel > 0;
+    input.addEventListener('change', function () {
+      if (input.checked) { setCatValue(cat, true); dishOpen[cat] = true; }
+      else setCatValue(cat, false);
+      buildDishList();
+    });
+    /* клик по строке (кроме чекбокса) раскрывает/сворачивает группу — выбор только чекбоксом */
     item.addEventListener('click', function (e) {
       e.stopPropagation();
-      if (e.target.closest('.ds-checkbox')) return;   /* чекбокс сам вызовет change */
-      dishOpen[key] = !open;
+      if (e.target.closest('.ds-checkbox')) return;
+      dishOpen[cat] = !open;
       buildDishList();
     });
     return item;
   }
+  /* снятие блюда внутри выбранной категории раскладывает категорию на блюда
+     (категория снимается, остальные блюда остаются выбранными по отдельности) */
+  function toggleDishInCat(cat, dishes, dish, on) {
+    var catOn = state.dish.indexOf(cat) > -1;
+    if (on) {
+      if (state.dish.indexOf(dish) < 0) state.dish.push(dish);
+    } else if (catOn) {
+      state.dish = state.dish.filter(function (x) { return x !== cat; });
+      dishes.forEach(function (x) { if (x !== dish && state.dish.indexOf(x) < 0) state.dish.push(x); });
+    } else {
+      state.dish = state.dish.filter(function (x) { return x !== dish; });
+    }
+    touched.dish = true;
+    updateForm();
+  }
   function buildDishList() {
     dishItems.innerHTML = '';
-    var src = dishSource();
-    if (!src.length) {
-      dishItems.appendChild(emptyItem(state.menu.length ? 'В выбранном внешнем меню нет блюд' : 'Сначала выберите внешнее меню'));
+    if (!state.menu.length) {
+      dishItems.appendChild(emptyItem('Сначала выберите внешнее меню'));
       return;
     }
-    var q = (dishSearch.value || '').trim().toLowerCase();
-    var allOn = state.dish.length === src.length;
-    var all = checkboxItem('__all__', 'Все', allOn, function (on) {
-      state.dish = on ? src.slice() : [];
+    var groups = dishGroups();
+    if (!groups.length) {
+      dishItems.appendChild(emptyItem('В выбранном внешнем меню нет блюд'));
+      return;
+    }
+    var q = dishInput.value.trim().toLowerCase();
+    /* под запрос: категория совпала — показываем её целиком, иначе только подходящие блюда */
+    var shown = [];
+    groups.forEach(function (g) {
+      var catHit = !!q && g.cat.toLowerCase().indexOf(q) > -1;
+      var dishes = catHit ? g.dishes.slice() : g.dishes.filter(function (d) { return !q || d.toLowerCase().indexOf(q) > -1; });
+      if (q && !catHit && !dishes.length) return;
+      shown.push({ cat: g.cat, dishes: dishes });
+    });
+    if (!shown.length) {
+      dishItems.appendChild(emptyItem('Ничего не найдено'));
+      return;
+    }
+    var cats = groups.map(function (g) { return g.cat; });
+    var catsOn = cats.filter(function (c) { return state.dish.indexOf(c) > -1; }).length;
+    var allOn = catsOn === cats.length;
+    var someOn = catsOn > 0 || dishSelectedIn(dishSource()) > 0;
+    dishItems.appendChild(checkboxItem('__all', 'Все', allOn, function (on) {
       touched.dish = true;
+      /* категория покрывает свои блюда — достаточно отметить все категории */
+      if (on) { state.dish = cats.slice(); dishOpen = {}; }
+      else state.dish = [];
       updateForm();
-    }, { indeterminate: state.dish.length > 0 && !allOn, itemClass: 'fpop__opt fpop__all' });
-    dishItems.appendChild(all);
+      buildDishList();
+    }, { indeterminate: someOn && !allOn }));
     var div = document.createElement('div');
     div.className = 'ds-divider';
     dishItems.appendChild(div);
-    /* дерево: категория → блюда (порядок — как в источнике меню) */
-    var groups = [], loose = [], hasCats = false;
-    src.forEach(function (v) {
-      var c = dishCatOf(v);
-      if (!c) { loose.push(v); return; }
-      hasCats = true;
-      var g = groups.filter(function (x) { return x.cat === c; })[0];
-      if (!g) { g = { cat: c, dishes: [] }; groups.push(g); }
-      g.dishes.push(v);
-    });
-    function matches(v) { return !q || v.toLowerCase().indexOf(q) >= 0; }
-    function addDish(v) {
-      var on = state.dish.indexOf(v) >= 0;
-      var it = checkboxItem(v, v, on, function (checked) { toggleDish(v, checked); }, {
-        itemClass: 'fpop__opt fpop__auto fpop__opt--child'
-      });
-      it.id = 'fpop-opt-' + (++autoOptSeq);
-      it.setAttribute('role', 'option');
-      it.setAttribute('tabindex', '-1');
-      it.setAttribute('aria-selected', on ? 'true' : 'false');
-      dishItems.appendChild(it);
-    }
-    if (!hasCats) {
-      var flat = src.filter(matches);
-      flat.forEach(addDish);
-      if (!flat.length) dishItems.appendChild(emptyItem('Ничего не найдено'));
-      syncPopScroll(dishPop);
-      return;
-    }
-    var shown = 0;
-    groups.forEach(function (g) {
-      var catHit = q && g.cat.toLowerCase().indexOf(q) >= 0;
-      var list = catHit ? g.dishes : g.dishes.filter(matches);
-      if (!list.length) return;
+    shown.forEach(function (g) {
+      var catOn = state.dish.indexOf(g.cat) > -1;
       var sel = dishSelectedIn(g.dishes);
-      var open = q ? true : (dishOpen[g.cat] !== undefined ? dishOpen[g.cat] : sel > 0);
-      dishItems.appendChild(dishCatItem(g.cat, g.cat, g.dishes, open));
-      if (open) list.forEach(addDish);
-      shown += list.length;
+      var open = q ? true : (dishOpen[g.cat] !== undefined ? dishOpen[g.cat] : (catOn || sel > 0));
+      dishItems.appendChild(dishCatRow(g.cat, g.dishes, open));
+      if (!open) return;
+      g.dishes.forEach(function (d) {
+        var on = catOn || state.dish.indexOf(d) > -1;
+        dishItems.appendChild(checkboxItem(d, d, on, function (checked) {
+          toggleDishInCat(g.cat, g.dishes, d, checked);
+          buildDishList();
+        }, { itemClass: 'fpop__opt--child' }));
+      });
     });
-    if (loose.length) {
-      var llist = loose.filter(matches);
-      if (llist.length) {
-        var lsel = dishSelectedIn(loose);
-        var lopen = q ? true : (dishOpen[NO_CAT] !== undefined ? dishOpen[NO_CAT] : lsel > 0);
-        dishItems.appendChild(dishCatItem(NO_CAT, 'Без категории', loose, lopen));
-        if (lopen) llist.forEach(addDish);
-        shown += llist.length;
-      }
-    }
-    if (!shown) dishItems.appendChild(emptyItem('Ничего не найдено'));
     syncPopScroll(dishPop);
   }
-  /* поиск в списке: фильтр по блюдам/категориям; при совпадении категория раскрыта */
-  dishSearch.addEventListener('input', function () { buildDishList(); });
-  dishSearch.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { e.stopPropagation(); dishSearch.value = ''; closeAll(); }
-  });
-  /* закрыли список — поиск сброшен (как в Material) */
-  function resetDishSearch() { if (dishSearch.value) dishSearch.value = ''; }
-  document.addEventListener('click', resetDishSearch);
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') resetDishSearch(); });
-  function toggleDish(v, on) {
-    touched.dish = true;
-    if (on) { if (state.dish.indexOf(v) < 0) state.dish.push(v); }
-    else state.dish = state.dish.filter(function (x) { return x !== v; });
-    updateForm();
-  }
-  function removeDish(v) {
-    state.dish = state.dish.filter(function (x) { return x !== v; });
-    touched.dish = true;
-    updateForm();
+  function removeDishValue(v) {
+    if (catsOfMenus().indexOf(v) > -1) setCatValue(v, false); else setDishValue(v, false);
   }
 
-  /* ── панель/таблица выбранных блюд (вкладки убраны 20.10 — ветка не используется) ── */
+  /* ── S3: вкладка «БЛЮДА» — таблица с категориями и блюдами ────────── */
   function switchFormTab(tab) {
     formTab = tab;
-    /* 20.10: вкладки убраны (блюда — в селекте), панели вкладки может не быть */
-    if (!dishesPanel) { if (detailsPanel) detailsPanel.hidden = false; return; }
     detailsPanel.hidden = tab !== 'details';
     dishesPanel.hidden = tab !== 'dishes';
     qsa('[data-ftab]').forEach(function (b) {
@@ -1407,130 +1427,236 @@
     });
     if (tab === 'dishes') renderDishesTab();
   }
-  function dishTypeLabel(name) { return catsOfMenus().indexOf(name) >= 0 ? 'Категория' : 'Блюдо'; }
-  function renderDishesTab() {
-    if (!dishesRows) return;
-    dishesTabSelected = dishesTabSelected.filter(function (v) { return state.dish.indexOf(v) >= 0; });
-    dishesRows.innerHTML = '';
-    state.dish.forEach(function (name) {
-      var row = document.createElement('div');
-      row.className = 'ds-table-content-row';
-      row.innerHTML = '<div class="ds-table-content-cell d-c-check"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox"' + (dishesTabSelected.indexOf(name) >= 0 ? ' checked' : '') + '><span class="ds-checkbox__box"></span></label></div></div>' +
-        '<div class="ds-table-content-cell d-c-name"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item"></span></div></div></div></div>' +
-        '<div class="ds-table-content-cell d-c-type"><span class="dishes-type">' + dishTypeLabel(name) + '</span></div>' +
-        '<div class="ds-table-content-cell d-c-actions"><button type="button" class="ds-btn-icon ds-btn-icon--s ds-btn-icon--neutral ds-btn-icon--text" aria-label="Убрать"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">delete</span></span></button></div>';
-      row.querySelector('.d-c-name .ds-text-ui__list-item').textContent = name;
-      var cb = row.querySelector('input');
-      cb.addEventListener('change', function () {
-        if (cb.checked) { if (dishesTabSelected.indexOf(name) < 0) dishesTabSelected.push(name); }
-        else dishesTabSelected = dishesTabSelected.filter(function (x) { return x !== name; });
-        renderDishesTab();
-      });
-      row.querySelector('.d-c-actions button').addEventListener('click', function () { removeDish(name); });
-      dishesRows.appendChild(row);
+  /* Всё на одной вкладке, как в списке баннеров: строка-группа категории
+     (чекбокс + chevron + счётчик) и строки блюд внутри. Без Expansion и без панели. */
+  var catOpen = {};   /* раскрытые категории; по умолчанию раскрыты */
+  function catDishesList(cat) {
+    var out = [];
+    selectedMenus().forEach(function (m) {
+      (m.groups || []).forEach(function (g) { if (g.cat === cat) out = out.concat(g.dishes); });
     });
-    dishesTable.hidden = state.dish.length === 0;
-    dishesEmpty.hidden = state.dish.length !== 0;
-    /* полоса массовых действий — только при отмеченных строках: без выбора удалять нечего */
-    var hasSel = dishesTabSelected.length > 0;
-    dishesStrip.hidden = !hasSel;
-    dishesStripSel.hidden = !hasSel;
-    dishesMassCount.textContent = 'Выбрано: ' + dishesTabSelected.length;
-    dishesAll.checked = state.dish.length > 0 && dishesTabSelected.length === state.dish.length;
-    dishesAll.indeterminate = dishesTabSelected.length > 0 && dishesTabSelected.length < state.dish.length;
+    return uniq(out);
   }
-  /* ── S4. Правая панель выбора блюд/категорий (организм app-right-panel) ── */
-  var DP_RP = 'chooseDishes';
-  function dpPanel() { return qs('.app-rp[data-rp="' + DP_RP + '"]'); }
-  function ensureDishPanel() {
-    if (dpPanel()) return true;
-    var panel = document.getElementById('panel') || qs('.panel');
-    var tpl = qs('#dpPanelTpl');
-    if (!panel || !tpl) return false;
-    panel.appendChild(tpl.content.cloneNode(true));
-    dpList = qs('#dpList'); dpSearch = qs('#dpSearch'); dpCount = qs('#dpCount'); dpAdd = qs('#dpAdd');
-    qsa('[data-dptab]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        dpTab = b.getAttribute('data-dptab');
-        qsa('[data-dptab]').forEach(function (x) {
-          var on = x === b;
-          x.classList.toggle('ds-tab--active', on);
-          x.setAttribute('aria-selected', on ? 'true' : 'false');
-        });
-        renderDishPicker();
+  function dishGroups() {
+    var seen = {};
+    var out = [];
+    catsOfMenus().forEach(function (cat) {
+      /* блюдо показываем только в первой категории, где оно встречается,
+         иначе одно и то же блюдо отмечается в нескольких строках и счётчик путает */
+      var dishes = catDishesList(cat).filter(function (d) {
+        if (seen[d]) return false;
+        seen[d] = true;
+        return true;
+      });
+      if (!dishes.length) return;   /* пустые категории не показываем */
+      out.push({ cat: cat, dishes: dishes });
+    });
+    return out;
+  }
+  /* счётчик — сколько блюд попадёт в деактивацию: категория разворачивается в свои блюда,
+     отдельные блюда считаются по одному, без дублей и без «+1» за категорию */
+  function dishesUiCount() {
+    var covered = {};
+    dishGroups().forEach(function (g) {
+      var catOn = state.dish.indexOf(g.cat) > -1;
+      g.dishes.forEach(function (d) {
+        if (catOn || state.dish.indexOf(d) > -1) covered[d] = true;
       });
     });
-    dpSearch.addEventListener('input', renderDishPicker);
-    dpAdd.addEventListener('click', applyDishPicker);
-    qs('#dpCancel').addEventListener('click', closeDishPicker);
-    return true;
+    return Object.keys(covered).length;
   }
-  function syncDpTab() {
-    qsa('[data-dptab]').forEach(function (b) {
-      var on = b.getAttribute('data-dptab') === 'dishes';
-      b.classList.toggle('ds-tab--active', on);
-      b.setAttribute('aria-selected', on ? 'true' : 'false');
+  function menusOfValue(name, isCat) {
+    return selectedMenus().filter(function (m) {
+      return isCat ? (m.cats || []).indexOf(name) > -1 : (m.dishes || []).indexOf(name) > -1;
+    }).map(function (m) { return m.label; });
+  }
+  function visibleGroups() {
+    var onlySel = !!(dishesShowSelected && dishesShowSelected.checked);
+    var q = (dishesSearch.value || '').trim().toLowerCase();
+    var out = [];
+    dishGroups().forEach(function (g) {
+      var catSel = state.dish.indexOf(g.cat) > -1;
+      var dishes = g.dishes;
+      /* тумблер «Показать выбранные»: категория без выбранных блюд скрывается; выбранная категория показывается целиком */
+      if (onlySel && !catSel) {
+        dishes = dishes.filter(function (d) { return state.dish.indexOf(d) > -1; });
+        if (!dishes.length) return;
+      }
+      if (q) {
+        var catHit = g.cat.toLowerCase().indexOf(q) > -1;
+        if (!catHit) dishes = dishes.filter(function (d) { return d.toLowerCase().indexOf(q) > -1; });
+        if (!catHit && !dishes.length) return;
+      }
+      out.push({ cat: g.cat, dishes: dishes });
     });
+    return out;
   }
-  function openDishPicker() {
-    if (!ensureDishPanel()) return;
-    dpSelected = state.dish.slice();
-    dpTab = 'dishes';
-    dpSearch.value = '';
-    syncDpTab();
-    renderDishPicker();
-    if (window.AppRightPanel) AppRightPanel.open(DP_RP);
-    setTimeout(function () { dpSearch.focus(); }, 60);
+  function syncDishesUI(groups) {
+    dishesTabCountUpdate();
+    var n = state.dish.length;
+    /* режимы полосы организма: заголовок ↔ «Выбрано: N» + ✕ */
+    if (dishesStripTitle) dishesStripTitle.hidden = n > 0;
+    if (dishesStripSel) dishesStripSel.hidden = n === 0;
+    if (dishesSelCount) dishesSelCount.textContent = 'Выбрано: ' + dishesUiCount();
+    if (!dishesAll) return;
+    var cats = groups.map(function (g) { return g.cat; });
+    /* «категория выбрана» = выбрана сама или все её блюда отмечены по отдельности */
+    var picked = groups.filter(function (g) {
+      if (state.dish.indexOf(g.cat) > -1) return true;
+      return g.dishes.length > 0 && g.dishes.every(function (d) { return state.dish.indexOf(d) > -1; });
+    }).length;
+    dishesAll.disabled = cats.length === 0;
+    dishesAll.checked = cats.length > 0 && picked === cats.length;
+    dishesAll.indeterminate = picked > 0 && picked < cats.length;
   }
-  function renderDishPicker() {
-    var src = dpTab === 'dishes' ? dishSource() : catsOfMenus();
-    var q = dpSearch.value.trim().toLowerCase();
-    var avail = src.filter(function (v) { return !q || v.toLowerCase().indexOf(q) >= 0; });
-    dpList.innerHTML = '';
-    if (!state.menu.length) {
-      dpList.innerHTML = '<div class="dp__empty">Сначала выберите внешнее меню</div>';
-    } else if (!avail.length) {
-      dpList.innerHTML = '<div class="dp__empty">' + (q ? 'Ничего не найдено' : (dpTab === 'dishes' ? 'В выбранном внешнем меню нет блюд' : 'В выбранном внешнем меню нет категорий')) + '</div>';
-    } else {
-      avail.forEach(function (name) {
-        var row = document.createElement('div');
-        row.className = 'dp-row';
-        row.innerHTML = '<label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox"' + (dpSelected.indexOf(name) >= 0 ? ' checked' : '') + '><span class="ds-checkbox__box"></span></label><span class="dp-row__name"></span><span class="dp-row__meta">' + (dpTab === 'dishes' ? 'Блюдо' : 'Категория') + '</span>';
-        row.querySelector('.dp-row__name').textContent = name;
-        var cb = row.querySelector('input');
-        cb.addEventListener('change', function () {
-          if (cb.checked) { if (dpSelected.indexOf(name) < 0) dpSelected.push(name); }
-          else dpSelected = dpSelected.filter(function (x) { return x !== name; });
-          dpCount.textContent = 'Выбрано: ' + dpSelected.length;
-          dpAdd.disabled = dpSelected.length === 0;
-        });
-        row.addEventListener('click', function (e) { if (e.target.closest('.ds-checkbox')) return; cb.checked = !cb.checked; cb.dispatchEvent(new Event('change', { bubbles: true })); });
-        dpList.appendChild(row);
-      });
-    }
-    dpCount.textContent = 'Выбрано: ' + dpSelected.length;
-    dpAdd.disabled = dpSelected.length === 0;
+  function dishesEmptyState(msg) {
+    dishesTable.hidden = true;
+    dishesEmpty.hidden = false;
+    dishesEmpty.textContent = msg;
+    syncDishesUI([]);
   }
-  function closeDishPicker() { if (window.AppRightPanel) AppRightPanel.close(DP_RP); }
-  function applyDishPicker() {
-    state.dish = uniq(state.dish.concat(dpSelected));
+  function setDishValue(name, on) {
+    if (on) { if (state.dish.indexOf(name) < 0) state.dish.push(name); }
+    else state.dish = state.dish.filter(function (x) { return x !== name; });
     touched.dish = true;
-    closeDishPicker();
     updateForm();
   }
+  function setCatValue(cat, on) {
+    if (on) {
+      if (state.dish.indexOf(cat) < 0) state.dish.push(cat);
+      /* блюда выбранной категории покрыты категорией — отдельно их не храним */
+      var ds = catDishesList(cat);
+      state.dish = state.dish.filter(function (x) { return ds.indexOf(x) < 0; });
+    } else {
+      /* снятие категории снимает и её блюда */
+      var ds2 = catDishesList(cat);
+      state.dish = state.dish.filter(function (x) { return x !== cat && ds2.indexOf(x) < 0; });
+    }
+    touched.dish = true;
+    updateForm();
+  }
+  function renderDishesTab() {
+    if (!dishesRows) return;
+    dishesTable.hidden = false;
+    dishesEmpty.hidden = true;
+    if (!state.menu.length) return dishesEmptyState('Сначала выберите внешнее меню');
+    var groups = visibleGroups();
+    if (!dishGroups().length) return dishesEmptyState('В выбранном внешнем меню нет блюд и категорий');
+    if (!groups.length) {
+      return dishesEmptyState(dishesShowSelected && dishesShowSelected.checked
+        ? 'Нет выбранных блюд — снимите «Показать выбранные»'
+        : 'Ничего не найдено');
+    }
+    var q = (dishesSearch.value || '').trim();
+    var onlySel = !!(dishesShowSelected && dishesShowSelected.checked);
+    dishesRows.innerHTML = '';
+    groups.forEach(function (g) {
+      var open = (q || onlySel) ? true : catOpen[g.cat] !== false;
+      var catOn = state.dish.indexOf(g.cat) > -1;
+      var pickedDishes = g.dishes.filter(function (d) { return state.dish.indexOf(d) > -1; }).length;
+
+      var row = document.createElement('div');
+      row.className = 'ds-table-content-row group-row';
+      row.setAttribute('data-cat', g.cat);
+      row.setAttribute('role', 'button');
+      row.setAttribute('aria-expanded', open ? 'true' : 'false');
+      row.innerHTML = '<div class="ds-table-content-cell d-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox"' + (catOn ? ' checked' : '') + '><span class="ds-checkbox__box"></span></label></div></div></div>' +
+        '<div class="ds-table-content-cell d-c-name">' +
+          '<span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">' + (open ? 'expand_more' : 'chevron_right') + '</span></span>' +
+          '<span class="ds-text-body-s-14-normal-medium d-c-name__label"></span>' +
+          '<span class="grp-count ds-text-body-s-14-normal-medium"></span>' +
+        '</div>' +
+        '<div class="ds-table-content-cell d-c-menu"><span class="dishes-menu"></span></div>';
+      row.querySelector('.d-c-name__label').textContent = g.cat;
+      row.querySelector('.grp-count').textContent = String(g.dishes.length);
+      var menuNames = menusOfValue(g.cat, true);
+      var menuCell = row.querySelector('.dishes-menu');
+      menuCell.textContent = menuNames.length + ' меню';
+      menuCell.title = menuNames.join(', ');
+      var ccb = row.querySelector('input');
+      /* категория отмечена, если выбрана сама или если отмечены ВСЕ её блюда по отдельности */
+      ccb.checked = catOn || (g.dishes.length > 0 && pickedDishes === g.dishes.length);
+      ccb.indeterminate = !catOn && pickedDishes > 0 && pickedDishes < g.dishes.length;
+      row.classList.toggle('ds-table-content-row--selected', ccb.checked);
+      ccb.addEventListener('change', function () { setCatValue(g.cat, ccb.checked); });
+      row.addEventListener('click', function (ev) {
+        if (ev.target.closest('.ds-checkbox')) return;
+        catOpen[g.cat] = !open;
+        renderDishesTab();
+      });
+      dishesRows.appendChild(row);
+
+      if (!open) return;
+      g.dishes.forEach(function (dish) {
+        var on = catOn || state.dish.indexOf(dish) > -1;
+        var drow = document.createElement('div');
+        drow.className = 'ds-table-content-row' + (on ? ' ds-table-content-row--selected' : '');
+        drow.innerHTML = '<div class="ds-table-content-cell d-c-check"><div class="ds-table-content-cell__element"><div class="ds-element-cell ds-element-cell--checkbox"><label class="ds-checkbox"><input class="ds-checkbox__input" type="checkbox"' + (on ? ' checked' : '') + '><span class="ds-checkbox__box"></span></label></div></div></div>' +
+          '<div class="ds-table-content-cell d-c-name d-c-dish"><div class="ds-element-cell ds-element-cell--text-ui"><div class="ds-text-ui"><div class="ds-text-ui__content"><span class="ds-text-ui__list-item"></span></div></div></div></div>' +
+          '<div class="ds-table-content-cell d-c-menu"><span class="dishes-menu"></span></div>';
+        drow.querySelector('.d-c-dish .ds-text-ui__list-item').textContent = dish;
+        var dm = menusOfValue(dish, false);
+        var dmc = drow.querySelector('.dishes-menu');
+        dmc.textContent = dm.length + ' меню';
+        dmc.title = dm.join(', ');
+        var dcb = drow.querySelector('input');
+        dcb.addEventListener('change', function () {
+          if (catOn && !dcb.checked) {
+            /* внутри выбранной категории сняли блюдо: категория снимается,
+               остальные её блюда остаются выбранными по отдельности */
+            state.dish = state.dish.filter(function (x) { return x !== g.cat; });
+            g.dishes.forEach(function (d) {
+              if (d !== dish && state.dish.indexOf(d) < 0) state.dish.push(d);
+            });
+            state.dish = state.dish.filter(function (x) { return x !== dish; });
+            touched.dish = true;
+            updateForm();
+            return;
+          }
+          setDishValue(dish, dcb.checked);
+        });
+        drow.addEventListener('click', function (ev) {
+          if (ev.target.closest('.ds-checkbox')) return;
+          dcb.checked = !dcb.checked;
+          dcb.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        dishesRows.appendChild(drow);
+      });
+    });
+    syncDishesUI(groups);
+  }
+  function dishesTabCountUpdate() {
+    var n = dishesUiCount();
+    if (!dishesCount) return;
+    dishesCount.textContent = n ? String(n) : '';
+    dishesCount.hidden = !n;
+  }
   qsa('[data-ftab]').forEach(function (b) { b.addEventListener('click', function () { switchFormTab(b.getAttribute('data-ftab')); }); });
-  qs('#addDishes').addEventListener('click', openDishPicker);
-  qs('#dishesClear').addEventListener('click', function () { dishesTabSelected = []; renderDishesTab(); });
-  /* иконки организма (data-tha-icon) — после его defer-скрипта */
+  if (dishesSearch) dishesSearch.addEventListener('input', renderDishesTab);
+  if (dishesShowSelected) dishesShowSelected.addEventListener('change', renderDishesTab);
+  /* иконки организма (data-tha-icon) подставляем после его defer-скрипта */
   document.addEventListener('DOMContentLoaded', function () {
     if (window.TableHeaderActions) TableHeaderActions.apply(dishesPanel || document);
   });
-  qs('#dishesAll').addEventListener('change', function () { dishesTabSelected = dishesAll.checked ? state.dish.slice() : []; renderDishesTab(); });
-  qs('#dishesDelete').addEventListener('click', function () {
-    var remove = dishesTabSelected.slice();
-    if (!remove.length) return;
-    state.dish = state.dish.filter(function (v) { return remove.indexOf(v) < 0; });
-    dishesTabSelected = [];
+  if (dishesClear) dishesClear.addEventListener('click', function () {
+    state.dish = [];
+    touched.dish = true;
+    updateForm();
+  });
+  if (dishesAll) dishesAll.addEventListener('change', function () {
+    var cats = visibleGroups().map(function (g) { return g.cat; });
+    if (dishesAll.checked) {
+      cats.forEach(function (c) { if (state.dish.indexOf(c) < 0) state.dish.push(c); });
+      /* блюда выбранных категорий покрыты категориями — отдельно не храним */
+      var covered = [];
+      cats.forEach(function (c) { covered = covered.concat(catDishesList(c)); });
+      state.dish = state.dish.filter(function (x) { return covered.indexOf(x) < 0; });
+    } else {
+      /* снимаем категории вместе с их блюдами (блюда могли быть отмечены по отдельности) */
+      var coveredOff = [];
+      cats.forEach(function (c) { coveredOff = coveredOff.concat(catDishesList(c)); });
+      state.dish = state.dish.filter(function (x) { return cats.indexOf(x) < 0 && coveredOff.indexOf(x) < 0; });
+    }
     touched.dish = true;
     updateForm();
   });
@@ -1685,6 +1811,14 @@
       var any = Array.prototype.slice.call(g.querySelectorAll('.field-anchor')).some(function (a) { return !a.hidden; });
       g.hidden = !any;
     });
+    /* единственное видимое поле в группе — на всю ширину сетки */
+    qsa('.frm-grid').forEach(function (grid) {
+      var visible = Array.prototype.slice.call(grid.children).filter(function (el) {
+        return el.classList && el.classList.contains('field-anchor') && !el.hidden;
+      });
+      Array.prototype.slice.call(grid.children).forEach(function (el) { if (el.classList) el.classList.remove('field-anchor--full'); });
+      if (visible.length === 1) visible[0].classList.add('field-anchor--full');
+    });
   }
   function updateForm() {
     var cats = isCats();
@@ -1699,19 +1833,20 @@
     showField('dish', hasType);
     syncGroups();
 
-    /* подпись поля — ВСЕГДА «Внешнее меню» (это внешнее меню киоска, в т.ч. для «Категорий меню») */
+    /* поле — всегда внешнее (киоск) меню: и в «Категориях меню», и в сценариях 1/3 */
     var menuName = 'Внешнее меню *';
+    /* блюда обязательны только для сценариев 1/3 — в «Категориях меню» звёздочки нет (как в v1) */
     var dishName = dishRequired() ? 'Блюда для деактивации *' : 'Блюда для деактивации';
 
     renderSelect(typeField, typeLabel, typeValue, 'Тип расположения *', state.type ? [state.type] : [], false);
-    renderSelect(menuField, menuLabel, menuValue, menuName,
-      orderedBy(state.menu, MENUS.map(function (m) { return m.id; })).map(formatMenu), true);
-    renderSelect(placeField, placeLabel, placeValue, 'Место расположения *', orderedBy(state.place, placeSource()), true);
     renderSelect(sizeField, sizeLabel, sizeValue, 'Размер *', state.size ? [state.size] : [], false);
     renderSelect(linkField, linkLabel, linkValue, 'Ссылка на блюдо или категорию', state.link ? [state.link] : [], false);
     /* крестик сброса — только когда значение выбрано (в пустом поле сбрасывать нечего) */
     linkClear.hidden = !state.link;
-    renderSelect(dishField, dishLabel, dishValue, dishName, orderedBy(state.dish, dishSource()), true);
+    /* версия 2: значения — чипами в поле, вводимый текст — в поле, подсказки — в списке */
+    renderAutoValue(menuField, menuChips, menuInput, menuLabel, menuName, state.menu, function (id) { toggleMenu(id, false); }, formatMenu);
+    renderAutoValue(placeField, placeChips, placeInput, placeLabel, 'Место расположения *', state.place, function (v) { togglePlace(v, false); }, function (v) { return v; });
+    renderAutoValue(dishField, dishChips, dishInput, dishLabel, dishName, state.dish, removeDishValue, function (v) { return v; });
 
     /* крестики сброса в полях видны всегда — как в образце оформления */
 
@@ -1752,18 +1887,23 @@
     if (!state.photo) e.photo = 'Загрузите изображение или видео';
     return e;
   }
-  /* тултип у «Создать»: перечисление незаполненного */
+  /* тултип у «Создать»: перечисление незаполненного (по вкладкам) */
   function saveTipText(e) {
     var names = { name: 'название', type: 'тип расположения', menu: 'внешнее меню', place: 'место расположения', size: 'размер', dish: 'блюда для деактивации', photo: 'изображение/видео' };
-    var keys = ['name', 'type', 'menu', 'place', 'size', 'dish', 'photo'].filter(function (k) { return e[k]; });
-    return keys.length ? 'Не заполнено: ' + keys.map(function (k) { return names[k]; }).join(', ') + '.' : '';
+    var parts = [];
+    var det = ['name', 'type', 'menu', 'place', 'size', 'dish', 'photo'].filter(function (k) { return e[k]; });
+    if (det.length) parts.push('Не заполнено: ' + det.map(function (k) { return names[k]; }).join(', '));
+    return parts.length ? parts.join('. ') + '.' : '';
   }
   function runValidation() {
     var e = getErrors();
     currentErrors = e;
-    ['name', 'type', 'menu', 'place', 'size', 'dish', 'photo'].forEach(function (key) {
+    ['name', 'type', 'menu', 'place', 'size', 'photo'].forEach(function (key) {
       setFieldError(key, (attempted || touched[key]) ? (e[key] || '') : '');
     });
+    /* обязательный выбор блюд — поле «Блюда для деактивации» в форме (табы скрыты) */
+    var dishMsg = (attempted || touched.dish) ? (e.dish || '') : '';
+    setFieldError('dish', dishMsg);
     /* 19.10: «Создать» неактивна, пока не заполнены ВСЕ обязательные поля
        (название, тип, меню, место/блюда по типу, файл). Кликнуть по неактивной
        кнопке нельзя — ошибки полей показываем по мере заполнения/по blur. */
@@ -1782,7 +1922,7 @@
     var key = null;
     for (var i = 0; i < order.length; i++) { if (e[order[i]]) { key = order[i]; break; } }
     if (!key) return;
-    var el = key === 'name' ? nameInput : (key === 'photo' ? upBox : (FIELD_UI[key].input || FIELD_UI[key].field));
+    var el = key === 'dish' ? dishInput : (key === 'name' ? nameInput : (key === 'photo' ? upBox : (FIELD_UI[key].input || FIELD_UI[key].field)));
     if (!el) return;
     el.focus();
     if (el.scrollIntoView) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -1818,9 +1958,12 @@
 
   /* ── выпадающие списки: регистрация ──────────────────────────────────── */
   bindPop(typeField, typePop, buildTypeList);
-  bindPop(menuField, menuPop, buildMenuList);
-  bindPop(placeField, placePop, buildPlaceList);
-  bindPop(dishField, dishPop, buildDishList);
+  bindPop(menuField, menuPop, buildMenuList, menuInput);
+  bindPop(placeField, placePop, buildPlaceList, placeInput);
+  bindPop(dishField, dishPop, buildDishList, dishInput);
+  bindInputKeys(menuInput, function () { return state.menu; }, function (id) { toggleMenu(id, false); });
+  bindInputKeys(placeInput, function () { return state.place; }, function (v) { togglePlace(v, false); });
+  bindInputKeys(dishInput, function () { return state.dish; }, removeDishValue);
   bindPop(sizeField, sizePop, buildSizeList);
   bindPop(linkField, linkPop, buildLinkList);
 
@@ -1837,7 +1980,10 @@
      для значений нет; единственный чип в форме — файл, он удаляется крестиком. */
 
   /* ── плашка, шапка, «Создать» ────────────────────────────────────────── */
-  /* диалог подтверждения выхода (20.10): возврат назад — через предупреждение */
+  qs('#backBtn').addEventListener('click', function () { openLeaveDlg(); });
+  qs('#backBtn').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLeaveDlg(); }
+  });
   function openLeaveDlg() {
     qs('#dlgDim').hidden = false;
     qs('#dlg').hidden = false;
@@ -1847,18 +1993,18 @@
     qs('#dlg').hidden = true;
     qs('#dlgDim').hidden = true;
   }
-  qs('#backBtn').addEventListener('click', function () { openLeaveDlg(); });
-  qs('#backBtn').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLeaveDlg(); }
-  });
   qs('#dlgCancel').addEventListener('click', closeLeaveDlg);
   qs('#dlgDim').addEventListener('click', closeLeaveDlg);
   qs('#dlgConfirm').addEventListener('click', function () { location.href = 'banners-spisok.html'; });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && qs('#dlg') && !qs('#dlg').hidden) closeLeaveDlg();
+  });
   saveBtn.addEventListener('click', function () {
     attempted = true;
     var e = runValidation();
     if (Object.keys(e).length) {
-      switchFormTab('details');
+      var firstKey = ['name', 'type', 'menu', 'place', 'size', 'dish', 'photo'].filter(function (k) { return e[k]; })[0];
+      switchFormTab(firstKey === 'dish' ? 'dishes' : 'details');
       qs('#warnBar').hidden = false;
       focusFirstError(e);
       return;
