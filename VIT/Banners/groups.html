@@ -472,7 +472,7 @@
                   <div class="ds-input ds-input--m ds-input--populated">
                     <div class="ds-input__frame">
                       <div class="ds-input__content">
-                        <span class="ds-input__label">Шаблон ресторанов</span>
+                        <span class="ds-input__label">Шаблон ресторанов *</span>
                         <span class="ds-input__field" id="templateValue">Шаблон «Кофейни»</span>
                       </div>
                       <span class="ds-input__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">arrow_drop_down</span></span></span>
@@ -493,7 +493,7 @@
                   <div class="ds-input ds-input--m ds-input--populated">
                     <div class="ds-input__frame">
                       <div class="ds-input__content">
-                        <span class="ds-input__label">Рестораны</span>
+                        <span class="ds-input__label">Рестораны *</span>
                         <span class="ds-input__field" id="pboValue">Все рестораны</span>
                       </div>
                       <span class="ds-input__icon"><span class="ds-icon-size ds-icon-size--5x"><span class="material-icons" aria-hidden="true">arrow_drop_down</span></span></span>
@@ -987,7 +987,7 @@
     return p.length === 3 ? new Date(+p[0], +p[1] - 1, +p[2]) : null;
   }
   var fromWrap = qs('#fromWrap'), toWrap = qs('#toWrap');
-  var fromDp = Datepicker.mountInput(fromWrap, { label: 'Дата начала показа' });
+  var fromDp = Datepicker.mountInput(fromWrap, { label: 'Дата начала показа *' });
   var toDp = Datepicker.mountInput(toWrap, { label: 'Дата окончания показа' });
   var fromDpInput = fromWrap.querySelector('.ds-input');
   var toDpInput = toWrap.querySelector('.ds-input');
