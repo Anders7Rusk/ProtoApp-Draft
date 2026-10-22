@@ -1,0 +1,2230 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КДС · Комбо-набор — прототип на ДС</title>
+<!--
+  ПРОТОТИП «КДС · Комбо-набор» — принадлежность блюда к комбо-набору на кухонном экране.
+  ОТКУДА ЧТО ВЗЯТО:
+    • постановка — Jira PB-8108 «Отображение принадлежности блюда к комбо-набору на кухонном экране»
+      (описание + приложение PB-8101-combo-user-scenarios-2026-10-19.md, выдержка сценариев из PB-7812);
+      связанная функциональность — PB-8101;
+    • ВИД КАРТОЧЕК — обновлённая версия экрана повара WebKDS v. 9.4.5: Figma «Web KDS Экраны»
+      (файл 05VEoPOZuAVHLfYI6yqVjz), узел 10497:3361 «Обновленная версия_Экран повара»:
+      карточка 360 — шапка с цветной полосой статуса 8 px сверху (заливка 12 % цвета статуса,
+      рамка 1px #616161, радиус 8), № (24/32) и таймер, канал 14/20, ресторан и мета-строка 14/20,
+      комментарий пунктиром; тело — строки-«коробки» 52 px (#212121, радиус 8, название 22/28 Medium)
+      с кнопкой 52×52 (#3b3b43), количество — плашкой #E0E0E0 (22/28 Bold #333); группа блюда —
+      коробка с шапкой (подпись гостя 12/16 + пиктограмма 16 + название) и вложенными строками
+      (пл 16, 18/24); перенос чека — пунктирная рамка «Часть заказа X из Y»;
+    • каркас страницы — подключение одной строкой: `../../Design-System/connect.js` с флагами
+      data-no-header data-no-sidenav (это экран кухни, шапка/меню приложения ему не нужны);
+      панель ревью и селект «Экраны» приходят сами (ds-review.js из connect.js), реестр — layouts.js рядом;
+    • компоненты ДС: токены (отступы frame — --ds-space-*, шрифт Roboto из font.css),
+      иконки Material Icons Outlined (правило ДС);
+    • КДС-карточки — СВОЯ РАСКЛАДКА по макету выше (компонента «карточка заказа KDS» в веб-ДС нет);
+      палитра тёмной темы — из того же макета;
+    • демо-контента нет — только собственные экраны прототипа (правило 16.10.2026).
+
+  ПРЕДЛОЖЕНИЕ ПО UX (суть, в языке обновлённой карточки):
+    1) Режим «по заказам»: компоненты набора в пределах курса — целостная ГРУППА-«коробка»
+       (#212121, радиус 8) с заголовком набора; заголовок — НЕ строка блюда: без количества,
+       статуса, таймера и своей кнопки (кнопка 52×52 остаётся только у строк блюд),
+       пиктограмма набора слева; другие блюда внутрь группы не попадают; способ обозначения
+       не меняется от фильтрации.
+    2) Частичная видимость: подпись «видно N из M позиций набора» — когда на этом экране видна
+       не вся группа; это про видимость, а не про готовность; группа из одного компонента — та же.
+    3) Экземпляры одного набора: перед названием — порядковый номер экземпляра (1., 2.),
+       одинаковый во всех курсах: первый «Ланч» в курсе 1 — тот же первый «Ланч» в курсе 2.
+    4) Курсы: группа набора живёт внутри курса, через границу курса не соединяется; курсы
+       нарисованы полосой-«пилюлей» 36 px (обводка 1px, текст 14/20 по центру) — как в макетах
+       поддержки курсов (DSGN-533), а не строкой блюда; производственные приоритеты не меняются.
+    5) Отдельно готовящийся модификатор: остаётся задачей блюда, обе связи компактно —
+       «к <блюду> · <набор> №<экз>» — новой пиктограммой post_add; компонентом набора не становится.
+    6) Режим «по блюдам»: принадлежность — компактная вторичная строка (звезда набора + «Комбо: …»),
+       производственные сведения (название, количество, статус, время) — первыми; полное название
+       набора — по наведению на сокращённую строку (тултип), без раскрытия состава набора.
+    7) Отменённый компонент: зачёркнут, не показывается как необходимая часть комплекта.
+    8) Пиктограммы: знак набора — звезда в круге (тот, что уже стоит у набора в макете); для блюда с
+       отдельно готовящимся модификатором — новая пиктограмма post_add; сущности различаются однозначно.
+    9) Экран тач-терминала (не мышь): без hover-зависимостей — полное название раскрывается нажатием
+       на всю строку (52 px) с авто-скрытием; цели нажатия — строки и кнопки 52×52, иконки шапки
+       и кнопка футера расширены невидимо до 44–48; текст не выделяется, тач-скролл по доске.
+   10) Обоснование — отдельный экран.
+
+  ЭКРАНЫ — ЧТО ПРОИСХОДИТ (реестр layouts.js, сценарии PB-8101-combo-user-scenarios):
+    1. «Экран как в Figma» (base) — база без задачи: обновлённый экран повара 1:1 по Figma
+       (10497:3361). Лента из 6 карточек №1028: ожидает → пора готовить → готовится,
+       перенос чека «Часть заказа X из Y» пунктиром, готовая карточка с комбо-блоком,
+       отменённый заказ. Показывает карточки до применения задачи.
+    2. «По заказам · группа из компонентов · сценарий 2 · горячий цех» (g-multi) — заказ №214,
+       горячий цех, момент проверки на сборке. «Ланч» — группа: заголовок (гость + звезда + название,
+       без кнопки и количества) + «видно 2 из 3» (салат в холодном цехе); компоненты —
+       вложенные строки со своими кнопками: картофель готов (зелёная галочка), бургер
+       из набора готовится (синяя). Отдельный бургер готов, но готовность отдельного
+       бургера не заменяет бургер из набора.
+    3. «По заказам · группа из компонентов · сценарий 2 · холодный цех» (g-single) — тот же
+       сценарий 2 и тот же заказ №214, экран холодного цеха: «Ланч» выглядит так же, внутри —
+       только салат, «видно 1 из 3». Один компонент — та же группа, а не полный состав;
+       судить о комплекте нельзя.
+    4. «По заказам · группа из компонентов · сценарий 2 · оба цеха» (g-kitchens) — общий экран:
+       данные горячего и холодного цеха на одной ленте; у каждого блюда справа рамка цвета
+       цеха (PB-6800): холодный цех — синяя, горячий — красная. «Ланч» виден целиком
+       (бургер, картофель — горячий цех; салат — холодный), отдельный бургер готов, но не
+       заменяет бургер из набора.
+    5. «По заказам · экран сборщика» (g-assembly, сценарий 2) — экран сборщика работает
+       на доставку или самовывоз (здесь заказ на доставку), «без статусов» по Figma
+       (8941:7418): шапка по отступам как у всех карточек, но нейтральная — полоса 8 px #616161,
+       без заливки статуса и без кнопки статуса (в новом дизайне кнопки нет), рамки справа
+       по цвету цеха; у блюд нет кнопок — только иконки статусов (стрелка / галочка / крестик).
+       «Ланч» целиком: картофель и салат готовы — их собирает сборщик, бургер готовится.
+    6. «По заказам · набор по курсам» (g-courses, сценарий 3.3) — «Бизнес-ланч» по курсам:
+       суп в курсе 1, бургер и картофель в курсе 2. Курс — полоса 36 px (заливка #424242,
+       белый текст 14/20 по центру, DSGN-533). Состояния «активный/дизейбл» у курса НЕ рисуем —
+       в сценариях его нет, все курсы выглядят одинаково.
+       Группы через границу курса не соединяются; комбо ≠ подача.
+    7. «По заказам · блюдо между компонентами» (g-between, сценарий 3.2) — бургер и картофель
+       из «Ланча», между ними в исходном перечне — самостоятельно заказанный салат.
+       Группа целостная: салат в неё не попадает и её не разрывает; приоритеты и курс не меняются.
+    8. «По заказам · два экземпляра, разный состав» (g-instances, сценарий 3.1) — заказ №215:
+       два «Ланча» из одного комбо-меню — экземпляр А: борщ, котлета, чай; экземпляр Б: гаспачо, рыба, компот;
+       супы в курсе 1, остальное в курсе 2. Номер экземпляра стоит перед названием и одинаков во всех курсах.
+    9. «По заказам · экземпляры с одинаковым составом» (g-instances-same, сценарий 3.1) —
+       состав совпал, номера экземпляров остаются, но это два разных комплекта; количества
+       и статусы порций не смешиваются.
+   10. «По заказам · отдельно готовящийся модификатор» (g-modifier, сценарий 3.6) —
+       «Соус к бургеру» — отдельная задача с двумя связями: «к Бургеру» и «Ланч»;
+       бургера на экране нет. Соус компонентом набора не становится, статус и кнопка свои.
+   11. «По заказам · отменённый компонент» (g-cancelled) — отменённый бургер из набора
+       зачёркнут и не показывается как необходимая часть комплекта; картофель готов;
+       отдельный бургер вне группы готов — как обычно.
+   12. «По заказам · длинное название, узкий экран» (g-long, сценарий 3.7) — экран 720 px,
+       два набора с похожими названиями, различающимися в конце. Название сокращается,
+       полное — нажатием по строке (на мыши — наведением), авто-скрытие; состав не раскрывается.
+   13. «По блюдам · принадлежность» (d-list, сценарий 2.2) — плоский список 1:1 по макету
+       «Режим Блюда» (10602:36475): звезда справа на строке гостя; «Комбо с пастой» — строка
+       с компонентами текстом и комментарием пунктиром; вложенные блюда — строки с отступом 36
+       и своей кнопкой; отменённая пицца — красная с корзиной; «Гость 3» — красный кант.
+       Скролл — отдельная вертикальная полоса справа (трек #9E9E9E, ползунок #616161).
+
+  ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ — только селектом «Экраны» в плашке ревью (событие dsreview:state,
+  ?state=<id> — прямая ссылка); в контенте ссылок-переключателей нет (правило 19.10.2026).
+-->
+<script src="../../Design-System/connect.js" data-no-header data-no-sidenav defer></script>
+<style>
+  /* Страница занимает всё окно: сетка контент-контейнера — от краёв, как в макете */
+  html, body { margin: 0; }
+  /* Кадр — как на страницах раздела (гайд «Принципы группировки контента»): 20/30/24 */
+  .frame { padding: var(--ds-space-5x, 20px) 30px var(--ds-space-6x, 24px); }
+  @media (max-width: 1160px) { .frame { padding: var(--ds-space-5x, 20px) var(--ds-space-4x, 16px) var(--ds-space-6x, 24px); } }
+
+  /* ── Своя раскладка экрана кухни (КДС-компонента в веб-ДС нет).
+        Вёрстка — 1:1 по обновлённой версии экрана повара (Figma 05VEoPOZuAVHLfYI6yqVjz,
+        узел 10497:3361): карточка 360 (#121212, r8), шапка с полосой статуса 8 px
+        (заливка 12 % цвета статуса, рамка 1px #616161), строки-«коробки» 52 (#212121, r8),
+        название 22/28 Medium, количество — плашкой #E0E0E0 (22/28 Bold #333),
+        кнопка 52×52 #3b3b43 (arrow_forward / check / close / delete, 28),
+        группа — шапка (гость 12/16 + пиктограмма 16 + название) + вложенные строки,
+        «Гость 3» — красный кант 4 px слева, перенос — пунктирная рамка «Часть заказа X из Y». */
+
+  /* ── Своя раскладка экрана кухни (КДС-компонента в веб-ДС нет) ──────────── */
+  .kds-host { max-width: 1280px; }
+  .kds-anno {
+    font: 400 14px/20px 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    color: #616161; margin: 0 0 12px; max-width: 1280px;
+  }
+  .kds-fit { position: relative; }
+  /* В режиме панели ревью подпись не нужна — иначе экран 1280×800 не влезает в кадр */
+  body.dsr-page .kds-anno { display: none; }
+
+  /* ── Описание экрана под макетом (читается на самой странице) ── */
+  .kds-doc {
+    margin: 20px 0 4px; max-width: 1280px;
+    font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  }
+  .kds-doc__title { font-size: 20px; font-weight: 500; line-height: 28px; letter-spacing: .15px; color: #333; margin: 0 0 8px; }
+  .kds-doc__item { font-size: 14px; line-height: 22px; color: #333; margin: 0; }
+  .kds-doc__item b { font-weight: 500; }
+  .kds-doc__item em { font-style: normal; color: #616161; }
+  .kds-doc__q { font-size: 14px; line-height: 22px; color: #616161; margin: 8px 0 0; }
+  .kds-doc__q b { font-weight: 500; color: #333; }
+  /* Список всех сценариев прототипа под описанием экрана: каждый экран отдельно, со своим описанием */
+  .kds-scen { margin: 16px 0 0; border-top: 1px solid #e0e0e0; padding-top: 12px; }
+  .kds-scen__head { font-size: 14px; font-weight: 500; line-height: 20px; color: #333; margin: 0 0 8px; }
+  .kds-scen__list { list-style: none; margin: 0; padding: 0; }
+  .kds-scen__i { display: flex; gap: 10px; align-items: flex-start; padding: 6px 8px; border-radius: 6px; }
+  .kds-scen__i + .kds-scen__i { margin-top: 2px; }
+  .kds-scen__i.is-cur { background: #eeeeee; }
+  .kds-scen__n { flex: 0 0 22px; font-size: 13px; line-height: 20px; color: #9e9e9e; text-align: right; }
+  .kds-scen__i.is-cur .kds-scen__n { color: #333; }
+  .kds-scen__body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  .kds-scen__t { font-size: 13px; line-height: 20px; color: #616161; }
+  .kds-scen__i.is-cur .kds-scen__t { color: #333; font-weight: 500; }
+  .kds-scen__d { font-size: 13px; line-height: 20px; color: #757575; }
+  .kds-scen__q { font-size: 13px; line-height: 20px; color: #616161; font-style: normal; }
+  .kds-scen__i.is-cur .kds-scen__q { color: #444; }
+  .kds-scen__i.is-cur .kds-scen__d { color: #333; }
+
+  .kds-view {
+    --kds-bg: #121212;            /* фон экрана — как в макете */
+    --kds-surface: #121212;       /* карточка, шапка, футер, пилюли */
+    --kds-row: #212121;           /* строка блюда / коробка группы */
+    --kds-btn: #3b3b43;           /* кнопка 52×52 у строки */
+    --kds-line: #616161;          /* рамки, разделители */
+    --kds-text: #ffffff;
+    --kds-text-2: #9e9e9e;
+    --kds-text-3: #d6d6d6;
+    --kds-ic-neutral: #9e9e9e;
+    --kds-ic-warning: #ffab40;
+    --kds-ic-accent: #448aff;
+    --kds-ic-positive: #14b456;
+    --kds-ic-negative: #ff5252;
+    position: relative; overflow: hidden; border-radius: 8px;
+    background: var(--kds-bg); color: var(--kds-text);
+    font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .kds-view, .kds-view * { box-sizing: border-box; }
+  .kds-view .material-icons { font-family: 'Material Icons Outlined'; vertical-align: middle; line-height: 1; }
+  .kds-view button { font-family: inherit; -webkit-tap-highlight-color: transparent; cursor: pointer; }
+  /* ── Экран тач-терминала (1280×800, палец, не мышь): без выделения текста,
+        без зависимости от hover, цель нажатия = не меньше 44–52 px ── */
+  .kds-view {
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .kds-view [data-full] { cursor: pointer; }
+  .kds-board, .kds-posters { touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+
+  /* ── Шапка экрана: Figma «Header» 1280×44, pad 12/16/8/16, внешний зазор 32,
+        списки 24, иконка→текст 8, счётчики 14 (внутри 6), текст Medium 16/24 ls .5 ── */
+  .kds-topbar { position: absolute; top: 0; left: 0; right: 0; height: 44px; padding: 12px 16px 8px; display: flex; align-items: center; gap: 32px; z-index: 6; }
+  .kds-tb-lists { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 24px; }
+  .kds-tb-list { display: flex; align-items: center; gap: 8px; height: 24px; flex: 0 0 auto; font-size: 16px; font-weight: 500; line-height: 24px; letter-spacing: .5px; color: #fff; white-space: nowrap; }
+  .kds-tb-list .material-icons { font-size: 20px; width: 24px; text-align: center; color: var(--kds-text-2); flex: 0 0 auto; }
+  .kds-tb-rest { flex: 1 1 auto; min-width: 0; }
+  .kds-tb-chev { font-size: 20px !important; width: 24px !important; margin-left: 0; }
+  .kds-tb-states { flex: 0 0 auto; display: flex; align-items: center; gap: 12px; }
+  .kds-tb-state { display: flex; align-items: center; gap: 4px; font-size: 16px; font-weight: 500; line-height: 24px; letter-spacing: .5px; white-space: nowrap; }
+  .kds-tb-state .material-icons { font-size: 20px; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; }
+  .kds-tb-ico { flex: 0 0 24px; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; }
+  .kds-svg-ico { width: 20px; height: 20px; flex: 0 0 auto; display: block; }
+  .kds-tb-state--clock .kds-svg-ico { color: #616161; }
+  .kds-tb-state--accent { color: var(--kds-ic-accent); }
+  .kds-tb-state--negative { color: var(--kds-ic-negative); }
+  .kds-tb-state--positive { color: var(--kds-ic-positive); }
+  .kds-tb-state--clock { color: #fff; }
+  .kds-tb-state--clock .material-icons { color: var(--kds-text-2); }
+  .kds-tb-icons { flex: 0 0 auto; display: flex; align-items: center; gap: 16px; }
+  .kds-iconbtn {
+    position: relative;
+    flex: 0 0 auto; width: 24px; height: 24px; border: 0; border-radius: 0;
+    background: transparent; color: var(--kds-text-2); display: flex; align-items: center; justify-content: center;
+  }
+  /* видимая иконка 24, но цель нажатия 44×44 — как требует тач */
+  .kds-iconbtn::after { content: ''; position: absolute; inset: -10px; }
+  .kds-iconbtn:active { background: rgba(255, 255, 255, .1); border-radius: 8px; }
+  .kds-iconbtn .material-icons { font-size: 20px; }
+  .kds-iconbtn--power .material-icons { font-size: 18px; }
+  .kds-iconbtn--power { color: var(--kds-ic-accent); }
+
+  /* ── Лента карточек ── */
+  .kds-board {
+    position: absolute; top: 48px; left: 16px; right: 16px; bottom: 74px;
+    display: flex; align-items: flex-start; gap: 16px; z-index: 1;
+    overflow: auto;
+    scrollbar-width: none;
+  }
+  .kds-board::-webkit-scrollbar { width: 0; height: 0; }
+
+  /* ── Полоса скролла (Figma: Scroll 1280×12 на y=728, ползунок 8 px r8 #333) ── */
+  .kds-scrollstrip { position: absolute; left: 0; right: 0; bottom: 56px; height: 12px; padding: 2px; z-index: 6; }
+  .kds-scrollstrip__thumb { height: 8px; border-radius: 8px; background: #333333; }
+
+  /* ── Футер (Figma: Footer 1280×56, pad 4/16, space-between; текст Medium 16/24 ls .5) ── */
+  .kds-footer {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 56px; padding: 4px 16px; z-index: 6;
+    background: var(--kds-surface);
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  }
+  .kds-footer__left { display: flex; align-items: center; gap: 24px; min-width: 0; }
+  .kds-footer__ver { font-size: 16px; font-weight: 500; line-height: 24px; letter-spacing: .5px; color: #fff; white-space: nowrap; }
+  .kds-footer__status { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 500; line-height: 24px; letter-spacing: .5px; }
+  /* Figma: ELLIPSE 16×16 залит #14b456 (а не глиф fiber_manual_record — в Outlined он рисуется кольцом) */
+  .kds-footer__status .kds-dot { flex: 0 0 auto; width: 16px; height: 16px; border-radius: 50%; background: var(--kds-ic-positive); }
+  .kds-footer__total { font-size: 16px; font-weight: 500; line-height: 24px; letter-spacing: .5px; white-space: nowrap; position: absolute; left: 50%; transform: translateX(-50%); }
+  .kds-footer__right { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+  .kds-footer__label { font-size: 16px; line-height: 24px; color: var(--kds-text-2); }
+  .kds-footer__btn {
+    position: relative;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 14px 16px;
+    border: 1px solid var(--kds-line); border-radius: 12px; background: transparent;
+    font-size: 14px; font-weight: 500; line-height: 20px; letter-spacing: .5px; text-transform: uppercase; color: #fff;
+  }
+  .kds-footer__btn:active { background: rgba(255, 255, 255, .08); }
+  .kds-footer__btn .material-icons { font-size: 20px; color: #fff; }
+  .kds-view--narrow .kds-footer__left { gap: 16px; }
+  .kds-view--narrow .kds-footer__total { display: none; }
+
+  /* ── Карточка заказа (обновлённый вид, 1:1 с макетом) ── */
+  .kds-card { display: flex; flex-direction: column; width: 360px; flex: 0 0 auto; background: transparent; border-radius: 8px; }
+  .kds-view--narrow .kds-card { width: 326px; }
+  .kds-card__head {
+    border: 0; box-shadow: inset 0 0 0 1px var(--kds-line);
+    border-top: 8px solid var(--st-band, #616161);
+    border-radius: 8px; background: var(--st-tint, rgba(97, 97, 97, .12));
+  }
+  /* Шапка: полоса 8 + блок «номер/канал» 60 (пад 4/6, без зазора между строками) + подвал
+     20 (+4) 20 (+4) комментарий 30 и 4 px снизу — итого 92 / 126 / 150 как в макете */
+  .kds-card__headtop { padding: 4px 6px; display: flex; flex-direction: column; gap: 0; }
+  /* шапка заказа целиком — кликабельная область статуса (PB-7765) */
+  .kds-card__head { cursor: pointer; }
+  .kds-card__head:active { filter: brightness(1.12); }
+  .kds-card__head p, .kds-card__head span { cursor: inherit; }
+  .kds-card__slot { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; min-height: 32px; }
+  .kds-card__num { font-size: 24px; font-weight: 500; line-height: 32px; letter-spacing: .5px; color: var(--st-num, #fff); }
+  .kds-card__brand { font-size: 14px; line-height: 20px; letter-spacing: .5px; color: #fff; margin-left: 8px; margin-right: auto; white-space: nowrap; }
+  .kds-card__timer { font-size: 24px; font-weight: 500; line-height: 32px; letter-spacing: .5px; color: var(--st-timer, #fff); }
+  .kds-card__ch { font-size: 14px; line-height: 20px; letter-spacing: .5px; color: #fff; white-space: pre-wrap; }
+  .kds-card__hfoot { padding: 0 6px 4px; display: flex; flex-direction: column; gap: 4px; }
+  .kds-card__rest { display: flex; align-items: center; gap: 4px; font-size: 14px; line-height: 20px; letter-spacing: .5px; }
+  .kds-card__rest .material-icons { font-size: 20px; color: var(--kds-ic-neutral); }
+  .kds-hmeta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .kds-hmeta__items { display: flex; align-items: center; gap: 16px; min-width: 0; flex-wrap: wrap; }
+  .kds-hmeta__item { display: flex; align-items: center; gap: 4px; font-size: 14px; line-height: 20px; letter-spacing: .5px; white-space: nowrap; }
+  .kds-hmeta__item .material-icons, .kds-hmeta__item .kds-svg-ico { font-size: 20px; color: var(--kds-ic-neutral); }
+  .kds-card__pay { font-size: 20px; color: var(--kds-ic-positive); flex-shrink: 0; }
+  .kds-card__pay--off { color: var(--kds-ic-neutral); }
+  /* В макете у карточек в статусах «Приготовлен» и «Отменён» вся шапка белая — иконки тоже белые */
+  .kds-card--wico .kds-hmeta__item .material-icons,
+  .kds-card--wico .kds-hmeta__item .kds-svg-ico,
+  .kds-card--wico .kds-card__rest .material-icons { color: #ffffff; }
+
+  /* ── Экран сборщика «без статусов» (Figma 8941:7418): в новом дизайне кнопки статуса нет.
+        Геометрия шапки — как у всех карточек (та же полоса 8 px, те же отступы), но без цвета
+        статуса: полоса нейтральная #616161, заливки статуса нет; кнопки строк нейтральные ── */
+  .kds-card--asm .kds-card__head { border-top-color: #616161; background: transparent; }
+  /* Экран сборщика: у блюд НЕТ кнопок — справа только иконка статуса (без подложки и рамки);
+     цвет и глиф — как у статусов везде (стрелка / галочка / крестик) */
+  .kds-row__ico { flex: 0 0 52px; display: flex; align-items: center; justify-content: center; }
+  .kds-row__ico .material-icons { font-size: 28px; }
+
+  /* Комментарий — пунктирная линия сверху, иконка 16 + текст 16/24 */
+  .kds-comment { display: flex; align-items: flex-start; gap: 6px; padding: 1px 0 0; margin-top: 0; }
+  .kds-comment__inner { flex: 1; min-width: 0; display: flex; align-items: flex-start; gap: 6px; border-top: 1px dashed var(--kds-line); padding: 4px 0 0; min-height: 28px; }
+  .kds-comment .material-icons { font-size: 16px; color: var(--kds-ic-warning); flex: 0 0 auto; padding-top: 4px; }
+  .kds-comment__text { font-size: 16px; line-height: 24px; letter-spacing: .5px; color: var(--kds-text-3); padding-top: 0; }
+
+  .kds-card__body { background: transparent; padding-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+  .kds-card__body--tint { background: transparent; }
+  .kds-card__body--flush { padding-top: 0; }
+  .kds-kit--tall { padding-bottom: 4px; }
+  .kds-kit--tall .kds-kit__btn { margin-bottom: -4px; }
+  .kds-card--partTop { box-shadow: inset 0 4px 0 var(--kds-line); }
+  .kds-card--partBottom { box-shadow: inset 0 -4px 0 var(--kds-line); }
+  .kds-card--partTop.kds-card--partBottom { box-shadow: inset 0 4px 0 var(--kds-line), inset 0 -4px 0 var(--kds-line); }
+  .kds-card__div { flex: 0 0 1px; width: 312px; height: 1px; margin: 0 0 -5px 8px; background: rgba(255, 255, 255, .12); }
+  .kds-cap { flex: 0 0 4px; height: 4px; margin-bottom: 4px; border: 2px dashed var(--kds-line); border-bottom: 0; border-radius: 4px 4px 0 0; }
+  .kds-card > .kds-transfer { margin-top: 4px; }
+  .kds-card__head--pad { padding-bottom: 2px; }
+  /* ── Строка блюда: «коробка» 52 (#212121, r8) + кнопка 52×52 (#3b3b43), рамка — цвет статуса ── */
+  .kds-row { display: flex; align-items: stretch; background: var(--kds-row); border-radius: 8px; overflow: hidden; min-height: 52px; }
+  .kds-row__main { flex: 1; min-width: 0; padding: 4px 8px; display: flex; flex-direction: column; justify-content: center; }
+  .kds-guest { display: flex; align-items: center; gap: 4px; height: 16px; font-size: 12px; line-height: 16px; letter-spacing: .4px; color: var(--kds-text-3); }
+  .kds-row__line { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .kds-row__name { font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; color: #fff; min-width: 0; white-space: nowrap; }
+  .kds-qty {
+    flex: 0 0 auto; background: #e0e0e0; border-radius: 6px; padding: 0 4px;
+    font-size: 22px; font-weight: 700; line-height: 28px; letter-spacing: .25px; color: #333;
+  }
+  .kds-row--neg .kds-row__name { color: var(--kds-text-3); text-decoration: line-through; }
+  /* ── Отменённый заказ (красная полоса): строки красные БЕЗ зачёркивания и без
+        подложки у кнопки, группа — наоборот: зачёркнута вся (как в макете) ── */
+  .kds-card--cancelled .kds-row--neg .kds-row__name { color: var(--kds-ic-negative); text-decoration: none; }
+  .kds-card--cancelled .kds-kit--neg .kds-kit__name,
+  .kds-card--cancelled .kds-kit--neg .kds-kit__comp { text-decoration: line-through; }
+  /* Пиктограмма набора — зелёная звезда в круге: это точный вектор компонента stars из Figma
+     (кольцо уже входит в глиф), поэтому CSS-обводки больше нет — только слот и цвет */
+  .kds-star { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+    color: var(--kds-ic-positive);
+  }
+  .kds-star--lg { width: 40px; height: 40px; }
+  .kds-star .kds-svg-ico { color: var(--kds-ic-positive); }
+  .kds-row__status { display: none; }
+  .kds-row--sel { box-shadow: inset 4px 0 0 var(--kds-ic-negative); }
+  /* Кухня блюда (PB-6800 «Визуальное выделение цеха»): рамка справа 1px на строке блюда.
+     Холодный цех — синяя #448AFF, горячий — красная #FF5252, жёлтая — #FFAB40 (цвета из макета).
+     Настоящий border-right: повторяет скругление углов строки (как border-r кадра в Figma);
+     inset-тень не подходит — она рисуется ПОД кнопкой у правого края и не видна. */
+  .kds-row--kt-cold { border-right: 1px solid #448aff; }
+  .kds-row--kt-hot { border-right: 1px solid #ff5252; }
+  .kds-row--kt-warn { border-right: 1px solid #ffab40; }
+  .kds-btn {
+    flex: 0 0 52px; width: 52px; border: 0; border-radius: 8px;
+    background: var(--kds-btn); display: flex; align-items: center; justify-content: center;
+    color: var(--kds-ic-neutral); transition: background-color .15s ease;
+  }
+  @media (hover: hover) and (pointer: fine) { .kds-btn:hover { background: #4d4d4d; } }
+  .kds-btn:active { background: #4d4d4d; }
+  .kds-btn .material-icons { font-size: 28px; }
+  /* Статус строки — ЦВЕТ/иконка кнопки 52×52, как в макете: ожидает — серая стрелка,
+     пора готовить — жёлтая, готовится — синяя, готов — зелёная галочка, отмена — красный крестик.
+     Правила идут ПОСЛЕ .kds-btn, иначе базовый серый цвет перебивал бы статусы. */
+  .kds-btn--waiting { color: var(--kds-ic-neutral); }
+  .kds-btn--urgent { color: var(--kds-ic-warning); }
+  .kds-btn--cooking { color: var(--kds-ic-accent); }
+  .kds-btn--ready { color: var(--kds-ic-positive); }
+  .kds-btn--cancelled { color: var(--kds-ic-negative); }
+  /* В отменённом заказе кнопки 52×52 сливаются со строкой (#212121) — как в Figma */
+  .kds-card--cancelled .kds-btn, .kds-card--cancelled .kds-kit__btn { background: transparent; }
+
+  /* ── Курс: полоса как в макете DSGN-533 (компонент Button kurs) — 36 px, r12, текст 14/20 по центру.
+        В сценариях 3.3 и «Общих границах» состояния «активный/дизейбл» у курса НЕТ: все курсы
+        выглядают одинаково — заливка #424242, белый текст. Курс — кнопка: нажатие бампает весь курс (DS-534) ── */
+  .kds-course {
+    display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+    flex: 0 0 auto; height: 36px; border: 1px solid #424242; border-radius: 12px; background: #424242;
+    font-size: 14px; line-height: 20px; letter-spacing: .25px; color: #ffffff;
+    margin-top: 12px;
+  }
+  .kds-course:active { background: #4d4d4d; }
+  .kds-course:first-child { margin-top: 0; }
+  /* шеврон компонента 18 px, зазор 8 ── как в DSGN-533 ── */
+  .kds-course .material-icons { font-size: 18px; color: #ffffff; }
+
+  /* ── Набор (применение задачи к новому дизайну) ──
+        Заголовок набора — отдельная строка без кнопки: гость 12/16 + пиктограмма 16 + название 22/28
+        (+ маркер экземпляра, + «видно N из M»); компоненты — вложенные строки как в макете (отступ 24),
+        каждая со своей кнопкой и статусом. */
+  /* ── Набор (комбо) в карточке — 1:1 по Figma (карточки «10585:7793», «10585:7667»):
+        блок 360 БЕЗ рамки (#212121, r8), шапка (гость 12/16 + звезда справа, название 22/28,
+        «видно N из M» 12/16 когда видна не вся группа), компоненты текстом 18/24 (без своих кнопок),
+        комментарий — пунктир сверху (иконка #FFAB40, текст 16/24 #D6D6D6), справа одна кнопка 52 на всю высоту ── */
+  .kds-kit { position: relative; display: flex; align-items: stretch; background: var(--kds-row); border-radius: 8px; overflow: hidden; }
+  .kds-kit__body { flex: 1; min-width: 0; display: flex; flex-direction: column; padding-bottom: 4px; }
+  .kds-kit__head { min-height: 52px; padding: 4px 8px; display: flex; flex-direction: column; justify-content: center; }
+  .kds-kit__gline { display: flex; align-items: center; height: 16px; }
+  .kds-kit__star { margin-left: auto; display: flex; color: var(--kds-ic-positive); }
+  .kds-kit__name { font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; }
+  /* Различие экземпляров одного набора. Бордеры слева и справа не используем — они заняты
+     другим функционалом; цифры не используем — читаются как количество порций.
+     Вариант 1: мягкая цветная подложка шапки группы (своя у первого и второго).
+     Вариант 2: цветная точка перед названием.
+     Вариант 3: залитый цветом прямоугольник той же формы, что плашка количества (28, радиус 6). */
+  .kds-kit__dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; vertical-align: middle; background: #e040fb; }
+  .kds-kit__dot--2 { background: #00e5ff; }
+  .kds-kit__chip { display: inline-block; width: 12px; height: 28px; border-radius: 6px; margin-right: 8px; vertical-align: middle; background: #e040fb; }
+  .kds-kit__chip--2 { background: #00e5ff; }
+  .kds-kit__seen { font-size: 12px; line-height: 16px; letter-spacing: .4px; color: var(--kds-text-2); margin-top: 2px; }
+  .kds-kit--neg .kds-kit__name { color: var(--kds-ic-negative); }
+  .kds-kit__comp { display: flex; align-items: center; gap: 6px; min-height: 24px; padding: 0 12px 0 16px;
+    font-size: 18px; line-height: 24px; letter-spacing: .5px; color: #fff; }
+  .kds-kit__comp--plain { padding-left: 41px; }
+  .kds-kit__comp--deep { padding-left: 41px; }
+  .kds-kit__comp--tight { padding-right: 8px; }
+  .kds-kit__comp--tall { min-height: 28px; }
+  .kds-kit__comp--neg { color: var(--kds-ic-negative); }
+  .kds-kit__qty { flex: 0 0 auto; min-width: 19px; height: 24px; background: #e0e0e0;
+    border-radius: 6px; padding: 0 4px; font-size: 18px; font-weight: 700; line-height: 24px; letter-spacing: .5px; color: #333; }
+  .kds-kit__qty--neg { background: transparent; box-shadow: inset 0 0 0 1px var(--kds-ic-negative); color: var(--kds-ic-negative); font-weight: 500; }
+  .kds-kit__comment { display: flex; align-items: flex-start; margin: 4px 0 0; padding: 2px 8px 0; }
+  .kds-kit__comment-in { flex: 1; min-width: 0; display: flex; align-items: flex-start; gap: 6px;
+    border-top: 1px dashed var(--kds-line); padding: 3px 0 0; }
+  .kds-kit__comment .material-icons { font-size: 16px; line-height: 1; color: var(--kds-ic-warning); padding-top: 4px; }
+  .kds-kit__comment .kds-comment__text { font-size: 16px; line-height: 24px; letter-spacing: .5px; color: #d6d6d6; }
+  .kds-kit__btn { flex: 0 0 52px; width: 52px; border: 0; padding: 0; background: var(--kds-btn); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; color: var(--kds-ic-neutral); transition: background-color .15s ease; }
+  .kds-kit__btn .material-icons { font-size: 28px; }
+  .kds-kit__btn:active { background: #4d4d4d; }
+  @media (hover: hover) and (pointer: fine) { .kds-kit__btn:hover { background: #4d4d4d; } }
+  .kds-kit__btn--urgent { color: var(--kds-ic-warning); }
+  .kds-kit__btn--cooking { color: var(--kds-ic-accent); }
+  .kds-kit__btn--ready { color: var(--kds-ic-positive); }
+  .kds-kit__btn--cancelled { color: var(--kds-ic-negative); }
+  .kds-kit--mods { box-shadow: none; }
+  .kds-kit--mods .kds-kit__body { padding-bottom: 0; }
+  .kds-nest { display: flex; flex-direction: column; gap: 4px; }
+  .kds-nest__rows { display: flex; flex-direction: column; gap: 4px; margin-left: 24px; }
+
+  /* ── Отдельно готовящийся модификатор ── */
+  .kds-mod__ico { font-size: 20px; color: var(--kds-ic-warning); flex: 0 0 auto; }
+  .kds-dlink { display: inline-flex; align-items: center; gap: 4px; min-width: 0; font-size: 12px; line-height: 16px; color: var(--kds-text-3); }
+  .kds-dlink .material-icons { font-size: 14px; color: var(--kds-text-2); }
+  .kds-dsep { color: var(--kds-text-2); }
+
+  /* ── Режим «по блюдам» — по макету Figma «Режим Блюда» (10602:36475):
+        строка = [шапка заказа 360] + 8 + [блюдо 820 + кнопка 52], рамка 1px #616161, r8 ── */
+  /* Список — как в макете: видимая область от шапки (48) до футера (56), скролл — отдельная полоса справа (Scroll) */
+  .kds-dlist { position: absolute; top: 48px; left: 16px; right: 24px; bottom: 56px; overflow-y: auto; overflow-x: hidden;
+    display: flex; flex-direction: column; gap: 4px; z-index: 1; scrollbar-width: none; }
+  .kds-dlist::-webkit-scrollbar { width: 0; height: 0; }
+  /* Вертикальная полоса скролла (Figma: Scroll 12 px на правом краю, от шапки до футера;
+     трек 8 px #9E9E9E r8, ползунок #616161 r8) */
+  .kds-vscroll { position: absolute; top: 48px; right: 2px; bottom: 56px; width: 12px; padding: 2px; z-index: 6; }
+  .kds-vscroll__track { position: relative; width: 8px; height: 100%; border-radius: 8px; background: #9e9e9e; }
+  .kds-vscroll__knob { position: absolute; left: 0; top: 0; width: 8px; min-height: 24px; border-radius: 8px; background: #616161; }
+  .kds-board, .kds-posters, .kds-dlist { cursor: grab; }
+  .kds-board.is-panning, .kds-posters.is-panning, .kds-dlist.is-panning { cursor: grabbing; }
+  /* Строка — без своего фона: две отдельные «коробки» (плашка заказа и блюдо) с зазором 8 по фону экрана, как в макете */
+  .kds-dl-row { display: flex; align-items: stretch; gap: 8px; min-height: 60px; flex: 0 0 auto; }
+  /* Плашка заказа: заливка 12 % цвета статуса, рамка 1px #616161, r8, паддинг 4/6 */
+  .kds-dl-stub { flex: 0 0 360px; width: 360px; padding: 4px 6px; border: 1px solid #616161; border-radius: 8px;
+    display: flex; flex-direction: column; align-items: stretch; text-align: left;
+    background: rgba(97,97,97,.12); cursor: pointer; }
+  .kds-dl-stub--waiting { background: rgba(97,97,97,.12); }
+  .kds-dl-stub--urgent { background: rgba(234,120,6,.12); }
+  .kds-dl-stub--cooking { background: rgba(38,81,181,.12); }
+  .kds-dl-stub--ready { background: rgba(15,133,44,.12); }
+  .kds-dl-stub--cancelled { background: rgba(222,26,18,.12); }
+  .kds-dl-stub:active { filter: brightness(1.1); }
+  .kds-dl-stub__top { display: flex; align-items: baseline; justify-content: space-between; gap: 36px; height: 32px; }
+  .kds-dl-stub__num, .kds-dl-stub__timer { font-size: 24px; font-weight: 500; line-height: 32px; letter-spacing: .5px; color: #fff; }
+  .kds-dl-stub--urgent .kds-dl-stub__timer { color: var(--kds-ic-warning); }
+  .kds-dl-stub--cancelled .kds-dl-stub__timer { color: #d6d6d6; }
+  .kds-dl-stub__timer.is-neg { color: #ff5252; }
+  .kds-dl-stub__ch { font-size: 14px; line-height: 20px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kds-dl-body { flex: 1 1 auto; min-width: 0; display: flex; background: #212121; border-radius: 8px; overflow: hidden; }
+  .kds-dl-body--indent { margin-left: 36px; }
+  .kds-dl-body--sel { box-shadow: inset 4px 0 0 var(--kds-ic-negative); }
+  .kds-dl-main { flex: 1 1 auto; min-width: 0; padding: 4px 8px; display: flex; flex-direction: column; justify-content: center; }
+  .kds-dl-cell { display: flex; flex-direction: column; justify-content: center; }
+  .kds-dl-main--chips { padding-bottom: 8px; }
+  .kds-dl-main--chips .kds-dl-cell { min-height: 48px; }
+  .kds-dl-main--combo { padding-bottom: 4px; gap: 4px; }
+  .kds-dl-main--combo .kds-dl-cell { min-height: 44px; }
+  .kds-dl-main--combo .kds-dl-chips { min-height: 24px; }
+  .kds-dl-gline { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 16px; }
+  .kds-guest { font-size: 12px; line-height: 16px; letter-spacing: .4px; color: #d6d6d6; }
+  .kds-dl-line { display: flex; align-items: center; gap: 6px; min-height: 28px; }
+  .kds-dl-name { font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kds-dl-name.is-neg { color: var(--kds-ic-negative); }
+  .kds-dl-qty { flex: 0 0 auto; min-width: 21px; height: 28px; padding: 0 4px; border-radius: 6px; background: #e0e0e0;
+    color: #333; font-size: 22px; font-weight: 700; line-height: 26px; letter-spacing: .25px; text-align: center; }
+  .kds-dl-star { flex: 0 0 auto; display: flex; color: var(--kds-ic-positive); }
+  .kds-dl-chips { display: flex; flex-wrap: wrap; align-items: center; min-height: 28px; padding-left: 24px; }
+  .kds-dl-chip { display: inline-flex; align-items: center; gap: 6px; padding: 0 12px;
+    font-size: 18px; line-height: 24px; letter-spacing: .5px; color: #fff; white-space: nowrap; }
+  .kds-dl-chip.is-neg { color: var(--kds-ic-negative); }
+  .kds-dl-chip__qty { min-width: 19px; height: 24px; padding: 0 4px; border-radius: 6px; border: 1px solid currentColor;
+    font-size: 18px; font-weight: 700; line-height: 22px; letter-spacing: .5px; text-align: center; }
+  .kds-dl-comment { display: flex; align-items: flex-start; gap: 6px; padding: 4px 8px 0; border-top: 1px dashed #616161; }
+  .kds-dl-comment .material-icons { font-size: 16px; color: #d6d6d6; }
+  .kds-dl-comment__text { font-size: 16px; line-height: 24px; color: #d6d6d6; }
+  .kds-dl-btn { flex: 0 0 52px; width: 52px; border: 0; border-radius: 8px; background: #3b3b43; color: #9e9e9e;
+    display: flex; align-items: center; justify-content: center; }
+  .kds-dl-btn .material-icons { font-size: 28px; }
+  .kds-dl-btn.kds-btn--cancelled { background: #3b3b43; color: var(--kds-ic-negative); }
+  .kds-dl-btn.kds-btn--ready { background: #3b3b43; color: var(--kds-ic-positive); }
+  .kds-ditem { font-size: 12px; line-height: 16px; color: var(--kds-text-2); white-space: nowrap; }
+  .kds-drow__sub { display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: wrap; }
+
+  /* Группа набора по сценариям: заголовок без кнопки/статуса + компоненты строками с кнопками (отступ 24) */
+  .kds-cset { display: flex; flex-direction: column; gap: 4px; }
+  .kds-cset__head { background: var(--kds-row); border-radius: 8px; padding: 4px 8px; min-height: 52px;
+    display: flex; flex-direction: column; justify-content: center; }
+  .kds-cset__gline { display: flex; align-items: center; height: 16px; }
+  .kds-cset__star { margin-left: auto; display: flex; color: var(--kds-ic-positive); }
+  .kds-cset__name { font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; color: #fff; }
+  .kds-cset__seen { font-size: 12px; line-height: 16px; letter-spacing: .4px; color: var(--kds-text-2); margin-top: 2px; }
+  .kds-cset__rows { display: flex; flex-direction: column; gap: 4px; margin-left: 24px; }
+
+  /* ── Перенос чека: пунктир слева/справа/снизу, сверху открыт (24 px, как в макете) ── */
+  .kds-transfer {
+    display: flex; align-items: center; justify-content: center; height: 24px; padding: 0;
+    border-bottom: 2px dashed var(--kds-line); border-left: 2px dashed var(--kds-line); border-right: 2px dashed var(--kds-line);
+    border-radius: 0 0 4px 4px; font-size: 14px; line-height: 20px; letter-spacing: .5px; color: var(--kds-text-3);
+  }
+  .kds-transfer--top { height: 2px; border-top: 2px dashed var(--kds-line); border-left: 2px dashed var(--kds-line); border-right: 2px dashed var(--kds-line); border-bottom: 0; border-radius: 4px 4px 0 0; padding: 0; }
+
+  /* ── Сокращение длинных названий + тултип полного названия ── */
+  .kds-ellip { display: inline-block; max-width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+  .kds-kit__name.kds-ellip { max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .kds-dlink .kds-ellip { max-width: 300px; }
+  .kds-tip {
+    position: absolute; z-index: 30; display: none; pointer-events: none;
+    max-width: 320px; padding: 8px 12px; border-radius: 8px;
+    background: var(--kds-btn); color: #fff; font-size: 16px; line-height: 24px; letter-spacing: .25px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .45);
+  }
+
+  /* ── Плакаты (пиктограммы / обоснование) ── */
+  .kds-posters {
+    position: absolute; top: 48px; left: 16px; right: 16px; bottom: 74px; z-index: 1;
+    overflow: auto; display: flex; flex-direction: column; gap: 16px; align-items: stretch;
+    scrollbar-width: thin; scrollbar-color: #616161 transparent;
+  }
+  .kds-posters::-webkit-scrollbar { width: 8px; height: 8px; }
+  .kds-posters::-webkit-scrollbar-thumb { background: #616161; border-radius: 8px; }
+  .kds-poster { background: var(--kds-surface); border-radius: 8px; padding: 20px 24px; max-width: 980px; width: 100%; }
+  .kds-poster--row { display: flex; gap: 16px; align-items: stretch; }
+  .kds-poster__cell { flex: 1; min-width: 0; background: var(--kds-row); border: 1px solid var(--kds-line); border-radius: 8px; padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+  .kds-poster__ico { font-size: 40px; color: var(--kds-ic-accent); }
+  .kds-poster__ico--warn { color: var(--kds-ic-warning); }
+  .kds-poster__title { font-size: 20px; font-weight: 500; line-height: 28px; }
+  .kds-poster__sub { font-size: 14px; line-height: 20px; color: var(--kds-text-3); }
+  .kds-poster__list { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+  .kds-poster__list li { font-size: 14px; line-height: 20px; color: var(--kds-text-3); }
+  .kds-poster__list li b { color: #fff; font-weight: 500; }
+  .kds-posters__note { font-size: 14px; line-height: 20px; color: var(--kds-text-2); max-width: 980px; width: 100%; padding: 0 4px; }
+
+  /* ══════════ Работающий макет: элементы управления ══════════
+     Всё, кроме статусов строк, взято из компонентов Figma:
+     «Menu setting» (10106:75132) — меню показателей из шапки;
+     «Menu header» 340×64 + «Menu content» 340×124 (7471:15466 / 7471:15467)
+     и «Toogle mode» (7069:32810) — панель «Настройки». */
+  .kds-tb-pick { border: 0; background: transparent; padding: 0; cursor: pointer; text-align: left; }
+  .kds-tb-pick:active { opacity: .7; }
+  .kds-tb-pick.is-open { color: var(--kds-ic-accent); }
+  .kds-tb-pick.is-open .material-icons { color: var(--kds-ic-accent); }
+  /* счётчики-фильтры: сами по себе кнопки, активный подчёркнут цветом без сдвига макета */
+  .kds-tb-state { border: 0; background: transparent; padding: 0; cursor: pointer; }
+  .kds-tb-state:active { opacity: .7; }
+  .kds-tb-state.is-sel { box-shadow: 0 3px 0 currentColor; }
+  .kds-tb-state b { font-weight: 500; }
+
+  /* меню: контейнер 360, #333333, r12, рамка 1px #616161, пад 12/4, пункт 48 */
+  .kds-menu { position: absolute; z-index: 30; display: none; width: 360px; padding: 12px 4px;
+    background: #333333; border: 1px solid #616161; border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .45); }
+  .kds-menu.is-open { display: block; }
+  .kds-menu--metrics { width: 360px; }
+  .kds-menu__title { display: flex; align-items: center; gap: 8px; padding: 12px 0 12px 12px;
+    font-size: 16px; font-weight: 400; line-height: 24px; letter-spacing: .5px; color: #fff; }
+  .kds-menu__title .material-icons { font-size: 20px; width: 24px; text-align: center; color: #9e9e9e; }
+  .kds-menu__div { height: 1px; background: #616161; margin: 0 0 8px; }
+  .kds-menu__item { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 48px;
+    padding: 12px 0 12px 12px; border: 0; border-radius: 8px; background: transparent; text-align: left;
+    white-space: nowrap; overflow: hidden;
+    font-size: 16px; font-weight: 400; line-height: 24px; letter-spacing: .5px; color: #fff; }
+  .kds-menu__ico { flex: 0 0 24px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+  .kds-menu__ico .material-icons { font-size: 20px; }
+  .kds-menu__ico .kds-svg-ico { width: 20px; height: 20px; }
+  .kds-menu__item:active, .kds-menu__item.is-sel { background: rgba(255, 255, 255, .08); }
+
+  /* панель «Настройки»: шапка 340×64 + контент 340×124 */
+  .kds-menu--settings { width: 340px; padding: 12px 4px 8px; }
+  .kds-set__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 8px 8px 12px; }
+  .kds-set__title { font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; color: #fff; }
+  .kds-set__body { display: flex; flex-direction: column; gap: 16px; padding: 8px 12px 12px; }
+  .kds-set__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
+  .kds-set__label { font-size: 16px; font-weight: 400; line-height: 24px; letter-spacing: .5px; color: #fff; }
+  /* Toogle mode 92×44: пад 4/6, r16, иконки 36×36 r16 */
+  .kds-toggle { display: flex; gap: 8px; padding: 4px 6px; background: #121212; border-radius: 16px; }
+  .kds-toggle__i { width: 36px; height: 36px; border: 0; border-radius: 16px; background: #424242; color: #fff;
+    display: flex; align-items: center; justify-content: center; }
+  .kds-toggle__i.is-on { background: #ffffff; color: #121212; }
+  .kds-toggle__i .material-icons { font-size: 28px; }
+  /* Масштаб: кнопки 44×44 r8 #121212, значение 57×40 */
+  .kds-scale { display: flex; align-items: center; gap: 16px; }
+  .kds-scale__btn { width: 44px; height: 44px; border: 0; border-radius: 8px; background: #121212; color: #fff;
+    display: flex; align-items: center; justify-content: center; }
+  .kds-scale__btn .material-icons { font-size: 28px; }
+  .kds-scale__btn--reset { background: transparent; color: #9e9e9e; }
+  .kds-scale__val { min-width: 57px; text-align: center; font-size: 16px; font-weight: 400; line-height: 40px; letter-spacing: .5px; color: #fff; }
+
+  /* слой масштаба: содержимое экрана масштабируется внутри кадра 1280×800 */
+  .kds-zoom { position: absolute; inset: 0; transform-origin: top left; }
+
+  /* кнопка «Отменить» неактивна, пока нечего отменять */
+  .kds-footer__btn:disabled { opacity: .38; cursor: default; }
+  .kds-footer__btn:disabled:active { background: transparent; }
+  /* ползунок полосы скролла можно тянуть */
+  .kds-scrollstrip__thumb { cursor: grab; touch-action: none; }
+  .kds-scrollstrip__thumb:active { cursor: grabbing; background: #4d4d4d; }
+
+  /* ── Светлая тема — палитра из кадра «Светлая тема» (7014:4550 → 7091:54119) ── */
+  .kds-view--light {
+    --kds-bg: #ececec; --kds-surface: #ffffff; --kds-row: #f5f5f5; --kds-btn: #e0e0e0;
+    --kds-line: #e0e0e0; --kds-text: #333333; --kds-text-2: #616161; --kds-text-3: #424242;
+    --kds-ic-neutral: #757575;
+  }
+  .kds-view--light .kds-tb-list, .kds-view--light .kds-tb-state--clock, .kds-view--light .kds-card__brand,
+  .kds-view--light .kds-card__ch, .kds-view--light .kds-row__name, .kds-view--light .kds-kit__name,
+  .kds-view--light .kds-kit__comp, .kds-view--light .kds-footer__ver,
+  .kds-view--light .kds-footer__total, .kds-view--light .kds-footer__btn,
+  .kds-view--light .kds-poster__list li b, .kds-view--light .kds-card__num { color: #333333; }
+  .kds-view--light .kds-footer__btn .material-icons { color: #333333; }
+  .kds-view--light .kds-card__head { border-color: #e0e0e0; }
+  .kds-view--light .kds-menu { background: #ffffff; border-color: #e0e0e0; }
+  .kds-view--light .kds-menu__title, .kds-view--light .kds-menu__item, .kds-view--light .kds-set__label,
+  .kds-view--light .kds-set__title, .kds-view--light .kds-scale__val { color: #333333; }
+  .kds-view--light .kds-menu__div { background: #e0e0e0; }
+  .kds-view--light .kds-menu__item:active, .kds-view--light .kds-menu__item.is-sel { background: #f5f5f5; }
+</style>
+</head>
+<body>
+  <div id="kdsHost" class="kds-host"></div>
+  <script>
+  (function () {
+    'use strict';
+
+    /* ── Статусы: полоса/заливка шапки карточки (band/tint), цвета № и таймера ── */
+    var ST = {
+      waiting:   { t: 'Ожидает',       c: '#9e9e9e', band: '#616161', tint: 'rgba(97,97,97,.12)',   timer: '#ffffff', num: '#ffffff' },
+      urgent:    { t: 'Пора готовить', c: '#ffab40', band: '#ffab40', tint: 'rgba(234,120,6,.12)',  timer: '#ffab40', num: '#ffffff' },
+      cooking:   { t: 'Готовится',     c: '#448aff', band: '#2651b5', tint: 'rgba(38,81,181,.12)',  timer: '#ffffff', num: '#ffffff' },
+      ready:     { t: 'Приготовлен',   c: '#14b456', band: '#0f852c', tint: 'rgba(15,133,44,.12)',  timer: '#ffffff', num: '#ffffff' },
+      cancelled: { t: 'Отменён',       c: '#ff5252', band: '#de1a12', tint: 'rgba(222,26,18,.12)',  timer: '#d6d6d6', num: '#d6d6d6' }
+    };
+
+    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function d(name, qty, st, kt) { return { k: 'dish', name: name, qty: qty, st: st, kt: kt }; }
+    function r(name, qty, order, time, st, extra) { return { name: name, qty: qty, order: order, time: time, st: st, extra: extra }; }
+
+    /* ── Экраны (постановка PB-8108 + сценарии PB-8101-…-2026-10-19) ── */
+    var SCREENS = {
+
+      /* 0. БАЗА: экран повара 1:1 по Figma (узел 10497:3361) — без задачи, чистый новый дизайн */
+      'base': {
+        nw: 1280, nh: 800, pill: 'Экран повара', stat: 'Заказов: 3', total: '34',
+        anno: 'Экран повара в обновлённой версии — 1:1 по Figma (узел 10497:3361): карточки 360 с полосой статуса 8 px, строки 52 с кнопкой 52×52, количество плашкой, группы с модификаторами, «Гость 3» с красным кантом, перенос чека пунктиром. Это база, поверх которой дальше применяется задача PB-8108. Экран рабочий (PB-7765): кнопка строки — bump блюда (Ожидает → Пора готовить → Готовится → Приготовлено → сброс), шапка карточки — bump заказа (Ожидает → Пора готовить → Готовится → Приготовлен → уходит), курс — bump курса, «Отменить» откатывает до 5 шагов.',
+        orders: [
+          { num: '1028', timer: '12:35', st: 'waiting', ch: '#9753 Яндекс доставка', rest: 'Константинопольский', contentTint: true,
+            meta: [['restaurant', 'Обычный заказ'], ['table_restaurant', 'Б12'], ['group', '3']],
+            comment: ['check_box_outline_blank', 'Принести сразу морс'],
+            items: [
+              { k: 'dish', name: 'Морс ягодный 1 л.', qty: 1, st: 'waiting' },
+              { k: 'dish', name: 'Паста карбонара', qty: 1, st: 'waiting' },
+              { k: 'mgroup', name: 'Пицца от шефа маленькая', neg: true, btn: 'delete', tall: true, rows: [
+                { qty: 2, text: 'Двойной сыр', neg: true }, { text: 'Толстое', neg: true }, { text: 'Бекон', neg: true },
+                { text: 'Курица', neg: true, tall: true }, { qty: 2, text: 'Пепперони', neg: true }, { text: 'Салями', neg: true }
+              ] }
+            ] },
+          { num: '1028', timer: '04:27', st: 'urgent', ch: '#9753 Яндекс доставка',
+            meta: [['restaurant', 'Доставка'], ['schedule', '19:30']],
+            comment: ['check_box_outline_blank', 'Обязательно нужно успеть доставить до 19:30'],
+            items: [
+              { k: 'dish', guest: 'Гость 1', name: 'Морс ягодный 1 л.', qty: 1, st: 'urgent' },
+              { k: 'nest', guest: 'Гость 2', qty: 2, name: 'Салат с морепродуктами', rows: [
+                { name: 'Тунец' }, { name: 'Креветки' }, { qty: 2, name: 'Кальмары' }, { qty: 2, name: 'Моцарелла' }
+              ] },
+              { k: 'dish', guest: 'Гость 1', name: 'Паста карбонара', qty: 1, st: 'urgent' }
+            ] },
+          { num: '1028', timer: '- 00:27', timerNeg: true, st: 'cooking', ch: '#9753', payOff: true,
+            meta: [['box', 'Самовывоз'], ['acute', '17:00']],
+            items: [
+              { k: 'combo', guest: 'Гость 1', star: true, st: 'waiting', title: 'Комбо с пастой', comment: ['check_box_outline_blank', 'Капучино на растительном молоке'], rows: [
+                { text: 'Паста карбонара' }, { text: 'Капучино' }
+              ] },
+              { k: 'dish', guest: 'Гость 2', name: 'Морс ягодный 1 л.', qty: 3, st: 'urgent' },
+              { k: 'dish', name: 'Морс ягодный 1 л.', qty: 1, st: 'urgent' },
+              { k: 'dish', guest: 'Гость 3', star: true, name: 'Паста карбонара', qty: 1, st: 'cooking', sel: true },
+              { k: 'dish', name: 'Креветки', qty: 1, st: 'waiting' },
+              { k: 'dish', name: 'Салат с морепродуктами', qty: 1, st: 'waiting' },
+              { k: 'dish', guest: 'Гость 2', name: 'Паста карбонара', qty: 1, st: 'waiting' },
+              { k: 'transfer', label: 'Часть заказа X из Y' }
+            ] },
+          { contTop: true, contentTint: true,
+            items: [
+              { k: 'mgroup', name: 'Пицца от шефа маленькая', btn: 'check', rows: [
+                { qty: 2, text: 'Двойной сыр' }, { text: 'Толстое' }, { text: 'Бекон' },
+                { text: 'Курица', neg: true, tall: true }, { qty: 2, text: 'Пепперони' }, { text: 'Салями' }
+              ] },
+              { k: 'dish', name: 'Морс ягодный 1 л.', qty: 1, st: 'urgent' },
+              { k: 'transfer', label: 'Часть заказа X из Y' }
+            ] },
+          { num: '1028', timer: '04:27', st: 'ready', ch: '#9753 Яндекс доставка', headPad: 2,
+            meta: [['restaurant', 'Доставка'], ['schedule', 'Завтра к 07:00']],
+            comment: ['check_box_outline_blank', 'Оставить у дверей'],
+            items: [
+              { k: 'combo', guest: 'Гость 1', star: true, st: 'ready', title: 'Комбо с пастой', comment: ['check_box_outline_blank', 'Капучино на растительном молоке'], rows: [
+                { text: 'Паста карбонара' }, { text: 'Капучино' }
+              ] },
+              { k: 'dish', name: 'Морс ягодный 1 л.', qty: 1, st: 'ready' },
+              { k: 'dish', guest: 'Гость 2', name: 'Морс ягодный 1 л.', qty: 2, qtyBg: '#f5f5f5', st: 'urgent' },
+              { k: 'dish', guest: 'Гость 2', name: 'Паста карбонара', qty: 2, qtyBg: '#f5f5f5', st: 'urgent' },
+              { k: 'dish', guest: 'Гость 1', name: 'Морс ягодный 1 л.', qty: 1, st: 'ready' },
+              { k: 'dish', guest: 'Гость 1', name: 'Паста карбонара', qty: 1, st: 'ready' }
+            ] },
+          { num: '1028', brand: 'Яндекс лавка', timer: '12:35', st: 'cancelled', cardBg: '#121212', ch: '#975328  Яндекс доставка', rest: 'Константинопольский',
+            meta: [['deployed_code_update', 'Самовывоз'], ['table_restaurant', 'Б12'], ['group', '3']],
+            comment: ['check_box_outline_blank', 'Побыстрее'],
+            items: [
+              { k: 'dish', name: 'Морс ягодный 1 л.', qty: 1, st: 'cancelled' },
+              { k: 'dish', name: 'Паста карбонара', qty: 1, st: 'cancelled' },
+              { k: 'mgroup', name: 'Пицца от шефа маленькая', neg: true, flush: true, btn: 'delete', rows: [
+                { text: 'Двойной сыр', neg: true }, { text: 'Толстое', neg: true }, { text: 'Бекон', neg: true },
+                { text: 'Курица', neg: true, tall: true }, { text: 'Пепперони', neg: true }, { text: 'Салями', neg: true }
+              ] }
+            ] }
+        ]
+      },
+
+      /* 1. По заказам: группа из нескольких компонентов + то же блюдо отдельно (сценарий 2) */
+      'g-multi': {
+        nw: 1280, nh: 800, pill: 'Горячий цех', stat: 'Заказов: 1',
+        anno: 'Сценарий 2: заказ №214 · горячий цех, момент проверки на сборке. Группа «Ланч» — заголовок набора в «коробке» без кнопки, количества и статуса (гость 12/16 + звезда + название 22/28), под ним — «видно 2 из 3 позиций набора» (салат готовит холодный цех, на этом экране его нет). Компоненты — вложенные строки (отступ 24) со своими статусами и кнопками: картофель готов (зелёная галочка), бургер из «Ланча» ещё готовится (синяя). Второй бургер куплен отдельно и уже готов — но готовность отдельного бургера не заменяет бургер из набора.',
+        orders: [
+          { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '3']],
+            items: [
+              { k: 'cset', guest: 'Гость 1', star: true, title: 'Ланч', total: 3, rows: [
+                d('Бургер', 1, 'cooking'), d('Картофель', 1, 'ready') ] },
+              { k: 'dish', name: 'Бургер', qty: 1, st: 'ready' }
+            ] }
+        ]
+      },
+
+      /* 2. По заказам: один видимый компонент (сценарий 2.1, холодный цех) */
+      'g-single': {
+        nw: 1280, nh: 800, pill: 'Холодный цех', stat: 'Заказов: 2',
+        anno: 'Тот же заказ №214 · холодный цех. Группа «Ланч» выглядит так же, внутри — только салат. «Видно 1 из 3 позиций набора» — признак частичной видимости: состав набора не считается полным и готовым.',
+        orders: [
+          { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '3']],
+            items: [
+              { k: 'cset', guest: 'Гость 1', title: 'Ланч', inst: null, total: 3, rows: [ d('Салат', 1, 'ready') ] }
+            ] },
+          { num: '216', timer: '01:12', st: 'waiting', ch: '#216', rest: 'Константинопольский',
+            meta: [['delivery_dining', 'Доставка'], ['schedule', '18:20']],
+            items: [ d('Цезарь', 1, 'waiting') ] }
+        ]
+      },
+
+      /* 2а. По заказам: общий экран обоих цехов — рамка справа по цвету цеха (PB-6800) */
+      'g-kitchens': {
+        nw: 1280, nh: 800, pill: 'Оба цеха', stat: 'Заказов: 2',
+        anno: 'Сценарий 2 · общий экран: данные горячего и холодного цеха на одной ленте. У каждого блюда справа рамка цвета цеха (PB-6800 «Визуальное выделение цеха»): холодный цех — синяя, горячий — красная. «Ланч» виден целиком: бургер и картофель — горячий цех, салат — холодный; отдельный бургер готов, но не заменяет бургер из набора.',
+        orders: [
+          { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '3']],
+            items: [
+              { k: 'cset', guest: 'Гость 1', star: true, title: 'Ланч', total: 3, rows: [
+                d('Бургер', 1, 'cooking', 'hot'), d('Картофель', 1, 'ready', 'hot'), d('Салат', 1, 'ready', 'cold') ] },
+              { k: 'dish', name: 'Бургер', qty: 1, st: 'ready', kt: 'hot' }
+            ] },
+          { num: '216', timer: '01:12', st: 'waiting', ch: '#216', rest: 'Константинопольский',
+            meta: [['delivery_dining', 'Доставка'], ['schedule', '18:20']],
+            items: [ { k: 'dish', name: 'Цезарь', qty: 1, st: 'waiting', kt: 'cold' } ] }
+        ]
+      },
+
+      /* 2б. Экран сборщика — «без статусов» (Figma 8941:7418): шапка без цветной полосы,
+         статус обведённой пилюлей, рамки справа по цвету цеха, кнопки строк нейтральные */
+      'g-assembly': {
+        nw: 1280, nh: 800, pill: 'Сборка', stat: '', asm: true,
+        anno: 'Экран сборщика — работает на доставку или самовывоз (здесь заказ на доставку), «без статусов» по Figma (8941:7418): шапка по отступам и геометрии такая же, как у всех карточек, но нейтральная — полоса 8 px #616161, без заливки статуса и без кнопки статуса (в новом дизайне кнопки нет); у каждого блюда справа рамка цвета цеха (PB-6800); у блюд НЕТ кнопок — только иконки статусов (стрелка / галочка / крестик). Сценарий 2: «Ланч» виден целиком — картофель и салат готовы, их собирает сборщик; бургер ещё готовится; отдельный бургер готов, но не заменяет бургер из набора.',
+        orders: [
+          { num: '214', timer: '04:27', st: 'cooking', ch: '#214 Доставка', rest: 'Константинопольский',
+            meta: [['delivery_dining', 'Доставка'], ['schedule', '18:20']],
+            items: [
+              { k: 'cset', guest: 'Гость 1', star: true, title: 'Ланч', total: 3, rows: [
+                d('Бургер', 1, 'cooking', 'hot'), d('Картофель', 1, 'ready', 'hot'), d('Салат', 1, 'ready', 'cold') ] },
+              { k: 'dish', name: 'Бургер', qty: 1, st: 'ready', kt: 'hot' }
+            ] }
+        ]
+      },
+
+      /* 3. По заказам: набор по курсам (сценарий 3.3) */
+      'g-courses': {
+        nw: 1280, nh: 800, pill: 'Горячий цех', stat: 'Заказов: 1',
+        anno: '«Бизнес-ланч» обслуживается в двух курсах: суп выдают первым, бургер и картофель готовят и подают позже. Группа набора есть в каждом курсе; через границу курса группы не соединяются, порядок выдачи не меняется.',
+        orders: [
+          { num: '217', timer: '08:41', st: 'cooking', ch: '#217', rest: 'Константинопольский',
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 9'], ['person', '2']],
+            items: [
+              { k: 'course', label: 'Курс 1' },
+              { k: 'combo', guest: 'Гость 1', title: 'Бизнес-ланч', inst: null, total: 3, rows: [ d('Суп-пюре грибной', 1, 'ready') ] },
+              { k: 'course', label: 'Курс 2' },
+              { k: 'combo', guest: 'Гость 1', title: 'Бизнес-ланч', inst: null, total: 3, rows: [ d('Бургер', 1, 'cooking'), d('Картофель', 1, 'ready') ] }
+            ] }
+        ]
+      },
+
+      /* 3а. По заказам: обычное блюдо между компонентами набора (сценарий 3.2) */
+      'g-between': {
+        nw: 1280, nh: 800, pill: 'Горячий цех', stat: 'Заказов: 1',
+        anno: 'Сценарий 3.2: в одном курсе заказаны бургер и картофель из «Ланча», а между ними в исходном перечне — самостоятельно заказанный салат. Заказ идёт по обычному порядку, а компоненты набора собраны в одну целостную группу «Ланч» — салат в неё не попадает и группу не разрывает; приоритеты приготовления и принадлежность блюд к курсу не меняются.',
+        orders: [
+          { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '3']],
+            items: [
+              { k: 'dish', name: 'Салат', qty: 1, st: 'ready' },
+              { k: 'cset', guest: 'Гость 1', star: true, title: 'Ланч', total: 3, rows: [
+                d('Бургер', 1, 'cooking'), d('Картофель', 1, 'ready') ] },
+              { k: 'dish', name: 'Бургер', qty: 1, st: 'ready' }
+            ] }
+        ]
+      },
+
+      /* 4. По заказам: два экземпляра одного набора, разный состав (сценарий 3.1) */
+      'g-instances': {
+        nw: 1280, nh: 880, pill: 'Сборка', stat: 'Заказов: 3',
+        anno: 'Заказ №215: один гость заказал два «Ланча» из одного комбо-меню с разным выбранным составом. Три карточки рядом: 1) без признака экземпляра; 2) цветная точка перед названием; 3) залитый цветом прямоугольник перед названием. Признак одинаков во всех курсах; цифры не используются — читаются как количество порций.',
+        orders: [
+          { num: '215', timer: '12:05', st: 'cooking', ch: '#215', rest: 'Константинопольский',
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 6'], ['person', '1']],
+            items: [
+              { k: 'course', label: 'Курс 1' },
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 1, total: 3, rows: [ d('Борщ', 1, 'cooking') ] },
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 2, total: 3, rows: [ d('Гаспачо', 1, 'waiting') ] },
+              { k: 'course', label: 'Курс 2' },
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 1, total: 3, rows: [ d('Котлета', 1, 'ready'), d('Чай', 1, 'waiting') ] },
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 2, total: 3, rows: [ d('Рыба', 1, 'cooking'), d('Компот', 1, 'waiting') ] }
+            ] },
+          { num: '215', timer: '12:05', st: 'cooking', ch: '#215', rest: 'Константинопольский', colorInst: true,
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 6'], ['person', '1']],
+            items: [
+              { k: 'course', label: 'Курс 1' },
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 1, total: 3, rows: [ d('Борщ', 1, 'cooking') ] },
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 2, total: 3, rows: [ d('Гаспачо', 1, 'waiting') ] },
+              { k: 'course', label: 'Курс 2' },
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 1, total: 3, rows: [ d('Котлета', 1, 'ready'), d('Чай', 1, 'waiting') ] },
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 2, total: 3, rows: [ d('Рыба', 1, 'cooking'), d('Компот', 1, 'waiting') ] }
+            ] },
+          { num: '215', timer: '12:05', st: 'cooking', ch: '#215', rest: 'Константинопольский', tintInst: true,
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 6'], ['person', '1']],
+            items: [
+              { k: 'course', label: 'Курс 1' },
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 1, total: 3, rows: [ d('Борщ', 1, 'cooking') ] },
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 2, total: 3, rows: [ d('Гаспачо', 1, 'waiting') ] },
+              { k: 'course', label: 'Курс 2' },
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 1, total: 3, rows: [ d('Котлета', 1, 'ready'), d('Чай', 1, 'waiting') ] },
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 2, total: 3, rows: [ d('Рыба', 1, 'cooking'), d('Компот', 1, 'waiting') ] }
+            ] }
+        ]
+      },
+
+      /* 5. По заказам: экземпляры с одинаковым составом (сценарий 3.1) */
+      'g-instances-same': {
+        nw: 1280, nh: 880, pill: 'Сборка', stat: 'Заказов: 1',
+        anno: 'Один гость заказал два «Ланча» с одинаковым составом: одинаковые названия и одинаковые позиции. Принадлежность видна по залитому прямоугольнику перед названием — маджентовый у первого набора, циановый у второго; количества и статусы порций у комплектов свои и не смешиваются.',
+        orders: [
+          { num: '218', timer: '05:33', st: 'cooking', ch: '#218', rest: 'Константинопольский', tintInst: true,
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 2'], ['person', '1']],
+            items: [
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 1, total: 3, rows: [
+                d('Бургер', 1, 'cooking'), d('Картофель', 1, 'waiting'), d('Салат', 1, 'ready') ] },
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 2, total: 3, rows: [
+                d('Бургер', 1, 'waiting'), d('Картофель', 1, 'cooking'), d('Салат', 1, 'waiting') ] }
+            ] }
+        ]
+      },
+
+      /* 6. По заказам: отдельно готовящийся модификатор (сценарий 3.6) */
+      'g-modifier': {
+        nw: 1280, nh: 800, pill: 'Горячий цех', stat: 'Заказов: 1',
+        anno: '«Соус к бургеру» готовится отдельной задачей. Бургера на этом экране нет — его готовит другой цех; у соуса обе связи: «к Бургеру» и «Ланч». Компонентом набора соус не становится. Пиктограммы у такой строки нет — в макете (DSGN-501) модификаторы идут текстом.',
+        orders: [
+          { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '1']],
+            items: [
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 1, total: 3, rows: [ d('Картофель', 1, 'ready') ] },
+              { k: 'mod', name: 'Соус к бургеру', parent: 'Бургеру', combo: 'Ланч', inst: 1, st: 'cooking' }
+            ] }
+        ]
+      },
+
+      /* 7. По заказам: отменённый компонент (постановка: «отменённое блюдо не показывается…») */
+      'g-cancelled': {
+        nw: 1280, nh: 800, pill: 'Горячий цех', stat: 'Заказов: 1',
+        anno: 'Бургер из набора отменён: зачёркнут и не показывается как необходимая часть комплекта; картофель готов; отдельный бургер вне группы готов — как на других экранах.',
+        orders: [
+          { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '1']],
+            items: [
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: null, total: 3, rows: [ d('Бургер', 1, 'cancelled'), d('Картофель', 1, 'ready') ] },
+              { k: 'dish', name: 'Бургер', qty: 1, st: 'ready', note: 'куплен отдельно' }
+            ] }
+        ]
+      },
+
+      /* 8. По заказам: длинное название набора, узкий экран (сценарий 3.7) */
+      'g-long': {
+        nw: 720, nh: 800, pill: 'Горячий цех', stat: 'Заказов: 2',
+        anno: 'Узкий экран: длинные названия наборов сокращаются, полное название — по наведению на заголовок (тултип), состав набора при этом не раскрывается. Производственные сведения о блюде остаются первыми.',
+        orders: [
+          { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '1']],
+            items: [
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч выходного дня с напитком и десертом на выбор', inst: null, total: 4, rows: [
+                d('Бургер', 1, 'cooking'), d('Картофель', 1, 'waiting') ] }
+            ] },
+          { num: '216', timer: '01:12', st: 'waiting', ch: '#216', rest: 'Константинопольский',
+            meta: [['delivery_dining', 'Доставка'], ['schedule', '18:20']],
+            items: [
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч выходного дня с напитком на выбор', inst: null, total: 3, rows: [
+                d('Салат', 1, 'waiting') ] }
+            ] }
+        ]
+      },
+
+      /* 9. Режим «по блюдам» — 1:1 по макету Figma «Режим Блюда» (10602:36475) */
+      'd-list': {
+        nw: 1280, nh: 800, pill: 'Режим «по блюдам»', stat: 'Позиций: 17', total: '34',
+        anno: 'Режим «по блюдам» — 1:1 по макету «Режим Блюда» (10602:36475), состав строк взят из макета: строка 1240×60 = плашка заказа 360 (заливка 12 % цвета статуса, рамка 1px #616161, r8; номер 24/32, таймер 24/32 — жёлтый у «пора готовить», красный при просрочке, канал 14/20) + 8 + блюдо 820 с кнопкой 52 на всю высоту (фон #3B3B43, иконка 28). Блюдо: гость 12/16 #D6D6D6, название 22/28 Medium, количество плашкой 21×28 (#E0E0E0, без рамки), модификаторы/компоненты — ТЕКСТОМ 18/24 (у отменённой пиццы — красные, количество плашкой с красной рамкой), звезда набора справа на строке гостя, комментарий 16/24 пунктиром, «Гость 3» — красный кант 4 px слева. Кнопка — bump блюда, нажатие на плашку — bump всего заказа.',
+        list: true,
+        rows: [
+          { ord: '1028', ch: '#9753 Яндекс доставка', timer: '12:35', st: 'waiting', dish: { name: 'Морс ягодный 1 л.', st: 'waiting' } },
+          { ord: '1028', ch: '#9753 Яндекс доставка', timer: '12:35', st: 'waiting', dish: { name: 'Паста карбонара', st: 'waiting' } },
+          { ord: '1028', ch: '#9753 Яндекс доставка', timer: '12:35', st: 'waiting', dish: { name: 'Пицца от шефа маленькая', st: 'cancelled', chips: [
+            { q: 2, t: 'Двойной сыр' }, { t: 'Толстое' }, { t: 'Бекон' }, { t: 'Курица' }, { q: 2, t: 'Пепперони' }, { t: 'Салями' }] } },
+          { ord: '1028', ch: '#9753 Яндекс доставка', timer: '04:27', st: 'urgent', dish: { guest: 'Гость 1', name: 'Морс ягодный 1 л.', st: 'urgent', star: true } },
+          { ord: '1028', ch: '#9753 Яндекс доставка', timer: '04:27', st: 'urgent', dish: { guest: 'Гость 2', qty: 2, name: 'Салат с морепродуктами', st: 'urgent' } },
+          { ord: '1028', ch: '#9753 Яндекс доставка', timer: '04:27', st: 'urgent', dish: { name: 'Тунец', st: 'urgent', indent: true } },
+          { ord: '1028', ch: '#9753 Яндекс доставка', timer: '04:27', st: 'urgent', dish: { name: 'Креветки', st: 'urgent', indent: true } },
+          { ord: '1028', ch: '#9753 Яндекс доставка', timer: '04:27', st: 'urgent', dish: { qty: 2, name: 'Кальмары', st: 'urgent', indent: true } },
+          { ord: '1028', ch: '#9753 Яндекс доставка', timer: '04:27', st: 'urgent', dish: { qty: 2, name: 'Моцарелла', st: 'urgent', indent: true } },
+          { ord: '1028', ch: '#9753 Яндекс доставка', timer: '04:27', st: 'urgent', dish: { guest: 'Гость 1', name: 'Паста карбонара', st: 'urgent' } },
+          { ord: '1028', ch: '#9753', timer: '- 00:27', timerNeg: true, st: 'cooking', dish: { guest: 'Гость 1', name: 'Комбо с пастой', st: 'cooking', star: true,
+            chips: [{ t: 'Паста карбонара' }, { t: 'Капучино' }], comment: 'Капучино на растительном молоке' } },
+          { ord: '1028', ch: '#9753', timer: '- 00:27', timerNeg: true, st: 'cooking', dish: { guest: 'Гость 2', qty: 3, qtyBg: '#f5f5f5', name: 'Морс ягодный 1 л.', st: 'cooking' } },
+          { ord: '1028', ch: '#9753', timer: '- 00:27', timerNeg: true, st: 'cooking', dish: { name: 'Морс ягодный 1 л.', st: 'cooking' } },
+          { ord: '1028', ch: '#9753', timer: '- 00:27', timerNeg: true, st: 'cooking', dish: { guest: 'Гость 3', name: 'Паста карбонара', st: 'cooking', star: true, sel: true } },
+          { ord: '1028', ch: '#9753', timer: '- 00:27', timerNeg: true, st: 'cooking', dish: { name: 'Креветки', st: 'cooking' } },
+          { ord: '1028', ch: '#9753', timer: '- 00:27', timerNeg: true, st: 'cooking', dish: { name: 'Салат с морепродуктами', st: 'cooking' } },
+          { ord: '1028', ch: '#9753', timer: '- 00:27', timerNeg: true, st: 'cooking', dish: { guest: 'Гость 2', name: 'Паста карбонара', st: 'cooking' } }
+        ]
+      },
+
+      /* 10. Пиктограммы */
+      'icons': {
+        nw: 1280, nh: 800, pill: 'Решение по пиктограммам', stat: '', posters: true,
+        anno: 'Пиктограмма, которая сейчас визуально ассоциируется с набором, занята другой сущностью — названием блюда с отдельно готовящимся модификатором. За набором остаётся его знак из макета; для модификатора предлагается новая пиктограмма — сущности различаются однозначно.',
+        cards: [
+          { row: [
+            { star: true, title: 'Комбо-набор', sub: 'Знак набора — зелёная звезда в круге: она уже стоит у набора в обновлённом экране. Это признак «входит в набор»: сама по себе звезда разные комплекты не различает — их различают название набора и маркер экземпляра.' },
+            { ico: 'post_add', warn: true, title: 'Модификатор, готовящийся отдельно', sub: 'Новая пиктограмма для блюда с отдельно готовящимся модификатором. Прежний смысл узнаётся по новой иконке, с пиктограммой набора не конкурирует.' }
+          ] }
+        ],
+        note: 'Правило: звезда в круге — у заголовка набора и в строке принадлежности; post_add — только у отдельной задачи модификатора. Размер: 16 у строки, 40 на плакате (post_add — 20 и 40).'
+      },
+
+      /* 11. Обоснование */
+      'rationale': {
+        nw: 1280, nh: 800, pill: 'Обоснование', stat: '', posters: true,
+        anno: 'Почему решение не путается со строкой блюда и не даёт ложного сигнала о готовности набора.',
+        cards: [
+          { title: 'Почему обозначение набора нельзя принять за исполняемую позицию', items: [
+            'Заголовок набора — «коробка» группы без кнопки и без количества: у строки блюда есть плашка количества и кнопка 52×52, у заголовка — только гость 12/16 и название 22/28.',
+            'Статус набора не показан: цвет несут только кнопки строк-блюд; заголовок нейтральный.',
+            'Группа визуально замкнута: самостоятельно заказанное блюдо между компонентами не попадает внутрь и не разрывает группу.'
+          ] },
+          { title: 'Почему не возникает ложного сигнала о готовности набора', items: [
+            'Общего статуса и кнопки «Завершить набор» нет: готовность видна только по статусам отдельных блюд.',
+            '«Видно N из M позиций набора» — про видимость на этом экране, а не про готовность; группа из одного компонента — та же группа, а не полный состав.',
+            'Отменённый компонент зачёркнут и не показывается как необходимая часть комплекта.',
+            'Цвет — не единственный носитель связи: название и маркер экземпляра текстовые; цвет занят статусами блюд.',
+            'В «по блюдам» принадлежность — вторичная строка; название, количество, статус и время остаются первыми.'
+          ] }
+        ]
+      }
+    };
+
+    /* ── Рендер блоков ── */
+    function qtyBox(qty, cls, bg) {
+      if (!(qty > 1)) return '';
+      return '<span class="' + (cls || 'kds-qty') + '"' + (bg ? ' style="background:' + bg + '"' : '') + '>' + qty + '</span>';
+    }
+    function starIcon() { return '<span class="kds-star">' + svgIco('stars', 16) + '</span>'; }
+    /* Строка блюда: статус — цвет/иконка кнопки (как в макете) */
+    function dishRow(dd) {
+      var st = dd.st || 'waiting';
+      var neg = st === 'cancelled';
+      var ico = neg ? 'close' : (st === 'ready' ? 'check' : 'arrow_forward');
+      var guest = dd.guest
+        ? '<div class="kds-guest">' + esc(dd.guest) + (dd.star ? '<span style="margin-left:auto">' + starIcon() + '</span>' : '') + '</div>'
+        : '';
+      /* Длинное название обрезаем и раскрываем полное по нажатию на всю строку (тач, не hover) */
+      var long = dd.name.length > 26;
+      var full = long ? ' data-full="' + esc(dd.name) + '"' : '';
+      var rid = dd._rid ? ' data-rid="' + dd._rid + '"' : '';
+      var ktc = dd.kt ? ' kds-row--kt-' + dd.kt : '';
+      /* Экран сборщика: у блюд нет кнопок — только иконка статуса (не кнопка) */
+      var ctl = RT.asm
+        ? '<span class="kds-row__ico kds-btn--' + st + '"><span class="material-icons">' + ico + '</span></span>'
+        : '<button class="kds-btn kds-btn--' + st + '" type="button"><span class="material-icons">' + ico + '</span></button>';
+      return '<div class="kds-row kds-row--' + st + (neg ? ' kds-row--neg' : '') + (dd.sel ? ' kds-row--sel' : '') + ktc + '"' + rid + '>' +
+        '<div class="kds-row__main"' + full + '>' + guest +
+          '<div class="kds-row__line">' + qtyBox(dd.qty, null, dd.qtyBg) + '<span class="kds-row__name' + (long ? ' kds-ellip' : '') + '">' + esc(dd.name) + '</span></div>' +
+        '</div>' +
+        ctl +
+      '</div>';
+    }
+    /* Блок набора: шапка (гость + звезда, название), компоненты, комментарий, одна кнопка на всю высоту */
+    function setBlock(o) {
+      var g = o.g;
+      var st = g.st || 'waiting';
+      var gline = (g.guest || g.star)
+        ? '<div class="kds-kit__gline">' + (g.guest ? '<span class="kds-guest">' + esc(g.guest) + '</span>' : '') +
+          (g.star ? '<span class="kds-kit__star">' + starIcon() + '</span>' : '') + '</div>'
+        : '';
+      var cmText = Array.isArray(g.comment) ? g.comment[1] : g.comment;   // данные бывают в старом формате [иконка, текст]
+      var comment = cmText
+        ? '<div class="kds-kit__comment"><div class="kds-kit__comment-in"><span class="material-icons">mode_comment</span><span class="kds-comment__text">' + esc(cmText) + '</span></div></div>'
+        : '';
+      var seen = (g.rows || []).length;
+      var seenCap = (g.total && seen < g.total)
+        ? '<div class="kds-kit__seen">видно ' + seen + ' из ' + g.total + ' позиций набора</div>'
+        : '';
+      /* Экземпляр набора: в карточке с подложкой — тон шапки группы;
+         в карточке с точкой — цветная точка; в карточке с прямоугольником — залитая плашка */
+      var thinst = (g._many && g.inst && g._th) ? ' kds-kit--tint' + g.inst : '';
+      var dot = (g._many && g.inst && g._col) ? '<span class="kds-kit__dot kds-kit__dot--' + g.inst + '"></span>' : '';
+      var chip = (g._many && g.inst && g._tint) ? '<span class="kds-kit__chip kds-kit__chip--' + g.inst + '"></span>' : '';
+      return '<div class="kds-kit kds-kit--' + st + thinst + (g.neg ? ' kds-kit--neg' : '') + (o.tall ? ' kds-kit--tall' : '') + (o.mods ? ' kds-kit--mods' : '') + '"' + (g._rid ? ' data-rid="' + g._rid + '"' : '') + '>' +
+        '<div class="kds-kit__body">' +
+          '<div class="kds-kit__head">' + gline +
+            '<div class="kds-kit__name">' + dot + chip + esc(o.name) + '</div>' + seenCap + '</div>' +
+          (o.kids || '') + comment +
+        '</div>' +
+        '<button class="kds-kit__btn kds-kit__btn--' + st + '" type="button"><span class="material-icons">' + icoFor(st, 'mgroup') + '</span></button>' +
+      '</div>';
+    }
+    /* Набор в карточке (Figma 10585:7793): компоненты — текстовые строки без своих кнопок */
+    function comboGroup(g) {
+      var kids = (g.rows || []).map(function (rr) {
+        return '<div class="kds-kit__comp' + (rr.neg ? ' kds-kit__comp--neg' : '') + '"' + (rr._rid ? ' data-rid="' + rr._rid + '"' : '') + '>' +
+          (rr.qty > 1 ? '<span class="kds-kit__qty' + (rr.neg ? ' kds-kit__qty--neg' : '') + '">' + rr.qty + '</span>' : '') +
+          '<span>' + esc(rr.name || rr.text) + '</span></div>';
+      }).join('');
+      return setBlock({ g: g, name: g.title || g.name, kids: kids });
+    }
+    /* Группа набора по сценариям: заголовок без кнопки/количества/статуса,
+       компоненты — вложенные строки (отступ 24) со своими кнопками и статусами */
+    function csetGroup(g) {
+      var gline = (g.guest || g.star)
+        ? '<div class="kds-cset__gline">' + (g.guest ? '<span class="kds-guest">' + esc(g.guest) + '</span>' : '') +
+          (g.star ? '<span class="kds-cset__star">' + starIcon() + '</span>' : '') + '</div>'
+        : '';
+      var seen = (g.rows || []).length;
+      var seenCap = (g.total && seen < g.total)
+        ? '<div class="kds-cset__seen">видно ' + seen + ' из ' + g.total + ' позиций набора</div>'
+        : '';
+      var kids = (g.rows || []).map(function (rr) {
+        return dishRow({ _rid: rr._rid, name: rr.name || rr.text, qty: rr.qty, st: rr.st || 'waiting', kt: rr.kt });
+      }).join('');
+      return '<div class="kds-cset">' +
+        '<div class="kds-cset__head">' + gline + '<div class="kds-cset__name">' + esc(g.title || g.name) + '</div>' + seenCap + '</div>' +
+        '<div class="kds-cset__rows">' + kids + '</div></div>';
+    }
+    /* Группа макета: та же «коробка», но строки-модификаторы с количеством */
+    function mgroup(g) {
+      var kids = (g.rows || []).map(function (rr) {
+        var negc = (rr.neg || g.neg) ? ' kds-kit__comp--neg' : '';
+        var plain = (!g.flush && !(rr.qty > 1)) ? ' kds-kit__comp--plain' : '';
+        var tight = g.flush ? ' kds-kit__comp--tight' : '';
+        var tallc = rr.tall ? ' kds-kit__comp--tall' : '';
+        var qty = rr.qty > 1
+          ? '<span class="kds-kit__qty' + (rr.neg ? ' kds-kit__qty--neg' : '') + '">' + rr.qty + '</span>'
+          : '';
+        return '<div class="kds-kit__comp' + plain + negc + tight + tallc + '">' + qty + '<span>' + esc(rr.text) + '</span></div>';
+      }).join('');
+      if (!g.st) g.st = g.neg ? 'cancelled' : (g.btn === 'check' ? 'ready' : 'waiting');
+      return setBlock({ g: g, name: g.name, kids: kids, tall: g.tall, mods: true });
+    }
+    /* Группа макета: блюдо с вложенными блюдами (отступ 24), у каждой строки своя кнопка */
+    function nestGroup(g) {
+      var head = dishRow({ _rid: g._rid, guest: g.guest, qty: g.qty, name: g.name, st: g.st || 'waiting' });
+      var subs = g.rows.map(function (rr) {
+        return dishRow({ _rid: rr._rid, name: rr.name, qty: rr.qty || 1, st: rr.st || 'waiting' });
+      }).join('');
+      return '<div class="kds-nest">' + head + '<div class="kds-nest__rows">' + subs + '</div></div>';
+    }
+    /* Отдельно готовящийся модификатор: строка блюда + обе связи (в макете DSGN-501
+       моды идут текстом, без отдельной пиктограммы) */
+    function modRow(m) {
+      return '<div class="kds-row"' + (m._rid ? ' data-rid="' + m._rid + '"' : '') + '>' +
+        '<div class="kds-row__main">' +
+          '<div class="kds-row__line"><span class="kds-row__name">' + esc(m.name) + '</span></div>' +
+          '<div class="kds-drow__sub"><span class="kds-ditem">к ' + esc(m.parent) + '</span><span class="kds-dsep">·</span>' +
+            '<span class="kds-dlink">' + starIcon() + esc(m.combo) + '</span></div>' +
+        '</div>' +
+        '<button class="kds-btn kds-btn--' + (m.st || 'waiting') + '" type="button"><span class="material-icons">' + icoFor(m.st || 'waiting', 'mod') + '</span></button>' +
+      '</div>';
+    }
+    function transfer(t) { return '<div class="kds-transfer">' + esc(t.label) + '</div>'; }
+    function renderItem(it, cid, idx) {
+      if (it.k === 'course') {
+        return '<button class="kds-course" type="button"' +
+          (cid ? ' data-cid="' + cid + '" data-course="' + idx + '"' : '') + '>' + esc(it.label) +
+          '<span class="material-icons">keyboard_arrow_right</span></button>';
+      }
+      if (it.k === 'combo') return comboGroup(it);
+      if (it.k === 'cset') return csetGroup(it);
+      if (it.k === 'mgroup') return mgroup(it);
+      if (it.k === 'nest') return nestGroup(it);
+      if (it.k === 'mod') return modRow(it);
+      if (it.k === 'transfer') return transfer(it);
+      return dishRow(it);
+    }
+    /* Иконки мета-строки — как в макете: тип заказа restaurant (вилка/нож),
+       стол — table_bar (высокий столик, как в макете), гости — group;
+       старые/альтернативные имена алиасим сюда же */
+    var META_ICO = { receipt_long: 'restaurant', chair: 'table_bar', table_restaurant: 'table_bar', person: 'group',
+      schedule: 'acute', storefront: 'box', delivery_dining: 'moped_package' };
+    /* Уточнение по тексту: «Доставка» в макете — moped_package, «Самовывоз» — box;
+       если в данных уже лежит векторное имя (напр. deployed_code_update), оно главнее */
+    var META_LABEL_ICO = { 'Доставка': 'moped_package', 'Самовывоз': 'box' };
+    function metaIco(key, label) {
+      if (SVG_PATHS[key]) return key;
+      return META_LABEL_ICO[label] || META_ICO[key] || key;
+    }
+    /* Иконка комментария — mode_comment 16, как в компоненте «Comment» (в данных исторически лежал чекбокс) */
+    var COMMENT_ICO = { check_box_outline_blank: 'mode_comment' };
+    /* Две иконки счётчиков в макете — векторные (Material Symbols), в подключаемом шрифте Material Icons таких
+       имён нет, поэтому переносим их векторные контуры прямо из Figma (viewBox 20×20, currentColor) */
+    var SVG_PATHS = {
+      clock_loader_40: 'M 10 20 C 8.62 20 7.32 19.74 6.1 19.21 C 4.88 18.69 3.83 17.97 2.93 17.08 C 2.03 16.18 1.31 15.12 0.79 13.9 C 0.26 12.68 0 11.38 0 10 C 0 8.62 0.26 7.32 0.79 6.1 C 1.31 4.88 2.03 3.83 2.93 2.93 C 3.83 2.03 4.88 1.31 6.1 0.79 C 7.32 0.26 8.62 0 10 0 C 11.38 0 12.68 0.26 13.9 0.79 C 15.12 1.31 16.18 2.03 17.08 2.93 C 17.97 3.83 18.69 4.88 19.21 6.1 C 19.74 7.32 20 8.62 20 10 C 20 11.38 19.74 12.68 19.21 13.9 C 18.69 15.12 17.97 16.18 17.08 17.08 C 16.18 17.97 15.12 18.69 13.9 19.21 C 12.68 19.74 11.38 20 10 20 Z M 10 18 C 11.07 18 12.09 17.8 13.08 17.4 C 14.06 17 14.93 16.43 15.68 15.68 L 10 10 L 10 2 C 7.77 2 5.88 2.78 4.33 4.33 C 2.78 5.88 2 7.77 2 10 C 2 12.23 2.78 14.13 4.33 15.68 C 5.88 17.23 7.77 18 10 18 Z',
+      schedule_time: 'M 13.3 14.7 L 14.7 13.3 L 11 9.6 L 11 5 L 9 5 L 9 10.4 L 13.3 14.7 Z M 10 20 C 8.62 20 7.32 19.74 6.1 19.21 C 4.88 18.69 3.83 17.97 2.93 17.08 C 2.03 16.18 1.31 15.12 0.79 13.9 C 0.26 12.68 0 11.38 0 10 C 0 8.62 0.26 7.32 0.79 6.1 C 1.31 4.88 2.03 3.83 2.93 2.93 C 3.83 2.03 4.88 1.31 6.1 0.79 C 7.32 0.26 8.62 0 10 0 C 11.38 0 12.68 0.26 13.9 0.79 C 15.12 1.31 16.18 2.03 17.08 2.93 C 17.97 3.83 18.69 4.88 19.21 6.1 C 19.74 7.32 20 8.62 20 10 C 20 11.38 19.74 12.68 19.21 13.9 C 18.69 15.12 17.97 16.18 17.08 17.08 C 16.18 17.97 15.12 18.69 13.9 19.21 C 12.68 19.74 11.38 20 10 20 Z M 10 18 C 12.22 18 14.1 17.22 15.66 15.66 C 17.22 14.1 18 12.22 18 10 C 18 7.78 17.22 5.9 15.66 4.34 C 14.1 2.78 12.22 2 10 2 C 7.78 2 5.9 2.78 4.34 4.34 C 2.78 5.9 2 7.78 2 10 C 2 12.22 2.78 14.1 4.34 15.66 C 5.9 17.22 7.78 18 10 18 Z'
+    };
+    /* Иконки, которых нет в подключаемом шрифте Material Icons (это имена Material Symbols) —
+       контуры перенесены 1:1 из Figma: viewBox слота, смещение глифа внутри слота и правило заливки.
+       Размеры глифов из компонентов: stars 13 в слоте 16, box 15, acute 18×13, moped_package 17×13,
+       deployed_code_update 17×18 — все в слоте 20. Заливка (цвет) — currentColor, как у лигатур. */
+    SVG_PATHS.stars = { vb: 16, t: [1.33, 1.33], evenodd: true, d: 'M 4 10.67 L 6.67 8.63 L 9.33 10.67 L 8.33 7.37 L 11 5.47 L 7.73 5.47 L 6.67 2 L 5.6 5.47 L 2.33 5.47 L 5 7.37 L 4 10.67 Z M 6.67 13.33 C 5.74 13.33 4.88 13.16 4.07 12.81 C 3.26 12.46 2.55 11.98 1.95 11.38 C 1.35 10.78 0.87 10.08 0.52 9.27 C 0.17 8.46 0 7.59 0 6.67 C 0 5.74 0.17 4.88 0.52 4.07 C 0.87 3.26 1.35 2.55 1.95 1.95 C 2.55 1.35 3.26 0.87 4.07 0.52 C 4.88 0.17 5.74 0 6.67 0 C 7.59 0 8.46 0.17 9.27 0.52 C 10.08 0.87 10.78 1.35 11.38 1.95 C 11.98 2.55 12.46 3.26 12.81 4.07 C 13.16 4.88 13.33 5.74 13.33 6.67 C 13.33 7.59 13.16 8.46 12.81 9.27 C 12.46 10.08 11.98 10.78 11.38 11.38 C 10.78 11.98 10.08 12.46 9.27 12.81 C 8.46 13.16 7.59 13.33 6.67 13.33 Z M 6.67 12 C 8.16 12 9.42 11.48 10.45 10.45 C 11.48 9.42 12 8.16 12 6.67 C 12 5.18 11.48 3.92 10.45 2.88 C 9.42 1.85 8.16 1.33 6.67 1.33 C 5.18 1.33 3.92 1.85 2.88 2.88 C 1.85 3.92 1.33 5.18 1.33 6.67 C 1.33 8.16 1.85 9.42 2.88 10.45 C 3.92 11.48 5.18 12 6.67 12 Z' };
+    SVG_PATHS.box = { vb: 20, t: [2.5, 2.5], evenodd: true, d: 'M 1.67 4.17 L 1.67 13.33 L 13.33 13.33 L 13.33 4.17 L 10.83 4.17 L 10.83 10.83 L 7.5 9.17 L 4.17 10.83 L 4.17 4.17 L 1.67 4.17 Z M 1.67 15 C 1.21 15 0.82 14.84 0.49 14.51 C 0.16 14.18 0 13.79 0 13.33 L 0 2.94 C 0 2.74 0.03 2.56 0.09 2.38 C 0.16 2.19 0.25 2.03 0.38 1.88 L 1.42 0.6 C 1.57 0.41 1.76 0.26 1.99 0.16 C 2.22 0.05 2.46 0 2.71 0 L 12.29 0 C 12.54 0 12.78 0.05 13.01 0.16 C 13.24 0.26 13.43 0.41 13.58 0.6 L 14.63 1.88 C 14.75 2.03 14.84 2.19 14.91 2.38 C 14.97 2.56 15 2.74 15 2.94 L 15 13.33 C 15 13.79 14.84 14.18 14.51 14.51 C 14.18 14.84 13.79 15 13.33 15 L 1.67 15 Z M 2 2.5 L 13 2.5 L 12.29 1.67 L 2.71 1.67 L 2 2.5 Z M 5.83 4.17 L 5.83 8.13 L 7.5 7.29 L 9.17 8.13 L 9.17 4.17 L 5.83 4.17 Z' };
+    SVG_PATHS.acute = { vb: 20, t: [0.83, 3.33], d: 'M 11.67 13.33 C 9.81 13.33 8.23 12.69 6.94 11.4 C 5.65 10.1 5 8.53 5 6.67 C 5 4.82 5.65 3.25 6.94 1.95 C 8.23 0.65 9.81 0 11.67 0 C 13.51 0 15.09 0.65 16.39 1.95 C 17.68 3.25 18.33 4.82 18.33 6.67 C 18.33 8.53 17.68 10.1 16.39 11.4 C 15.09 12.69 13.51 13.33 11.67 13.33 Z M 11.67 11.67 C 13.06 11.67 14.24 11.18 15.21 10.21 C 16.18 9.24 16.67 8.06 16.67 6.67 C 16.67 5.28 16.18 4.1 15.21 3.13 C 14.24 2.15 13.06 1.67 11.67 1.67 C 10.28 1.67 9.1 2.15 8.13 3.13 C 7.15 4.1 6.67 5.28 6.67 6.67 C 6.67 8.06 7.15 9.24 8.13 10.21 C 9.1 11.18 10.28 11.67 11.67 11.67 Z M 13.56 9.77 L 14.75 8.58 L 12.5 6.33 L 12.5 3.33 L 10.83 3.33 L 10.83 7.02 L 13.56 9.77 Z M 0.83 4.17 L 0.83 2.5 L 4.17 2.5 L 4.17 4.17 L 0.83 4.17 Z M 0 7.5 L 0 5.83 L 4.17 5.83 L 4.17 7.5 L 0 7.5 Z M 0.83 10.83 L 0.83 9.17 L 4.17 9.17 L 4.17 10.83 L 0.83 10.83 Z' };
+    SVG_PATHS.moped_package = { vb: 20, t: [1.67, 2.33], d: 'M 0.83 4.17 L 0.83 0 L 6.67 0 L 6.67 4.17 L 0.83 4.17 Z M 2.5 2.5 L 5 2.5 L 5 1.67 L 2.5 1.67 L 2.5 2.5 Z M 4.17 13.33 C 3.47 13.33 2.88 13.09 2.4 12.6 C 1.91 12.12 1.67 11.53 1.67 10.83 L 0 10.83 L 0 8.33 C 0 7.42 0.33 6.63 0.98 5.98 C 1.63 5.33 2.42 5 3.33 5 L 6.67 5 L 6.67 9.17 L 9.58 9.17 L 12.5 5.54 L 12.5 3.33 L 10 3.33 L 10 1.67 L 12.5 1.67 C 12.96 1.67 13.35 1.83 13.68 2.16 C 14 2.48 14.17 2.87 14.17 3.33 L 14.17 6.12 L 10.42 10.83 L 6.67 10.83 C 6.67 11.53 6.42 12.12 5.94 12.6 C 5.45 13.09 4.86 13.33 4.17 13.33 Z M 4.17 11.67 C 4.4 11.67 4.6 11.59 4.76 11.43 C 4.92 11.27 5 11.07 5 10.83 L 3.33 10.83 C 3.33 11.07 3.41 11.27 3.57 11.43 C 3.73 11.59 3.93 11.67 4.17 11.67 Z M 14.17 13.33 C 13.47 13.33 12.88 13.09 12.4 12.6 C 11.91 12.12 11.67 11.53 11.67 10.83 C 11.67 10.14 11.91 9.55 12.4 9.06 C 12.88 8.58 13.47 8.33 14.17 8.33 C 14.86 8.33 15.45 8.58 15.94 9.06 C 16.42 9.55 16.67 10.14 16.67 10.83 C 16.67 11.53 16.42 12.12 15.94 12.6 C 15.45 13.09 14.86 13.33 14.17 13.33 Z M 14.17 11.67 C 14.4 11.67 14.6 11.59 14.76 11.43 C 14.92 11.27 15 11.07 15 10.83 C 15 10.6 14.92 10.4 14.76 10.24 C 14.6 10.08 14.4 10 14.17 10 C 13.93 10 13.73 10.08 13.57 10.24 C 13.41 10.4 13.33 10.6 13.33 10.83 C 13.33 11.07 13.41 11.27 13.57 11.43 C 13.73 11.59 13.93 11.67 14.17 11.67 Z M 1.67 9.17 L 5 9.17 L 5 6.67 L 3.33 6.67 C 2.87 6.67 2.48 6.83 2.16 7.16 C 1.83 7.48 1.67 7.87 1.67 8.33 L 1.67 9.17 Z' };
+    SVG_PATHS.deployed_code_update = { vb: 20, t: [2.5, 1.83], d: 'M 12.5 16.67 L 15 14.17 L 14.42 13.58 L 12.92 15.08 L 12.92 11.67 L 12.08 11.67 L 12.08 15.08 L 10.58 13.58 L 10 14.17 L 12.5 16.67 Z M 7.5 1.67 L 2.56 4.52 L 7.5 7.37 L 12.44 4.52 L 7.5 1.67 Z M 0 11.65 L 0 5.02 C 0 4.72 0.07 4.44 0.22 4.19 C 0.36 3.94 0.57 3.74 0.83 3.58 L 6.67 0.23 C 6.81 0.16 6.94 0.1 7.07 0.06 C 7.2 0.02 7.35 0 7.5 0 C 7.65 0 7.8 0.02 7.94 0.06 C 8.08 0.1 8.21 0.16 8.33 0.23 L 14.17 3.58 C 14.43 3.74 14.64 3.94 14.78 4.19 C 14.93 4.44 15 4.72 15 5.02 L 15 8.33 L 13.33 8.33 L 13.33 5.92 L 7.48 9.29 L 1.67 5.92 L 1.67 11.62 L 6.67 14.52 L 6.67 16.44 L 0.83 13.08 C 0.57 12.93 0.36 12.73 0.22 12.48 C 0.07 12.23 0 11.95 0 11.65 Z M 12.5 18.33 C 11.35 18.33 10.36 17.93 9.55 17.11 C 8.74 16.3 8.33 15.32 8.33 14.17 C 8.33 13.01 8.74 12.03 9.55 11.22 C 10.36 10.41 11.35 10 12.5 10 C 13.65 10 14.64 10.41 15.45 11.22 C 16.26 12.03 16.67 13.01 16.67 14.17 C 16.67 15.32 16.26 16.3 15.45 17.11 C 14.64 17.93 13.65 18.33 12.5 18.33 Z' };
+    function svgIco(name, size) {
+      var it = SVG_PATHS[name];
+      if (!it) return '';
+      if (typeof it === 'string') it = { vb: 20, d: it };
+      var s = size || 20;
+      var tr = it.t ? ' transform="translate(' + it.t[0] + ' ' + it.t[1] + ')"' : '';
+      var fr = it.evenodd ? ' fill-rule="evenodd"' : '';
+      return '<svg class="kds-svg-ico" data-ico="' + name + '" viewBox="0 0 ' + it.vb + ' ' + it.vb + '" width="' + s + '" height="' + s +
+        '" style="width:' + s + 'px;height:' + s + 'px" fill="currentColor" aria-hidden="true" focusable="false">' +
+        '<path' + fr + tr + ' d="' + it.d + '"/></svg>';
+    }
+    /* Смешанные иконки: есть вектор из Figma — рисуем его, иначе лигатуру шрифта */
+    function icoGlyph(name, size) {
+      if (SVG_PATHS[name]) return svgIco(name, size || 20);
+      return '<span class="material-icons" data-ico="' + name + '">' + name + '</span>';
+    }
+    function card(o) {
+      var s = ST[o.st] || ST.waiting;
+      var head;
+      if (o.contTop) {
+        head = '';
+      } else {
+        var metas = o.meta.map(function (m) {
+          return '<span class="kds-hmeta__item">' + icoGlyph(metaIco(m[0], m[1]), 20) + esc(m[1]) + '</span>';
+        }).join('');
+        var comment = o.comment
+          ? '<div class="kds-comment"><div class="kds-comment__inner"><span class="material-icons">' + (COMMENT_ICO[o.comment[0]] || o.comment[0]) + '</span><span class="kds-comment__text">' + esc(o.comment[1]) + '</span></div></div>'
+          : '';
+        head = '<div class="kds-card__head" style="--st-band:' + s.band + ';--st-tint:' + s.tint + ';--st-timer:' + (o.timerNeg ? '#ff5252' : s.timer) + ';--st-num:' + s.num + (o.headPad ? ';padding-bottom:' + o.headPad + 'px' : '') + '">' +
+          '<div class="kds-card__headtop">' +
+            '<div class="kds-card__slot"><span class="kds-card__num">' + esc(o.num) + '</span>' +
+              (o.brand ? '<span class="kds-card__brand">' + esc(o.brand) + '</span>' : '') +
+              '<span class="kds-card__timer">' + esc(o.timer) + '</span></div>' +
+            '<div class="kds-card__ch">' + esc(o.ch) + '</div>' +
+          '</div>' +
+          '<div class="kds-card__hfoot">' +
+            (o.rest ? '<div class="kds-card__rest"><span class="material-icons">person</span>' + esc(o.rest) + '</div>' : '') +
+            '<div class="kds-hmeta"><div class="kds-hmeta__items">' + metas + '</div><span class="kds-card__pay material-icons' + (o.payOff ? ' kds-card__pay--off' : '') + '">credit_card</span></div>' +
+            comment +
+          '</div>' +
+        '</div>';
+      }
+      var items = o.items || [];
+      var box = o.contTop ? items.filter(function (it) { return it.k !== 'transfer'; }) : items;
+      var labels = o.contTop ? items.filter(function (it) { return it.k === 'transfer'; }) : [];
+      return '<article class="kds-card' + (RT.cfg && RT.cfg.asm ? ' kds-card--asm' : '') +
+        (o.st === 'cancelled' ? ' kds-card--cancelled' : '') +
+        (o.st === 'ready' || o.st === 'cancelled' ? ' kds-card--wico' : '') +
+        (o.partTop ? ' kds-card--partTop' : '') + (o.partBottom ? ' kds-card--partBottom' : '') + '"' +
+        (o.cardBg ? ' style="background:' + o.cardBg + '"' : '') +
+        (o._cid ? ' data-cid="' + o._cid + '"' : '') + ' data-st="' + o.st + '">' + head +
+        (o.contTop ? '<div class="kds-cap"></div>' : '') +
+        '<div class="kds-card__body' + (o.contentTint ? ' kds-card__body--tint' : '') + (o.contTop ? ' kds-card__body--flush' : '') + '">' +
+        box.map(function (it, i) { return renderItem(it, o._cid, i); }).join('') + '</div>' +
+        labels.map(function (t) { return transfer(t); }).join('') + '</article>';
+    }
+    /* Строка режима «по блюдам» — 1:1 по макету «Режим Блюда» (10602:36475):
+       [шапка заказа 360×60] + 8 + [блюдо 820 + кнопка 52 на всю высоту] */
+    function dlRow(rr) {
+      var d = rr.dish || {};
+      var st = d.st || 'waiting';
+      var neg = st === 'cancelled';
+      var chips = (d.chips && d.chips.length)
+        ? '<div class="kds-dl-chips">' + d.chips.map(function (c) {
+            return '<span class="kds-dl-chip' + (neg ? ' is-neg' : '') + '">' +
+              (c.q > 1 ? '<span class="kds-dl-chip__qty">' + c.q + '</span>' : '') +
+              '<span>' + esc(c.t) + '</span></span>';
+          }).join('') + '</div>'
+        : '';
+      var comment = d.comment
+        ? '<div class="kds-dl-comment"><span class="material-icons">mode_comment</span><span class="kds-dl-comment__text">' + esc(d.comment) + '</span></div>'
+        : '';
+      var gline = (d.guest || d.star)
+        ? '<div class="kds-dl-gline">' + (d.guest ? '<span class="kds-guest">' + esc(d.guest) + '</span>' : '') +
+          (d.star ? '<span class="kds-dl-star">' + svgIco('stars', 16) + '</span>' : '') + '</div>'
+        : '';
+      var qty = d.qty > 1 ? '<span class="kds-dl-qty"' + (d.qtyBg ? ' style="background:' + d.qtyBg + '"' : '') + '>' + d.qty + '</span>' : '';
+      return '<div class="kds-dl-row"' + (d._rid ? ' data-rid="' + d._rid + '"' : '') + '>' +
+        '<button class="kds-dl-stub kds-dl-stub--' + (rr.st || 'waiting') + '" type="button" data-ord="' + esc(rr.ord) + '">' +
+          '<span class="kds-dl-stub__top"><span class="kds-dl-stub__num">' + esc(rr.ord) + '</span>' +
+            '<span class="kds-dl-stub__timer' + (rr.timerNeg ? ' is-neg' : '') + '">' + esc(rr.timer) + '</span></span>' +
+          '<span class="kds-dl-stub__ch">' + esc(rr.ch) + '</span>' +
+        '</button>' +
+        '<div class="kds-dl-body' + (d.indent ? ' kds-dl-body--indent' : '') + (d.sel ? ' kds-dl-body--sel' : '') + '">' +
+          '<div class="kds-dl-main' + (chips ? ' kds-dl-main--chips' : '') + (comment ? ' kds-dl-main--combo' : '') + '">' +
+            '<div class="kds-dl-cell">' + gline +
+              '<div class="kds-dl-line">' + qty + '<span class="kds-dl-name' + (neg ? ' is-neg' : '') + '">' + esc(d.name) + '</span></div>' +
+            '</div>' +
+            chips +
+            comment +
+          '</div>' +
+          '<button class="kds-dl-btn kds-btn--' + st + '" type="button"><span class="material-icons">' + icoFor(st, 'lrow') + '</span></button>' +
+        '</div>' +
+      '</div>';
+    }
+    function posters(p) {
+      var html = p.cards.map(function (c) {
+        if (c.row) {
+          var cells = c.row.map(function (cell) {
+            return '<div class="kds-poster__cell">' +
+              (cell.star ? '<span class="kds-star kds-star--lg">' + svgIco('stars', 40) + '</span>' :
+                '<span class="kds-poster__ico' + (cell.warn ? ' kds-poster__ico--warn' : '') + ' material-icons">' + cell.ico + '</span>') +
+              '<div class="kds-poster__title">' + esc(cell.title) + '</div>' +
+              '<div class="kds-poster__sub">' + esc(cell.sub) + '</div>' +
+            '</div>';
+          }).join('');
+          return '<article class="kds-poster kds-poster--row">' + cells + '</article>';
+        }
+        return '<article class="kds-poster">' +
+          '<div class="kds-poster__title">' + esc(c.title) + '</div>' +
+          '<ul class="kds-poster__list">' + c.items.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') + '</ul>' +
+        '</article>';
+      }).join('');
+      return '<div class="kds-posters">' + html + (p.note ? '<div class="kds-posters__note">' + esc(p.note) + '</div>' : '') + '</div>';
+    }
+
+    /* ── Описание экрана под макетом: для каждого экрана свой заголовок и текст ── */
+    var DOC = {
+      'base': { t: 'Экран как в Figma', s: 'база без задачи', q: 'Набор — не блюдо, не подача и не статус: у него нет количества, статуса, времени и действий. Всё исполняемое остаётся у блюд: количество, модификаторы, статус, время.', d: 'Сценарием не задан — это база 1:1 по Figma, на которой держатся остальные экраны: шапка карточки, строки блюд с кнопками статусов, перенос чека пунктиром, готовая карточка с блоком набора, отменённый заказ.' },
+      'g-multi': { t: 'По заказам · блюда набора одним блоком', s: 'сценарий 2 · горячий цех', q: 'Режим «по заказам»: в пределах курса видимые компоненты одного набора — целостная группа с названием набора независимо от их числа, включая единственный видимый компонент; другие блюда внутрь не вклиниваются.', d: 'Сделано по сценарию 2 (горячий цех): в «Ланче» видны только блюда этого цеха — бургер и картофель, сверху подпись «видно 2 из 3»; заголовок набора без кнопки и без статуса; отдельно купленный бургер стоит своей строкой и бургер из набора не заменяет.' },
+      'g-single': { t: 'По заказам · блюда набора одним блоком', s: 'сценарий 2 · холодный цех', q: 'Частичная видимость: отсутствие строки блюда не означает, что оно готово или отсутствует в наборе, и экран не должен создавать такое впечатление. Один или несколько компонентов внутри группы не означают, что показан полный состав.', d: 'Сделано по сценарию 2 (холодный цех): тот же заказ №214, в «Ланче» только салат и подпись «видно 1 из 3» — группа из одного компонента остаётся той же группой набора и не выдаёт себя за полный состав.' },
+      'g-kitchens': { t: 'По заказам · блюда набора одним блоком', s: 'сценарий 2 · оба цеха', q: 'Цех и фильтры: на цеховом экране видна только часть набора, и фильтр не должен переключать способ обозначения набора. Группа из единственного видимого компонента — норма, а не особый случай: тот же набор на другом экране с несколькими компонентами выглядит как та же группа.', d: 'Сделано по сценарию 2 (оба цеха на одном экране): у каждого блюда справа рамка цвета цеха (PB-6800), «Ланч» виден целиком — бургер и картофель горячего цеха, салат холодного; отдельный бургер готов, но бургер из набора не заменяет.' },
+      'g-assembly': { t: 'По заказам · экран сборщика', s: 'сценарий 2', q: 'Часть позиций набора может не требовать приготовления — их берёт сборщик.', d: 'Сделано по сценарию 2 (экран сборщика, здесь доставка): шапка нейтральная — без заливки статуса и без кнопки; у блюд только иконки статусов и рамка цеха, кнопок нет; «Ланч» целиком — готовые картофель и салат собирает сборщик, бургер ещё готовится.' },
+      'g-courses': { t: 'По заказам · набор разложен по курсам', s: 'сценарий 3.3', q: 'Курсы: набор не равен подаче. В пределах одного курса компоненты конкретного экземпляра набора воспринимаются как одна целостная группа, другие блюда её не разрывают. Части набора из разных курсов между курсами не перемещаются, но их принадлежность должна оставаться понятной.', d: 'Сделано по сценарию 3.3: «Бизнес-ланч» разложен по двум курсам — суп в первом, бургер и картофель во втором; в каждом курсе своя группа набора с подписью «видно N из 3»; через границу курса группы не соединяются и порядок выдачи не меняется; активного или дизейбл-курса нет — в сценарии такого состояния нет.' },
+      'g-between': { t: 'По заказам · отдельное блюдо между блюдами набора', s: 'сценарий 3.2', q: 'Группировка и курсы: компоновка, при которой целостность группы внутри курса видна, части набора из разных курсов не перемещаются между курсами, а порядок заказов, курсы и производственные приоритеты сохраняются.', d: 'Сделано по сценарию 3.2: набор «Ланч» стоит между других блюд заказа — сверху самостоятельно заказанный салат, снизу отдельно купленный бургер; салат в группу набора не попадает и её не разрывает; курс и приоритеты сохраняются.' },
+      'g-instances': { t: 'По заказам · два набора, разный состав', s: 'сценарий 3.1', q: 'В одном заказе возможны одно и то же блюдо с разной принадлежностью (в наборе и отдельно), несколько экземпляров одного набора и разные наборы с одинаковым блюдом.', d: 'Сделано по сценарию 3.1: один гость заказал два «Ланча» из одного комбо-меню — у первого борщ, котлета, чай, у второго гаспачо, рыба, компот. Три карточки рядом: без признака, с цветной точкой и с залитым прямоугольником; признак повторяется в каждом курсе.' },
+      'g-instances-same': { t: 'По заказам · два набора, одинаковый состав', s: 'сценарий 3.1', q: 'Экземпляры одного набора — это повторно заказанный набор с независимо выбранными блюдами: название у них общее и экземпляр оно не идентифицирует, поэтому различать их нужно всегда, в том числе при совпавшем выбранном составе, — и внутри одного курса, и между курсами. Количества и статусы отдельных порций нельзя смешивать.', d: 'Сделано по сценарию 3.1: повторно заказанный набор с совпавшим составом — название экземпляр не различает, поэтому стоит признак-прямоугольник (маджентовый у первого, циановый у второго); количества и статусы порций у комплектов не смешиваются.' },
+      'g-modifier': { t: 'По заказам · модификатор готовится отдельно', s: 'сценарий 3.6', q: 'Модификатор относится к блюду, а не к набору. Если модификатор готовится отдельной позицией — по существующим правилам, — он сохраняет две связи: с родительским блюдом и с конкретным экземпляром набора этого блюда. Отдельным компонентом набора он при этом не становится: компонент набора — блюдо вместе со своими модификаторами, поэтому состав набора не меняется. Обе связи должны читаться и тогда, когда родительского блюда на экране нет.', d: 'Сделано по сценарию 3.6: «Соус к бургеру» — отдельная задача, и видны обе его связи — «к Бургеру» и «Ланч», хотя бургера на экране нет (другой цех); компонентом набора соус не становится и свои статус и кнопку сохраняет.' },
+      'g-cancelled': { t: 'По заказам · отменённое блюдо из набора', s: '', q: 'Принадлежность уже отправленных на кухню блюд к набору не меняется. Отмена и изменение блюд обрабатываются по обычным правилам изменения заказа: отменённое блюдо не показывается как необходимая часть комплекта.', d: 'Отдельного сценария в списке нет — сделано по требованию задачи: отменённое блюдо не показывается как необходимая часть комплекта — бургер из набора зачёркнут, картофель готов, отдельный бургер вне группы готов как обычно.' },
+      'g-long': { t: 'По заказам · длинное название, узкий экран', s: 'сценарий 3.7', q: 'Название набора есть всегда. При нехватке места допускается сокращённое представление, но полное название должно оставаться доступным сотруднику. Производственные сведения о блюде — название и количество, статус, модификаторы, время — остаются первыми.', d: 'Сделано по сценарию 3.7: экран 720 px, два набора с похожими названиями, которые различаются в конце; название сокращается, полное открывается нажатием по строке (на мыши — наведением), состав при этом не раскрывается.' },
+      'd-list': { t: 'По блюдам · набор подписан текстом', s: 'сценарий 2.2', q: 'Режим «по блюдам»: компактное текстовое указание принадлежности у строки блюда, без показа остальных компонентов набора.', d: 'Сделано по сценарию 2.2: в плоском списке принадлежность указана текстом в строке — «Комбо с пастой» с компонентами текстом и комментарием пунктиром; остальные позиции — обычные строки блюд со своей кнопкой, количество и статус не вытесняются.' }
+    };
+    function docBlock(id) {
+      var x = DOC[id] || DOC['base'];
+      return '<div class="kds-doc"><div class="kds-doc__title">' +
+        (x.s ? x.t + ' · ' + x.s : x.t) + '</div>' +
+        (x.q ? '<p class="kds-doc__q"><b>Сценарий из задачи PB-8108:</b> «' + x.q + '»</p>' : '') +
+        '<p class="kds-doc__item">' + x.d + '</p></div>';
+    }
+    /* Все сценарии по экранам: каждый экран отдельной строкой со своим описанием.
+       Текущий экран подсвечен. Данные — из самих описаний DOC. */
+    function scenList(curId) {
+      var rows = Object.keys(SCREENS).map(function (sid, i) {
+        var dd = DOC[sid];
+        if (!dd) return '';
+        return '<li class="kds-scen__i' + (sid === curId ? ' is-cur' : '') + '">' +
+          '<span class="kds-scen__n">' + (i + 1) + '</span>' +
+          '<span class="kds-scen__body">' +
+            '<span class="kds-scen__t">' + esc(dd.t + (dd.s ? ' · ' + dd.s : '')) + '</span>' +
+            (dd.q ? '<span class="kds-scen__q">Задача: «' + dd.q + '»</span>' : '') +
+            '<span class="kds-scen__d">' + dd.d + '</span>' +
+          '</span></li>';
+      }).join('');
+      return '<div class="kds-scen"><div class="kds-scen__head">Сценарии по экранам — всё, что есть в прототипе</div>' +
+        '<ul class="kds-scen__list">' + rows + '</ul></div>';
+    }
+
+    /* ── Сборка экрана ── */
+    var host = document.getElementById('kdsHost');
+    function render(id) {
+      var src = SCREENS[id] || SCREENS['g-multi'];
+      var cfg = JSON.parse(JSON.stringify(src));          // рабочая копия: состояние живёт до смены экрана
+      RT.cfg = cfg; RT.M = {}; RT.hist = []; RT.filter = null; RT.shift = true; RT.asm = !!cfg.asm;
+      prep(cfg);
+      var body;
+      if (cfg.posters) body = posters(cfg);
+      else if (cfg.list) body = '<div class="kds-dlist">' + cfg.rows.map(dlRow).join('') + '</div>';
+      else body = '<div class="kds-board">' + cfg.orders.map(card).join('') + '</div>';
+      var view = '<div class="kds-view' + (cfg.nw <= 760 ? ' kds-view--narrow' : '') + '" style="width:' + cfg.nw + 'px;height:' + cfg.nh + 'px">' +
+        '<div class="kds-zoom">' +
+        '<div class="kds-topbar">' +
+          '<div class="kds-tb-lists">' +
+            '<span class="kds-tb-list" data-clock>' + nowHHMM() + '</span>' +
+            '<button class="kds-tb-list kds-tb-pick" type="button" data-select="term"><span class="material-icons">monitor</span><span data-val>Имя терминала</span></button>' +
+            '<button class="kds-tb-list kds-tb-pick kds-tb-rest" type="button" data-select="rest"><span class="material-icons">person</span><span data-val>Константинопольский</span><span class="kds-tb-chev material-icons">keyboard_arrow_down</span></button>' +
+            '<span class="kds-tb-states">' +
+              (cfg.stat ? '<button class="kds-tb-state kds-tb-state--accent" type="button" data-filter="run"><span class="kds-tb-ico">' + svgIco('clock_loader_40', 20) + '</span><b data-cnt="run">12</b></button>' +
+                '<button class="kds-tb-state kds-tb-state--negative" type="button" data-filter="over"><span class="material-icons">info</span><b data-cnt="over">2</b></button>' +
+                '<button class="kds-tb-state kds-tb-state--positive" type="button" data-filter="done"><span class="material-icons">check_circle</span><b data-cnt="done">8</b></button>' : '') +
+              '<button class="kds-tb-state kds-tb-state--clock" type="button" data-pop="metrics"><span class="kds-tb-ico">' + svgIco('schedule_time', 20) + '</span><b data-cnt="avg">14:32</b></button>' +
+            '</span>' +
+          '</div>' +
+          '<div class="kds-tb-icons">' +
+            '<button class="kds-iconbtn kds-iconbtn--power" type="button" data-act="power"><span class="material-icons">power_settings_new</span></button>' +
+            '<button class="kds-iconbtn" type="button" data-pop="settings"><span class="material-icons">settings</span></button>' +
+          '</div>' +
+        '</div>' +
+        body +
+        '<div class="kds-scrollstrip"><div class="kds-scrollstrip__thumb"></div></div>' +
+        '<div class="kds-vscroll"><div class="kds-vscroll__track"><div class="kds-vscroll__knob"></div></div></div>' +
+        '<div class="kds-footer">' +
+          '<div class="kds-footer__left"><span class="kds-footer__ver">WebKDS v. 9.4.5.208229</span><span class="kds-footer__status"><span class="kds-dot"></span>Включен</span></div>' +
+          (cfg.posters ? '' : '<span class="kds-footer__total">Всего заказов: ' + (cfg.total || (cfg.list ? cfg.rows.length : cfg.orders.length)) + '</span>') +
+          '<div class="kds-footer__right"><button class="kds-footer__btn" type="button" data-act="undo"><span class="material-icons">settings_backup_restore</span>Отменить</button></div>' +
+        '</div>' +
+        '<div class="kds-tip"></div>' +
+        '</div>' +
+      '</div>';
+      host.innerHTML = '<div class="kds-anno">' + esc(cfg.anno) + '</div><div class="kds-fit">' + view + '</div>' + docBlock(id);
+      RT.view = host.querySelector('.kds-view');
+      RT.layer = RT.view.querySelector('.kds-zoom');
+      bindTips(RT.view);
+      bindPan(RT.view);
+      bindScrollStrip(RT.view);
+      bindVScroll(RT.view);
+      bindInteractive(RT.view);
+      sortBoard();
+      RT.CNT0 = null; RT.filter = null;
+      applyCounts(); syncUndo(); applyTheme(); applyZoom(); startTicker();
+      fitScale();
+    }
+
+    /* ── Масштаб холста под контейнер (по ширине и по высоте кадра) ── */
+    function fitScale() {
+      var fit = host.querySelector('.kds-fit');
+      if (!fit) return;
+      var view = fit.firstElementChild;
+      if (!view) return;
+      var availW = fit.clientWidth;
+      var availH = 0;
+      /* под макетом есть текстовый блок — высоту кадра считаем по видимой области окна,
+         чтобы макет масштабировался как раньше и не растягивался из-за текста ниже */
+      var fitTop = fit.getBoundingClientRect().top;
+      availH = Math.max(0, Math.min(window.innerHeight, window.innerHeight - fitTop) - 24);
+      var scale = Math.min(1, availW / view.offsetWidth);
+      if (availH > 120) scale = Math.min(scale, availH / view.offsetHeight);
+      /* целочисленный масштаб: при дробном scale браузер даёт 1-px швы на скруглениях и «рамки» у строк */
+      if (scale > 0.9) scale = 1;
+      else scale = Math.max(0.5, Math.round(scale * 8) / 8);
+      view.style.transform = scale === 1 ? 'none' : 'scale(' + scale + ')';
+      view.style.transformOrigin = 'top left';
+      fit.style.height = Math.ceil(view.offsetHeight * scale) + 'px';
+    }
+
+    /* ── Тултип полного названия (своя раскладка: Hint для тёмной темы КДС в ДС нет) ── */
+    function relPos(el, root) {
+      var x = 0, y = 0;
+      while (el && el !== root) { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; }
+      return { x: x, y: y };
+    }
+    function bindTips(view) {
+      if (!view) return;
+      var tip = view.querySelector('.kds-tip');
+      var hideT = 0;
+      /* hover существует только на мыши; на тач-экране всё делается нажатием */
+      var hoverOK = !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+
+      function hide() { clearTimeout(hideT); tip.style.display = 'none'; tip.textContent = ''; }
+      function show(t, auto) {
+        tip.textContent = t.getAttribute('data-full');
+        tip.style.display = 'block';
+        var p = relPos(t, view);
+        var maxLeft = Math.max(8, view.clientWidth - tip.offsetWidth - 8);
+        var top = p.y + t.offsetHeight + 6;
+        if (top + tip.offsetHeight > view.clientHeight - 8) top = Math.max(8, p.y - tip.offsetHeight - 6);
+        tip.style.left = Math.min(Math.max(p.x, 8), maxLeft) + 'px';
+        tip.style.top = top + 'px';
+        clearTimeout(hideT);
+        if (auto) hideT = setTimeout(hide, 4000);
+      }
+      function target(e) { return e.target && e.target.closest ? e.target.closest('[data-full]') : null; }
+
+      /* Нажатие/клик по строке с обрезанным названием — показать полное; повторное — скрыть */
+      view.addEventListener('click', function (e) {
+        var t = target(e);
+        if (!t) return;
+        if (tip.style.display === 'block' && tip.textContent === t.getAttribute('data-full')) { hide(); return; }
+        show(t, true);
+      });
+      /* Нажатие мимо — закрыть сразу (до появления подсказки) */
+      view.addEventListener('pointerdown', function (e) { if (!target(e)) hide(); }, true);
+
+      if (hoverOK) {
+        view.addEventListener('mouseover', function (e) { var t = target(e); if (t) show(t, false); });
+        view.addEventListener('mouseout', function (e) { var t = target(e); if (t) hide(); });
+      }
+    }
+
+    /* ── Прокрутка «рукой»: мышью тянем доску/список, на тач-экране — нативный свайп ── */
+    function bindPan(view) {
+      if (!view) return;
+      var panes = view.querySelectorAll('.kds-board, .kds-posters, .kds-dlist');
+      Array.prototype.forEach.call(panes, function (pane) {
+        var active = false, startX = 0, startY = 0, startL = 0, startT = 0, moved = false;
+        pane.addEventListener('pointerdown', function (e) {
+          if (e.pointerType === 'touch' || e.button !== 0) return;      // тач — нативный свайп
+          if (e.target.closest && e.target.closest('button')) return;    // кнопки не перехватываем
+          active = true; moved = false;
+          startX = e.clientX; startY = e.clientY;
+          startL = pane.scrollLeft; startT = pane.scrollTop;
+          try { pane.setPointerCapture(e.pointerId); } catch (err) {}
+        });
+        pane.addEventListener('pointermove', function (e) {
+          if (!active) return;
+          var dx = e.clientX - startX, dy = e.clientY - startY;
+          if (!moved && Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+          moved = true;
+          pane.classList.add('is-panning');
+          pane.scrollLeft = startL - dx;
+          pane.scrollTop = startT - dy;
+        });
+        function stop() {
+          if (!active) return;
+          active = false;
+          pane.classList.remove('is-panning');
+          if (moved) setTimeout(function () { moved = false; }, 0);
+        }
+        pane.addEventListener('pointerup', stop);
+        pane.addEventListener('pointercancel', stop);
+        /* после протяжки клик по строке не должен открывать подсказку */
+        pane.addEventListener('click', function (e) {
+          if (!moved) return;
+          e.stopPropagation(); e.preventDefault();
+          moved = false;
+        }, true);
+      });
+    }
+
+    /* ── Полоса скролла под лентой (своя, как в макете: 12 px, ползунок 8 px #333) ── */
+    function bindScrollStrip(view) {
+      if (!view) return;
+      var board = view.querySelector('.kds-board');
+      var strip = view.querySelector('.kds-scrollstrip');
+      var thumb = view.querySelector('.kds-scrollstrip__thumb');
+      if (!strip || !thumb) return;
+      if (!board) { strip.style.display = 'none'; return; }
+      function upd() {
+        var cw = board.clientWidth, sw = board.scrollWidth;
+        if (sw <= cw) { strip.style.display = 'none'; return; }
+        strip.style.display = 'block';
+        var track = cw - 4;
+        var w = Math.max(48, Math.round(track * cw / sw));
+        thumb.style.width = w + 'px';
+        var max = track - w;
+        thumb.style.transform = 'translateX(' + Math.round((board.scrollLeft / (sw - cw)) * max) + 'px)';
+      }
+      board.addEventListener('scroll', upd);
+      upd();
+    }
+    /* ── Вертикальная полоса скролла режима «по блюдам» (Figma Scroll: трек #9E9E9E, ползунок #616161) ── */
+    function bindVScroll(view) {
+      var list = view.querySelector('.kds-dlist');
+      var strip = view.querySelector('.kds-vscroll');
+      if (!strip) return;
+      if (!list) { strip.style.display = 'none'; return; }
+      var track = strip.querySelector('.kds-vscroll__track');
+      var knob = strip.querySelector('.kds-vscroll__knob');
+      function upd() {
+        var ch = list.clientHeight, sh = list.scrollHeight;
+        if (sh <= ch + 1) { strip.style.display = 'none'; return; }
+        strip.style.display = 'block';
+        var th = track.clientHeight;
+        var k = Math.max(24, Math.round(th * ch / sh));
+        knob.style.height = k + 'px';
+        knob.style.transform = 'translateY(' + Math.round((list.scrollTop / (sh - ch)) * (th - k)) + 'px)';
+      }
+      list.addEventListener('scroll', upd);
+      window.addEventListener('resize', upd);
+      upd();
+    }
+
+    /* ══════════ Работающий макет: состояние, статусы, шапка, селекты, футер ══════════ */
+    var RT = { cfg: null, view: null, layer: null, M: {}, hist: [], shift: true, filter: null,
+      tickId: 0, pop: null, CNT0: null,
+      opts: { theme: 'dark', zoom: 1 } };
+    /* Значения счётчиков из макета («Menu setting»): 12 / 2 / 8 и ср. время 14:32.
+       На экране меньше заказов, поэтому показываем их же, но с живой дельтой
+       от состояния карточек — цифры меняются от нажатий. */
+    var CNT_BASE = { run: 12, over: 2, done: 8, avg: '14:32' };
+    /* Цикл статуса: серая (ожидает) → жёлтая (пора готовить) → синяя (готовится) → зелёная (готов) → сброс;
+       красная — ошибка/отмена, из неё — сброс со экрана. */
+    var CYCLE = { waiting: 'urgent', urgent: 'cooking', cooking: 'ready', ready: 'done', cancelled: 'done' };
+    /* Порядок карточек на доске — слева направо по статусу (та же последовательность, что и цикл);
+       красная (отмена/ошибка) — в конце ряда. */
+    var STATUS_ORDER = { waiting: 0, urgent: 1, cooking: 2, ready: 3, cancelled: 4 };
+    function orderStKey(cid) {
+      var idx = +cid.slice(1);
+      var o = RT.cfg.orders[idx];
+      if (!o) return 0;
+      /* карточка-продолжение чека без своего статуса — встаёт по статусу предыдущей части */
+      if (o.contTop && idx > 0) {
+        var prev = RT.cfg.orders[idx - 1];
+        return prev && STATUS_ORDER[prev.st] != null ? STATUS_ORDER[prev.st] : 0;
+      }
+      return STATUS_ORDER[o.st] != null ? STATUS_ORDER[o.st] : 0;
+    }
+    function sortBoard() {
+      var board = RT.view && RT.view.querySelector('.kds-board');
+      if (!board) return;
+      var cards = Array.prototype.slice.call(board.querySelectorAll('.kds-card[data-cid]'));
+      cards.sort(function (a, b) {
+        return orderStKey(a.getAttribute('data-cid')) - orderStKey(b.getAttribute('data-cid'));
+      });
+      cards.forEach(function (c) { board.appendChild(c); });
+    }
+    var HIST_MAX = 5;                       // глубина истории отмены — до 5 шагов (вики, сценарий 1, шаг 4)
+    var TERMS = ['Имя терминала', 'Кухня · терминал 1', 'Гриль · терминал 2'];
+    var RESTS = ['Константинопольский', 'Тверская 7', 'Арбат 12'];
+    var SEL = { term: 0, rest: 0 };
+
+    function nowHHMM() {
+      var d = new Date();
+      return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+    }
+    function parseTimer(s) {
+      var neg = /^\s*-/.test(String(s));
+      var m = String(s).match(/(\d+):(\d+)/);
+      if (!m) return null;
+      var v = (+m[1]) * 60 + (+m[2]);
+      return neg ? -v : v;
+    }
+    function fmtTimer(v) {
+      var neg = v < 0, a = Math.abs(v), mm = Math.floor(a / 60), ss = a % 60;
+      return (neg ? '- ' : '') + (mm < 10 ? '0' + mm : mm) + ':' + (ss < 10 ? '0' + ss : ss);
+    }
+    /* Иконка кнопки из статуса: стрелка → в работу, галочка → готово, крестик/корзина → отмена */
+    function icoFor(st, kind) {
+      if (kind === 'mgroup' || kind === 'lrow') return st === 'cancelled' ? 'delete' : (st === 'ready' ? 'check' : 'arrow_forward');
+      if (st === 'cancelled') return 'close';
+      if (st === 'ready') return 'check';
+      return 'arrow_forward';
+    }
+    /* Проставляем id строкам: по ним нажатие находит модель */
+    function prep(cfg) {
+      var n = 0;
+      function A(o, kind, cid) {
+        o._rid = 'r' + (++n); o._kind = kind; o._cid = cid;
+        RT.M[o._rid] = { o: o, kind: kind, cid: cid };
+      }
+      (cfg.orders || []).forEach(function (o, i) {
+        o._cid = 'c' + i;
+        if (o.timer) o._secs = parseTimer(o.timer);
+        /* номер экземпляра — по порядку вхождения этого набора в заказ; нужен только когда наборов несколько */
+        var titles = {};
+        (o.items || []).forEach(function (it) {
+          if (it.k === 'combo' && it.title) titles[it.title] = (titles[it.title] || 0) + 1;
+        });
+        (o.items || []).forEach(function (it) {
+          if (it.k === 'combo' && it.title && titles[it.title] > 1) {
+            it._many = true;
+            it._th = !!o.tintHead;      // карточка с подложкой шапки группы
+            it._col = !!o.colorInst;    // карточка с цветной точкой
+            it._tint = !!o.tintInst;    // карточка с залитым прямоугольником
+          }
+        });
+        (o.items || []).forEach(function (it) {
+          if (it.k === 'mgroup') {
+            if (!it.st) it.st = it.neg ? 'cancelled' : (it.btn === 'check' ? 'ready' : 'waiting');
+            A(it, 'mgroup', o._cid); return;
+          }
+          if (it.k === 'combo' || it.k === 'nest' || it.k === 'cset') {
+            if (!it.st) it.st = 'waiting';
+            A(it, it.k, o._cid);
+            (it.rows || []).forEach(function (rw) { if (!rw.st) rw.st = 'waiting'; A(rw, 'dish', o._cid); });
+            return;
+          }
+          if (it.k === 'mod') { if (!it.st) it.st = 'waiting'; A(it, 'mod', o._cid); return; }
+          if (it.k === 'transfer' || it.k === 'course') return;
+          if (!it.st) it.st = 'waiting';
+          A(it, 'dish', o._cid);
+        });
+      });
+      (cfg.rows || []).forEach(function (rw) {
+        var d = rw.dish || rw;
+        if (!d.st) d.st = 'waiting';
+        A(d, 'lrow', 'dl');
+      });
+    }
+
+    /* ── Действия со строками (вики: Готовится → Приготовлено → строка исчезает) ── */
+    function pushHist(e) {
+      RT.hist.push(e);
+      while (RT.hist.length > HIST_MAX) RT.hist.shift();
+    }
+    function rowEl(rid) { return RT.view.querySelector('[data-rid="' + rid + '"]'); }
+    function cardEl(cid) { return RT.view.querySelector('[data-cid="' + cid + '"]'); }
+    function rowAction(rid) {
+      var m = RT.M[rid];
+      if (!m || !RT.shift) return;                 // смена выключена — действия недоступны
+      if (m.kind === 'combo' || m.kind === 'mgroup' || m.kind === 'set') { setAction(rid); return; }
+      if (m.o.st === 'done') return;               // блюдо уже сброшено с экрана
+      var next = CYCLE[m.o.st] || 'cooking';
+      pushHist({ type: 'row', rid: rid, prev: m.o.st });
+      applyRow(rid, next);
+    }
+    /* Кнопка набора = bump всего набора (компоненты переходят вместе) */
+    function setAction(rid) {
+      var m = RT.M[rid];
+      if (!m || !RT.shift || m.o.st === 'done') return;
+      var kids = (m.o.rows || []).filter(function (rw) { return rw._rid && RT.M[rw._rid] && RT.M[rw._rid].o.st !== 'done'; });
+      var next = CYCLE[m.o.st] || 'cooking';
+      pushHist({ type: 'set', rid: rid, prev: m.o.st, rows: kids.map(function (rw) { return { rid: rw._rid, prev: rw.st }; }) });
+      kids.forEach(function (rw) { rw.st = CYCLE[rw.st] || 'cooking'; });
+      applySet(rid, next);
+    }
+    /* Отрисовка состояния набора: цвет шапки/компонентов и иконка единственной кнопки */
+    function applySet(rid, st) {
+      var m = RT.M[rid];
+      if (!m) return;
+      m.o.st = st;
+      var el = rowEl(rid);
+      if (!el) return;
+      if (st === 'done') { el.style.display = 'none'; applyCounts(); syncUndo(); return; }
+      el.style.display = '';
+      var neg = st === 'cancelled';
+      el.classList.toggle('kds-kit--neg', neg);
+      ['waiting', 'urgent', 'cooking', 'ready', 'cancelled', 'done'].forEach(function (s) { el.classList.toggle('kds-kit--' + s, st === s); });
+      el.querySelectorAll('.kds-kit__comp').forEach(function (c) { c.classList.toggle('kds-kit__comp--neg', neg); });
+      var btn = el.querySelector('.kds-kit__btn');
+      if (btn) {
+        btn.className = 'kds-kit__btn kds-kit__btn--' + st;
+        btn.innerHTML = '<span class="material-icons">' + icoFor(st, 'mgroup') + '</span>';
+      }
+      applyCounts(); syncUndo();
+    }
+    /* Шапка карточки = bump заказа (PB-7765): действие с полноширинной кнопки перенесено в шапку.
+       В WebKDS статус заказа живёт отдельно от блюд, но bumpOrder прогоняет и блюда — область «весь заказ» (DS-534).
+       Цикл как у блюд: серая → жёлтая → синяя → зелёная, красная — ошибка/отмена. */
+    var ORDER_CYCLE = { waiting: 'urgent', urgent: 'cooking', cooking: 'ready', ready: 'done', cancelled: 'done' };
+    function orderAction(cid) {
+      var o = RT.cfg.orders[+cid.slice(1)];
+      if (!o || !RT.shift || o._hidden) return;
+      var items = cardRows(o);
+      if (!items.length) return;
+      var next = ORDER_CYCLE[o.st] || 'cooking';
+      pushHist({ type: 'card', cid: cid, prev: o.st, rows: items.map(function (m) { return { rid: m.o._rid, prev: m.o.st }; }) });
+      items.forEach(function (m) { if (m.o.st !== 'done') bumpRow(m.o._rid); });
+      if (next === 'done') { hideCard(cid); return; }
+      o.st = next;
+      paintCard(cid);
+      sortBoard();
+      applyCounts(); syncUndo();
+    }
+    /* клик по курсу = bumpCourse: тот же переход, но в пределах курса (DS-534) */
+    function courseAction(cid, idx) {
+      var o = RT.cfg.orders[+cid.slice(1)];
+      if (!o || !RT.shift || o._hidden) return;
+      var items = courseRows(o, idx);
+      if (!items.length) return;
+      pushHist({ type: 'card', cid: cid, prev: o.st, rows: items.map(function (m) { return { rid: m.o._rid, prev: m.o.st }; }) });
+      items.forEach(function (m) { if (m.o.st !== 'done') bumpRow(m.o._rid); });
+      applyCounts(); syncUndo();
+    }
+    function bumpRow(rid) {
+      var m = RT.M[rid];
+      if (!m) return;
+      applyRow(rid, CYCLE[m.o.st] || 'cooking');
+    }
+    function courseRows(o, idx) {
+      var out = [], on = false;
+      (o.items || []).forEach(function (it, i) {
+        if (it.k === 'course') { on = (i === idx); return; }
+        if (!on) return;
+        if (it.k === 'combo' || it.k === 'nest' || it.k === 'cset') {
+          (it.rows || []).forEach(function (rw) { if (RT.M[rw._rid]) out.push(RT.M[rw._rid]); });
+        } else if (RT.M[it._rid] && it.k !== 'transfer') out.push(RT.M[it._rid]);
+      });
+      return out;
+    }
+    /* строки карточки без служебных заголовков набора */
+    function cardRows(o) {
+      var out = [];
+      (o.items || []).forEach(function (it) {
+        if (it.k === 'combo' || it.k === 'nest' || it.k === 'cset') {
+          (it.rows || []).forEach(function (rw) { if (RT.M[rw._rid]) out.push(RT.M[rw._rid]); });
+        } else if (RT.M[it._rid] && it.k !== 'transfer' && it.k !== 'course') out.push(RT.M[it._rid]);
+      });
+      return out;
+    }
+    function applyRow(rid, st) {
+      var m = RT.M[rid];
+      if (!m) return;
+      m.o.st = st;
+      var el = rowEl(rid);
+      if (el) {
+        if (st === 'done') {
+          el.style.display = 'none';                 // блюдо сброшено с экрана
+        } else {
+          el.style.display = '';
+          var isGroup = m.kind === 'mgroup' || m.kind === 'combo' || m.kind === 'set';
+          var isLrow = m.kind === 'lrow';
+          el.classList.toggle('kds-row--neg', !isGroup && !isLrow && st === 'cancelled');
+          el.classList.toggle('kds-kit--neg', isGroup && st === 'cancelled');
+          el.querySelectorAll('.kds-kit__comp').forEach(function (c) { c.classList.toggle('kds-kit__comp--neg', isGroup && st === 'cancelled'); });
+          var nm = el.querySelector('.kds-dl-name');
+          if (nm) nm.classList.toggle('is-neg', st === 'cancelled');
+          ['waiting', 'urgent', 'cooking', 'ready', 'cancelled', 'done'].forEach(function (s) {
+            el.classList.toggle('kds-row--' + s, !isGroup && !isLrow && st === s);
+            el.classList.toggle('kds-kit--' + s, isGroup && st === s);
+          });
+          var btn = el.querySelector('.kds-btn, .kds-kit__btn, .kds-dl-btn');
+          if (btn) {
+            var base = isGroup ? 'kds-kit__btn kds-kit__btn--'
+              : isLrow ? 'kds-dl-btn kds-btn--'
+              : 'kds-btn kds-btn--';
+            btn.className = base + st;
+            btn.innerHTML = '<span class="material-icons">' + icoFor(st, isGroup ? 'mgroup' : m.kind) + '</span>';
+          } else {
+            /* экран сборщика: кнопки нет — обновляем иконку статуса */
+            var icoEl = el.querySelector('.kds-row__ico');
+            if (icoEl) {
+              icoEl.className = 'kds-row__ico kds-btn--' + st;
+              var gl = icoEl.querySelector('.material-icons');
+              if (gl) gl.textContent = icoFor(st, 'dish');
+            }
+          }
+        }
+      }
+      if (m.cid !== 'dl') autoHideCard(m.cid);
+      applyCounts(); syncUndo();
+    }
+    /* если все блюда заказа сброшены — карточка уходит с экрана (вики, шаг 3а);
+       статус самого заказа при этом не пересчитывается — он живёт отдельно */
+    function autoHideCard(cid) {
+      var o = RT.cfg.orders[+cid.slice(1)];
+      if (!o || o._hidden) return;
+      var rows = cardRows(o);
+      if (rows.length && rows.every(function (m) { return m.o.st === 'done'; })) hideCard(cid);
+    }
+    function hideCard(cid) {
+      var o = RT.cfg.orders[+cid.slice(1)];
+      var a = cardEl(cid);
+      if (o) o._hidden = true;
+      if (a) a.style.display = 'none';
+      applyCounts(); syncUndo();
+    }
+    function showCard(cid) {
+      var o = RT.cfg.orders[+cid.slice(1)];
+      var a = cardEl(cid);
+      if (o) o._hidden = false;
+      if (a) a.style.display = '';
+    }
+    function undo() {
+      var h = RT.hist.pop();
+      if (!h) return;
+      if (h.type === 'row') {
+        applyRow(h.rid, h.prev);
+        var m = RT.M[h.rid];
+        if (m && m.cid !== 'dl') showCard(m.cid);
+      } else if (h.type === 'card') {
+        if (h.rows) h.rows.forEach(function (r) { applyRow(r.rid, r.prev); });
+        var o = RT.cfg.orders[+h.cid.slice(1)];
+        if (o) { o.st = h.prev; paintCard(h.cid); }
+        showCard(h.cid);
+        sortBoard();
+      } else if (h.type === 'rows') {
+        h.rows.forEach(function (r) { applyRow(r.rid, r.prev); });
+      } else if (h.type === 'set') {
+        h.rows.forEach(function (r) { var km = RT.M[r.rid]; if (km) km.o.st = r.prev; });
+        applySet(h.rid, h.prev);
+      }
+      applyCounts(); syncUndo();
+    }
+    /* в режиме «по блюдам» шапка-плашка = bump всего заказа (bumpOrder) */
+    function listOrderAction(ord) {
+      if (!RT.shift) return;
+      var live = [];
+      (RT.cfg.rows || []).forEach(function (rw) {
+        var d = rw.dish || rw;
+        if (rw.ord !== ord) return;
+        var m = RT.M[d._rid];
+        if (m && m.o.st !== 'done') live.push(m);
+      });
+      if (!live.length) return;
+      pushHist({ type: 'rows', rows: live.map(function (m) { return { rid: m.o._rid, prev: m.o.st }; }) });
+      live.forEach(function (m) { applyRow(m.o._rid, CYCLE[m.o.st] || 'cooking'); });
+      applyCounts(); syncUndo();
+    }
+    function paintCard(cid) {
+      var o = RT.cfg.orders[+cid.slice(1)];
+      if (!o) return;
+      var art = RT.view.querySelector('[data-cid="' + cid + '"]');
+      if (!art) return;
+      var s = ST[o.st] || ST.waiting;
+      var head = art.querySelector('.kds-card__head');
+      if (head) {
+        head.style.setProperty('--st-band', s.band);
+        head.style.setProperty('--st-tint', s.tint);
+        head.style.setProperty('--st-num', s.num);
+        head.style.setProperty('--st-timer', (o._secs != null && o._secs < 0) ? '#ff5252' : s.timer);
+      }
+      art.setAttribute('data-st', o.st);
+      art.classList.toggle('kds-card--cancelled', o.st === 'cancelled');
+      art.classList.toggle('kds-card--wico', o.st === 'ready' || o.st === 'cancelled');
+    }
+
+    /* ── Счётчики шапки (Figma «Menu setting») и отмена последнего действия ──
+         Корзины — по цветам шапки (правило заказчика 22.10):
+           синяя «В работе» — блюдо «Готовится» (cooking);
+           красная «Просрочено» — время карточки истекло, задача ещё не готова (urgent/cooking);
+           зелёная «Готово» — «Приготовлено» (ready).
+         Ожидание, «Пора готовить» без просрочки, отменённое и сброшенное — не считаем. ── */
+    function inBucket(k, st, overdue) {
+      if (!st || st === 'cancelled' || st === 'done' || st === 'waiting') return false;
+      if (k === 'done') return st === 'ready';
+      if (k === 'run') return st === 'cooking';
+      /* просрочено — только то, что уже в работе: время вышло у «Готовится» */
+      if (k === 'over') return !!overdue && st === 'cooking';
+      return false;
+    }
+    function countsNow() {
+      var run = 0, over = 0, done = 0;
+      function add(st, overdue) {
+        if (inBucket('run', st, overdue)) run++;
+        if (inBucket('over', st, overdue)) over++;
+        if (inBucket('done', st, overdue)) done++;
+      }
+      ((RT.cfg && RT.cfg.orders) || []).forEach(function (o) {
+        if (o._hidden) return;
+        var overdue = !!(o.timerNeg || (o._secs != null && o._secs < 0));
+        cardRows(o).forEach(function (m) { add(m.o.st, overdue); });
+      });
+      ((RT.cfg && RT.cfg.rows) || []).forEach(function (rw) {
+        var d = rw.dish || rw;
+        add(d.st || 'waiting', !!rw.timerNeg);
+      });
+      return { run: run, over: over, done: done };
+    }
+    /* на экране 6 карточек, а в макете 12/2/8 — храним дельту, чтобы стартовые
+       цифры совпадали с Figma, а дальше реагировали на нажатия */
+    function displayCounts() {
+      var c = countsNow();
+      /* цифры в шапке — реальные количества блюд (без подмешивания Figma-значений) */
+      return { run: c.run, over: c.over, done: c.done, avg: CNT_BASE.avg };
+    }
+    function applyCounts() {
+      if (!RT.view) return;
+      var c = displayCounts();
+      ['run', 'over', 'done', 'avg'].forEach(function (k) {
+        var el = RT.view.querySelector('[data-cnt="' + k + '"]');
+        if (el) el.textContent = c[k];
+      });
+      var menu = RT.view.querySelector('.kds-menu--metrics');
+      if (menu) {
+        var rows = menu.querySelectorAll('[data-mrow]');
+        Array.prototype.forEach.call(rows, function (r) {
+          var k = r.getAttribute('data-mrow');
+          r.lastChild.textContent = r.getAttribute('data-label') + ' ' + c[k];
+        });
+      }
+      applyFilter();
+    }
+    /* ── Счётчики-фильтры: «В работе» / «Просрочено» / «Вовремя» ── */
+    function toggleFilter(k) {
+      RT.filter = RT.filter === k ? null : k;
+      applyFilter();
+      /* фильтр применяется к ленте с её начала — иначе скрытые карточки за экраном
+         и кажется, что фильтр ничего не сделал */
+      var board = RT.view && RT.view.querySelector('.kds-board');
+      if (board) board.scrollLeft = 0;
+    }
+    function matchFilter(st, overdue) {
+      if (!RT.filter) return true;
+      return inBucket(RT.filter, st, overdue);
+    }
+    function applyFilter() {
+      if (!RT.view || !RT.cfg) return;
+      var changed = false;
+      /* Фильтр — по ЗАДАЧАМ (блюдам), как счётчики шапки: неподходящие блюда скрываются
+         внутри карточек, карточка без единого видимого блюда прячется целиком */
+      (RT.cfg.orders || []).forEach(function (o) {
+        var art = cardEl(o._cid);
+        if (!art) return;
+        var overdue = !!(o.timerNeg || (o._secs != null && o._secs < 0));
+        var any = false;
+        Array.prototype.forEach.call(art.querySelectorAll('[data-rid]'), function (el) {
+          var m = RT.M[el.getAttribute('data-rid')];
+          if (!m) return;
+          /* коробка набора не блюдо: её видимость решается по её блюдам (ниже) */
+          if (el.classList.contains('kds-kit') && el.querySelector('[data-rid]')) return;
+          var st = m.o.st || 'waiting';
+          var hide = (st === 'done') || !matchFilter(st, overdue);
+          var want = hide ? 'none' : '';
+          if (el.style.display !== want) { el.style.display = want; changed = true; }
+          if (!hide) any = true;
+        });
+        /* коробка набора видна, только если внутри есть видимое блюдо */
+        Array.prototype.forEach.call(art.querySelectorAll('.kds-kit[data-rid]'), function (box) {
+          var kids = box.querySelectorAll('[data-rid]');
+          if (!kids.length) return;
+          var alive = Array.prototype.some.call(kids, function (k) { return k.style.display !== 'none'; });
+          var wantBox = alive ? '' : 'none';
+          if (box.style.display !== wantBox) { box.style.display = wantBox; changed = true; }
+        });
+        var want = (o._hidden || (!!RT.filter && !any)) ? 'none' : '';
+        if (art.style.display !== want) { art.style.display = want; changed = true; }
+      });
+      (RT.cfg.rows || []).forEach(function (rw) {
+        var d = rw.dish || rw;
+        if (!d._rid) return;
+        var el = rowEl(d._rid);
+        if (!el) return;
+        var want = (d.st === 'done' || !matchFilter(d.st || 'waiting', !!rw.timerNeg)) ? 'none' : '';   // сброшенное блюдо не возвращаем фильтром
+        if (el.style.display !== want) { el.style.display = want; changed = true; }
+      });
+      Array.prototype.forEach.call(RT.view.querySelectorAll('[data-filter]'), function (b) {
+        b.classList.toggle('is-sel', RT.filter === b.getAttribute('data-filter'));
+      });
+      if (changed) {
+        var board = RT.view.querySelector('.kds-board');
+        if (board) board.dispatchEvent(new Event('scroll'));
+      }
+    }
+    function syncUndo() {
+      var b = RT.view && RT.view.querySelector('[data-act="undo"]');
+      if (b) b.disabled = !RT.hist.length;
+    }
+
+    /* ── Выпадающие панели шапки (Figma: Menu setting, Menu header + content) ── */
+    function openPop(anchor, cls, html) {
+      var wasOpen = RT.pop && RT.pop.anchor === anchor;
+      closePop();
+      if (wasOpen) return null;
+      var menu = document.createElement('div');
+      menu.className = 'kds-menu ' + cls + ' is-open';
+      menu.innerHTML = html;
+      var layer = RT.layer || RT.view;
+      layer.appendChild(menu);
+      var p = relPos(anchor, layer);
+      var w = menu.offsetWidth, h = menu.offsetHeight;
+      var left = Math.min(Math.max(8, p.x), Math.max(8, layer.clientWidth - w - 8));
+      var top = p.y + anchor.offsetHeight + 8;
+      if (top + h > layer.clientHeight - 8) top = Math.max(8, p.y - h - 8);
+      menu.style.left = left + 'px';
+      menu.style.top = top + 'px';
+      RT.pop = { el: menu, anchor: anchor };
+      return menu;
+    }
+    function closePop() {
+      if (!RT.view) return;
+      Array.prototype.forEach.call(RT.view.querySelectorAll('.kds-menu'), function (m) { m.remove(); });
+      Array.prototype.forEach.call(RT.view.querySelectorAll('[data-select].is-open'), function (b) { b.classList.remove('is-open'); });
+      RT.pop = null;
+    }
+    /* меню показателей: «Показатели за 15 минут» (10106:75132) */
+    function openMetrics(anchor) {
+      var c = displayCounts();
+      function row(k, ico, color, label) {
+        return '<button class="kds-menu__item" type="button" data-mrow="' + k + '" data-label="' + label + '">' +
+          '<span class="kds-menu__ico" style="color:' + color + '">' + ico + '</span><span>' + label + ' ' + c[k] + '</span></button>';
+      }
+      var html = '<div class="kds-menu__title"><span class="material-icons">bar_chart</span>Показатели за 15 минут</div>' +
+        '<div class="kds-menu__div"></div>' +
+        row('run', svgIco('clock_loader_40'), '#448aff', 'В работе') +
+        row('over', '<span class="material-icons">info</span>', '#ff5252', 'Просрочено') +
+        row('done', '<span class="material-icons">check_circle</span>', '#14b456', 'Вовремя') +
+        row('avg', '<span class="material-icons">hourglass_empty</span>', '#9e9e9e', 'Ср. время');
+      openPop(anchor, 'kds-menu--metrics', html);
+    }
+    /* панель «Настройки»: шапка с заголовком и ×, «Тема», «Масштаб» */
+    function openSettings(anchor) {
+      var html = '<div class="kds-set__head"><span class="kds-set__title">Настройки</span>' +
+          '<button class="kds-iconbtn" type="button" data-act="close-pop"><span class="material-icons">close</span></button></div>' +
+        '<div class="kds-set__body">' +
+          '<div class="kds-set__row"><span class="kds-set__label">Тема</span>' +
+            '<div class="kds-toggle">' +
+              '<button class="kds-toggle__i' + (RT.opts.theme === 'light' ? ' is-on' : '') + '" type="button" data-act="theme-light"><span class="material-icons">light_mode</span></button>' +
+              '<button class="kds-toggle__i' + (RT.opts.theme === 'dark' ? ' is-on' : '') + '" type="button" data-act="theme-dark"><span class="material-icons">dark_mode</span></button>' +
+            '</div></div>' +
+          '<div class="kds-set__row"><span class="kds-set__label">Масштаб</span>' +
+            '<div class="kds-scale">' +
+              '<button class="kds-scale__btn kds-scale__btn--reset" type="button" data-act="zoom-reset"><span class="material-icons">refresh</span></button>' +
+              '<button class="kds-scale__btn" type="button" data-act="zoom-out"><span class="material-icons">remove</span></button>' +
+              '<span class="kds-scale__val" data-zoomval>' + Math.round(RT.opts.zoom * 100) + '%</span>' +
+              '<button class="kds-scale__btn" type="button" data-act="zoom-in"><span class="material-icons">add</span></button>' +
+            '</div></div>' +
+        '</div>';
+      openPop(anchor, 'kds-menu--settings', html);
+    }
+    /* списки терминала и ресторана — тот же контейнер меню */
+    function openSelect(btn) {
+      var kind = btn.getAttribute('data-select');
+      var items = kind === 'term' ? TERMS : RESTS;
+      var cur = SEL[kind];
+      var ico = kind === 'term' ? 'desktop_windows' : 'person';
+      var html = items.map(function (label, i) {
+        return '<button class="kds-menu__item' + (i === cur ? ' is-sel' : '') + '" type="button" data-pick="' + i + '">' +
+          '<span class="kds-menu__ico material-icons">' + (i === cur ? 'check' : ico) + '</span>' + esc(label) + '</button>';
+      }).join('');
+      var menu = openPop(btn, '', html);
+      if (!menu) return;
+      menu.addEventListener('click', function (ev) {
+        var b = ev.target.closest('[data-pick]');
+        if (!b) return;
+        var i = +b.getAttribute('data-pick');
+        SEL[kind] = i;
+        var val = btn.querySelector('[data-val]');
+        if (val) val.textContent = items[i];
+        closePop();
+      });
+    }
+
+    /* ── Тема и масштаб (панель «Настройки» из Figma) ── */
+    function setTheme(t) {
+      RT.opts.theme = t;
+      applyTheme();
+      var l = RT.view.querySelector('[data-act="theme-light"]');
+      var d = RT.view.querySelector('[data-act="theme-dark"]');
+      if (l) l.classList.toggle('is-on', t === 'light');
+      if (d) d.classList.toggle('is-on', t === 'dark');
+    }
+    function applyTheme() {
+      if (RT.view) RT.view.classList.toggle('kds-view--light', RT.opts.theme === 'light');
+    }
+    function setZoom(z) {
+      RT.opts.zoom = Math.min(1.5, Math.max(0.6, Math.round(z * 100) / 100));
+      applyZoom();
+    }
+    function applyZoom() {
+      if (!RT.view) return;
+      var z = RT.opts.zoom;
+      if (RT.layer) {
+        RT.layer.style.transform = 'scale(' + z + ')';
+        RT.layer.style.width = (100 / z) + '%';
+        RT.layer.style.height = (100 / z) + '%';
+      }
+      var v = RT.view.querySelector('[data-zoomval]');
+      if (v) v.textContent = Math.round(z * 100) + '%';
+    }
+    /* питание — состояние смены, которое показывает футер («Включен»/«Выключен») */
+    function toggleShift() {
+      RT.shift = !RT.shift;
+      if (!RT.view) return;
+      var st = RT.view.querySelector('.kds-footer__status');
+      if (st) st.innerHTML = '<span class="kds-dot"></span>' + (RT.shift ? 'Включен' : 'Выключен');
+      var dot = st && st.querySelector('.kds-dot');
+      if (dot) dot.style.background = RT.shift ? '' : 'var(--kds-ic-neutral)';
+      var area = RT.view.querySelector('.kds-board, .kds-dlist, .kds-posters');
+      if (area) area.style.opacity = RT.shift ? '' : '.45';
+    }
+    function doAct(a) {
+      if (a === 'power') toggleShift();
+      else if (a === 'undo') undo();
+      else if (a === 'close-pop') closePop();
+      else if (a === 'theme-light') setTheme('light');
+      else if (a === 'theme-dark') setTheme('dark');
+      else if (a === 'zoom-in') setZoom(RT.opts.zoom + 0.1);
+      else if (a === 'zoom-out') setZoom(RT.opts.zoom - 0.1);
+      else if (a === 'zoom-reset') setZoom(1);
+    }
+
+    /* ── Живые таймеры карточек и часы в шапке ── */
+    function startTicker() {
+      clearInterval(RT.tickId);
+      RT.tickId = setInterval(function () {
+        if (!RT.view || document.hidden) return;
+        var clock = RT.view.querySelector('[data-clock]');
+        if (clock) clock.textContent = nowHHMM();
+        var list = RT.cfg && RT.cfg.orders;
+        if (!list || !RT.shift) return;
+        var moved = false;
+        list.forEach(function (o) {
+          if (o._secs == null || o._hidden || o.st === 'ready' || o.st === 'cancelled') return;
+          o._secs -= 1; moved = true;
+          var art = RT.view.querySelector('[data-cid="' + o._cid + '"]');
+          if (art) {
+            var t = art.querySelector('.kds-card__timer');
+            if (t) t.textContent = fmtTimer(o._secs);
+            /* просрочка — это только красный таймер и подсветка полосы, статус задачи не меняется
+               (в макете карточка «Готовится» спокойно живёт с отрицательным таймером) */
+            var head = art.querySelector('.kds-card__head');
+            if (head && o._secs < 0) head.style.setProperty('--st-timer', '#ff5252');
+          }
+        });
+        if (moved) applyCounts();
+      }, 1000);
+    }
+
+    /* ── Ползунок полосы скролла: тянется мышью и пальцем ── */
+    function bindThumb(view) {
+      var board = view.querySelector('.kds-board');
+      var thumb = view.querySelector('.kds-scrollstrip__thumb');
+      if (!board || !thumb) return;
+      var dragging = false, startX = 0, startL = 0, k = 1;
+      thumb.addEventListener('pointerdown', function (e) {
+        dragging = true; startX = e.clientX; startL = board.scrollLeft;
+        k = view.getBoundingClientRect().width / view.offsetWidth || 1;
+        try { thumb.setPointerCapture(e.pointerId); } catch (err) {}
+        e.preventDefault(); e.stopPropagation();
+      });
+      thumb.addEventListener('pointermove', function (e) {
+        if (!dragging) return;
+        var cw = board.clientWidth, sw = board.scrollWidth;
+        var max = Math.max(1, (cw - 4) - thumb.offsetWidth);
+        board.scrollLeft = startL + ((e.clientX - startX) / k / max) * (sw - cw);
+        e.stopPropagation();
+      });
+      function end() { dragging = false; }
+      thumb.addEventListener('pointerup', end);
+      thumb.addEventListener('pointercancel', end);
+    }
+
+    /* ── Один делегированный обработчик на весь экран ── */
+    function bindInteractive(view) {
+      if (!view) return;
+      view.addEventListener('click', function (e) {
+        var t = e.target;
+        if (!t || !t.closest) return;
+        var pop = t.closest('[data-pop]');
+        if (pop) {
+          e.stopPropagation();
+          if (pop.getAttribute('data-pop') === 'metrics') openMetrics(pop); else openSettings(pop);
+          return;
+        }
+        var flt = t.closest('[data-filter]');
+        if (flt) { e.stopPropagation(); toggleFilter(flt.getAttribute('data-filter')); return; }
+        var sel = t.closest('[data-select]');
+        if (sel) { e.stopPropagation(); openSelect(sel); return; }
+        var act = t.closest('[data-act]');
+        if (act) { e.stopPropagation(); doAct(act.getAttribute('data-act')); return; }
+        var stub = t.closest('[data-ord]');
+        if (stub) { e.stopPropagation(); listOrderAction(stub.getAttribute('data-ord')); return; }
+        var row = t.closest('[data-rid]');
+        if (row) {
+          /* статус меняет только кнопка строки (52×52), а не вся строка:
+             нажатие на название раскрывает полное название, а не меняет статус */
+          if (t.closest('.kds-btn, .kds-kit__btn, .kds-dl-btn')) { rowAction(row.getAttribute('data-rid')); return; }
+          closePop();
+          return;
+        }
+        var course = t.closest('[data-course]');
+        if (course) { courseAction(course.getAttribute('data-cid'), +course.getAttribute('data-course')); return; }
+        var cardEl = t.closest('.kds-card[data-cid]');
+        if (cardEl && t.closest('.kds-card__head')) {
+          orderAction(cardEl.getAttribute('data-cid'));
+          return;
+        }
+        closePop();
+      });
+      view.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closePop();
+      });
+      bindThumb(view);
+    }
+
+    /* ── Переключение экранов — только из панели ревью (ds-review.js) ── */
+    window.DSReviewState = render;
+    document.addEventListener('dsreview:state', function (e) { render(e.detail && e.detail.id || 'base'); });
+
+    var initial = 'base';
+    try { initial = new URL(location.href).searchParams.get('state') || 'base'; } catch (err) {}
+    render(SCREENS[initial] ? initial : 'base');
+    window.addEventListener('load', fitScale);
+    window.addEventListener('resize', fitScale);
+    setTimeout(fitScale, 600);
+  })();
+  </script>
+</body>
+</html>
