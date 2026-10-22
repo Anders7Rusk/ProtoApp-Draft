@@ -433,7 +433,9 @@
   .kds-kit__comp--deep { padding-left: 41px; }
   .kds-kit__comp--tight { padding-right: 8px; }
   .kds-kit__comp--tall { min-height: 28px; }
-  .kds-kit__comp--neg { color: var(--kds-ic-negative); text-decoration: line-through; }
+  .kds-kit__comp--neg { color: var(--kds-ic-negative); }
+  /* Отменённый компонент набора (сценарий PB-8108) — красный И зачёркнутый; в базе у модификаторов — только цвет */
+  .kds-kit__comp--cancelled { text-decoration: line-through; }
   .kds-kit__qty { flex: 0 0 auto; min-width: 19px; height: 24px; background: #e0e0e0;
     border-radius: 6px; padding: 0 4px; font-size: 18px; font-weight: 700; line-height: 24px; letter-spacing: .5px; color: #333; }
   .kds-kit__qty--neg { background: transparent; box-shadow: inset 0 0 0 1px var(--kds-ic-negative); color: var(--kds-ic-negative); font-weight: 500; }
@@ -1193,8 +1195,9 @@
       /* Отменён последний видимый компонент — набор целиком отменён: пустой группы не остаётся */
       if ((g.rows || []).length && g.rows.every(function (rr) { return (rr.st || 'waiting') === 'cancelled'; })) return '';
       var kids = (g.rows || []).map(function (rr) {
-        var neg = rr.neg || (rr.st || 'waiting') === 'cancelled';
-        return '<div class="kds-kit__comp' + (neg ? ' kds-kit__comp--neg' : '') + '"' + (rr._rid ? ' data-rid="' + rr._rid + '"' : '') +
+        var st = rr.st || 'waiting';
+        var neg = rr.neg || st === 'cancelled';
+        return '<div class="kds-kit__comp' + (neg ? ' kds-kit__comp--neg' : '') + (st === 'cancelled' ? ' kds-kit__comp--cancelled' : '') + '"' + (rr._rid ? ' data-rid="' + rr._rid + '"' : '') +
           (g._instKey ? ' data-inst-row="' + esc(g._instKey) + '"' : '') + '>' +
           (rr.qty > 1 ? '<span class="kds-kit__qty' + (neg ? ' kds-kit__qty--neg' : '') + '">' + rr.qty + '</span>' : '') +
           '<span>' + esc(rr.name || rr.text) + '</span></div>';
