@@ -1596,12 +1596,14 @@
     }
     /* Иконка кнопки из статуса: стрелка → в работу, галочка → готово, крестик/корзина → отмена */
     function icoFor(st, kind) {
-      /* экран сборщика (Figma DSGN-509): статус без кнопки — часы (ожидает), update (готовится),
-         галочка (готово), корзина (отменено) */
+      /* экран сборщика (Figma DSGN-509/8941:7418) — статус без кнопки, KDS-иконки по состояниям:
+         часы access_time (ожидает, серый), update (пора готовить, оранжевый),
+         timelapse (готовится, синий), галочка (готово, зелёный), корзина (отменено, красный) */
       if (kind === 'asm') {
         if (st === 'cancelled') return 'delete';
         if (st === 'ready') return 'check';
-        if (st === 'cooking') return 'update';
+        if (st === 'cooking') return 'timelapse';
+        if (st === 'urgent') return 'update';
         return 'access_time';
       }
       if (kind === 'mgroup' || kind === 'lrow') return st === 'cancelled' ? 'delete' : (st === 'ready' ? 'check' : 'arrow_forward');
