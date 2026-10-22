@@ -20,11 +20,14 @@
       (пл 16, 18/24); перенос чека — пунктирная рамка «Часть заказа X из Y»;
     • каркас страницы — подключение одной строкой: `../../Design-System/connect.js` с флагами
       data-no-header data-no-sidenav (это экран кухни, шапка/меню приложения ему не нужны);
-      панель ревью и селект «Экраны» приходят сами (ds-review.js из connect.js), реестр — layouts.js рядом;
-    • компоненты ДС: токены (отступы frame — --ds-space-*, шрифт Roboto из font.css),
-      иконки Material Icons Outlined (правило ДС);
-    • КДС-карточки — СВОЯ РАСКЛАДКА по макету выше (компонента «карточка заказа KDS» в веб-ДС нет);
-      палитра тёмной темы — из того же макета;
+      панель ревью и селект «Экраны» приходят сами (ds-review.js из connect.js), реестр — layouts.js рядом.
+      ВАЖНО: ДС подключена ВЛОЖЕННОЙ копией (папка Design-System в корне репозитория прототипа) и может
+      отставать от канонической — это копия для показа, а не сборка из исходников ДС;
+    • из ДС в прототипе — только шрифт Roboto (font.css), иконки Material Icons Outlined и токены
+      отступов --ds-space-*; классов ds-* в разметке прототипа НЕТ;
+    • КДС-карточки — СВОЯ РАСКЛАДКА по макетам Figma: компонента «карточка заказа KDS» в веб-ДС нет;
+      палитра тёмной/светлой темы и размеры карточки — из макетов WebKDS; цвета и пиксельные размеры
+      вне шкалы ДС остаются намеренно — это макет КДС, а не набор компонентов ДС;
     • демо-контента нет — только собственные экраны прототипа (правило 16.10.2026).
 
   ПРЕДЛОЖЕНИЕ ПО UX (суть, в языке обновлённой карточки):
@@ -33,8 +36,8 @@
        статуса, таймера и своей кнопки (кнопка 52×52 остаётся только у строк блюд),
        пиктограмма набора слева; другие блюда внутрь группы не попадают; способ обозначения
        не меняется от фильтрации.
-    2) Частичная видимость: подпись «видно N из M позиций набора» — когда на этом экране видна
-       не вся группа; это про видимость, а не про готовность; группа из одного компонента — та же.
+    2) Частичная видимость: подпись «на экране N из M блюд набора» — когда на этой карточке видна
+       не вся группа; N считается по всей карточке (по всем курсам), а не внутри курса;
     3) Экземпляры одного набора: перед названием — порядковый номер экземпляра (1., 2.),
        одинаковый во всех курсах: первый «Ланч» в курсе 1 — тот же первый «Ланч» в курсе 2.
     4) Курсы: группа набора живёт внутри курса, через границу курса не соединяется; курсы
@@ -60,13 +63,13 @@
        отменённый заказ. Показывает карточки до применения задачи.
     2. «По заказам · группа из компонентов · сценарий 2 · горячий цех» (g-multi) — заказ №214,
        горячий цех, момент проверки на сборке. «Ланч» — группа: заголовок (гость + звезда + название,
-       без кнопки и количества) + «видно 2 из 3» (салат в холодном цехе); компоненты —
+       без кнопки и количества) + «на экране 2 из 3 блюд набора» (салат в холодном цехе); компоненты —
        вложенные строки со своими кнопками: картофель готов (зелёная галочка), бургер
        из набора готовится (синяя). Отдельный бургер готов, но готовность отдельного
        бургера не заменяет бургер из набора.
     3. «По заказам · группа из компонентов · сценарий 2 · холодный цех» (g-single) — тот же
        сценарий 2 и тот же заказ №214, экран холодного цеха: «Ланч» выглядит так же, внутри —
-       только салат, «видно 1 из 3». Один компонент — та же группа, а не полный состав;
+       только салат, «на экране 1 из 3 блюд набора». Один компонент — та же группа, а не полный состав;
        судить о комплекте нельзя.
     4. «По заказам · группа из компонентов · сценарий 2 · оба цеха» (g-kitchens) — общий экран:
        данные горячего и холодного цеха на одной ленте; у каждого блюда справа рамка цвета
@@ -87,26 +90,34 @@
     7. «По заказам · блюдо между компонентами» (g-between, сценарий 3.2) — бургер и картофель
        из «Ланча», между ними в исходном перечне — самостоятельно заказанный салат.
        Группа целостная: салат в неё не попадает и её не разрывает; приоритеты и курс не меняются.
-    8. «По заказам · два экземпляра, разный состав» (g-instances, сценарий 3.1) — заказ №215:
-       два «Ланча» из одного комбо-меню — экземпляр А: борщ, котлета, чай; экземпляр Б: гаспачо, рыба, компот;
-       супы в курсе 1, остальное в курсе 2. Номер экземпляра стоит перед названием и одинаков во всех курсах.
-    9. «По заказам · экземпляры с одинаковым составом» (g-instances-same, сценарий 3.1) —
-       состав совпал, номера экземпляров остаются, но это два разных комплекта; количества
+    8. «По заказам · два набора, разный состав» (g-instances, сценарий 3.1) — заказ №215:
+       два «Ланча» из одного комбо-меню — экземпляр 1: борщ, котлета, чай; экземпляр 2: гаспачо, рыба, компот;
+       супы в курсе 1, остальное в курсе 2. Номер экземпляра стоит в названии («Ланч №1», «Ланч №2»)
+       и одинаков во всех курсах; цвет — не носитель различия.
+    9. «По заказам · два набора, одинаковый состав» (g-instances-same, сценарий 3.1) —
+       состав совпал, номера экземпляров остаются; это два разных комплекта; количества
        и статусы порций не смешиваются.
-   10. «По заказам · отдельно готовящийся модификатор» (g-modifier, сценарий 3.6) —
-       «Соус к бургеру» — отдельная задача с двумя связями: «к Бургеру» и «Ланч»;
-       бургера на экране нет. Соус компонентом набора не становится, статус и кнопка свои.
-   11. «По заказам · отменённый компонент» (g-cancelled) — отменённый бургер из набора
+   10. «По заказам · модификатор готовится отдельно» (g-modifier, сценарий 3.6) —
+       «Соус к бургеру» — отдельная задача с двумя связями текстом: «к Бургеру · Ланч №2»,
+       пиктограмма post_add 16 — у подписи связи; звезды набора нет. Соус компонентом набора не становится.
+   11. «По заказам · отменённое блюдо из набора» (g-cancelled) — отменённый бургер из набора
        зачёркнут и не показывается как необходимая часть комплекта; картофель готов;
        отдельный бургер вне группы готов — как обычно.
    12. «По заказам · длинное название, узкий экран» (g-long, сценарий 3.7) — экран 720 px,
-       два набора с похожими названиями, различающимися в конце. Название сокращается,
-       полное — нажатием по строке (на мыши — наведением), авто-скрытие; состав не раскрывается.
-   13. «По блюдам · принадлежность» (d-list, сценарий 2.2) — плоский список 1:1 по макету
-       «Режим Блюда» (10602:36475): звезда справа на строке гостя; «Комбо с пастой» — строка
-       с компонентами текстом и комментарием пунктиром; вложенные блюда — строки с отступом 36
-       и своей кнопкой; отменённая пицца — красная с корзиной; «Гость 3» — красный кант.
-       Скролл — отдельная вертикальная полоса справа (трек #9E9E9E, ползунок #616161).
+       два набора с похожими названиями, которые различаются в видимой части. Название сокращается с многоточием,
+       полное — нажатием по строке заголовка (поповер, авто-скрытие 3 с), состав не раскрывается.
+   13. «По блюдам · набор подписан текстом» (d-list, сценарий 2.2) — плоский список 1:1 по макету
+       «Режим Блюда» (10602:36475): звезда справа на строке гостя; набор НЕ отдельной строкой —
+       у каждой позиции подпись «Комбо: <название>» 12/16 #9E9E9E, без состава; отменённая пицца — красная
+       с корзиной; «Гость 3» — красный кант. Скролл — отдельная вертикальная полоса справа.
+   14. «Сценарий 2 · исходный порядок» (g-between-order, сценарий 3.2) — строки в исходном порядке
+       (бургер, салат, картофель) с подписью «Комбо: Ланч» у компонентов, без группировки:
+       видно, чем порядок «как пришло» отличается от «как собрано».
+   15. «Сценарий 2 · фильтр «Готово»» (g-filter) — группа та же, видимы только готовые строки,
+       подпись видимости пересчитывается; 16. «позиция без приготовления» (g-nocook) — напиток
+       сборщика без статуса; 17. «два набора с одним блюдом» (g-two-combos, сценарий 3.1);
+       18. «отменён последний компонент» (g-cancel-last, сценарий 3.1) — пустая группа не остаётся;
+       19. «группа с левым рейлом» (g-group-rail) — вариант B сравнения с подложкой (вариант A).
 
   ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ — только селектом «Экраны» в плашке ревью (событие dsreview:state,
   ?state=<id> — прямая ссылка); в контенте ссылок-переключателей нет (правило 19.10.2026).
@@ -232,8 +243,8 @@
 
   /* ── Лента карточек ── */
   .kds-board {
-    position: absolute; top: 48px; left: 16px; right: 16px; bottom: 74px;
-    display: flex; align-items: flex-start; gap: 16px; z-index: 1;
+    position: absolute; top: 48px; left: var(--ds-space-4x, 16px); right: var(--ds-space-4x, 16px); bottom: 74px;
+    display: flex; align-items: flex-start; gap: var(--ds-space-4x, 16px); z-index: 1;
     overflow: auto;
     scrollbar-width: none;
   }
@@ -317,7 +328,7 @@
   .kds-comment .material-icons { font-size: 16px; color: var(--kds-ic-warning); flex: 0 0 auto; padding-top: 4px; }
   .kds-comment__text { font-size: 16px; line-height: 24px; letter-spacing: .5px; color: var(--kds-text-3); padding-top: 0; }
 
-  .kds-card__body { background: transparent; padding-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+  .kds-card__body { background: transparent; padding-top: 6px; display: flex; flex-direction: column; gap: var(--ds-space-1x, 4px); }
   .kds-card__body--tint { background: transparent; }
   .kds-card__body--flush { padding-top: 0; }
   .kds-kit--tall { padding-bottom: 4px; }
@@ -331,7 +342,7 @@
   .kds-card__head--pad { padding-bottom: 2px; }
   /* ── Строка блюда: «коробка» 52 (#212121, r8) + кнопка 52×52 (#3b3b43), рамка — цвет статуса ── */
   .kds-row { display: flex; align-items: stretch; background: var(--kds-row); border-radius: 8px; overflow: hidden; min-height: 52px; }
-  .kds-row__main { flex: 1; min-width: 0; padding: 4px 8px; display: flex; flex-direction: column; justify-content: center; }
+  .kds-row__main { flex: 1; min-width: 0; padding: var(--ds-space-1x, 4px) var(--ds-space-2x, 8px); display: flex; flex-direction: column; justify-content: center; }
   .kds-guest { display: flex; align-items: center; gap: 4px; height: 16px; font-size: 12px; line-height: 16px; letter-spacing: .4px; color: var(--kds-text-3); }
   .kds-row__line { display: flex; align-items: center; gap: 6px; min-width: 0; }
   .kds-row__name { font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; color: #fff; min-width: 0; white-space: nowrap; }
@@ -387,7 +398,7 @@
     display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
     flex: 0 0 auto; height: 36px; border: 1px solid #424242; border-radius: 12px; background: #424242;
     font-size: 14px; line-height: 20px; letter-spacing: .25px; color: #ffffff;
-    margin-top: 12px;
+    margin-top: var(--ds-space-3x, 12px);
   }
   .kds-course:active { background: #4d4d4d; }
   .kds-course:first-child { margin-top: 0; }
@@ -396,40 +407,37 @@
 
   /* ── Набор (применение задачи к новому дизайну) ──
         Заголовок набора — отдельная строка без кнопки: гость 12/16 + пиктограмма 16 + название 22/28
-        (+ маркер экземпляра, + «видно N из M»); компоненты — вложенные строки как в макете (отступ 24),
+        (+ маркер экземпляра, + «на экране N из M блюд набора»); компоненты — вложенные строки как в макете (отступ 24),
         каждая со своей кнопкой и статусом. */
   /* ── Набор (комбо) в карточке — 1:1 по Figma (карточки «10585:7793», «10585:7667»):
         блок 360 БЕЗ рамки (#212121, r8), шапка (гость 12/16 + звезда справа, название 22/28,
-        «видно N из M» 12/16 когда видна не вся группа), компоненты текстом 18/24 (без своих кнопок),
+        «на экране N из M блюд набора» 12/16 когда видна не вся группа), компоненты текстом 18/24 (без своих кнопок),
         комментарий — пунктир сверху (иконка #FFAB40, текст 16/24 #D6D6D6), справа одна кнопка 52 на всю высоту ── */
   .kds-kit { position: relative; display: flex; align-items: stretch; background: var(--kds-row); border-radius: 8px; overflow: hidden; }
-  .kds-kit__body { flex: 1; min-width: 0; display: flex; flex-direction: column; padding-bottom: 4px; }
-  .kds-kit__head { min-height: 52px; padding: 4px 8px; display: flex; flex-direction: column; justify-content: center; }
+  .kds-kit__body { flex: 1; min-width: 0; display: flex; flex-direction: column; padding-bottom: var(--ds-space-1x, 4px); }
+  .kds-kit__head { min-height: 52px; padding: var(--ds-space-1x, 4px) var(--ds-space-2x, 8px); display: flex; flex-direction: column; justify-content: center; }
   .kds-kit__gline { display: flex; align-items: center; height: 16px; }
   .kds-kit__star { margin-left: auto; display: flex; color: var(--kds-ic-positive); }
   .kds-kit__name { font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; }
-  /* Различие экземпляров одного набора. Бордеры слева и справа не используем — они заняты
-     другим функционалом; цифры не используем — читаются как количество порций.
-     Вариант 1: мягкая цветная подложка шапки группы (своя у первого и второго).
-     Вариант 2: цветная точка перед названием.
-     Вариант 3: залитый цветом прямоугольник той же формы, что плашка количества (28, радиус 6). */
-  .kds-kit__dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; vertical-align: middle; background: #e040fb; }
-  .kds-kit__dot--2 { background: #00e5ff; }
-  .kds-kit__chip { display: inline-block; width: 12px; height: 28px; border-radius: 6px; margin-right: 8px; vertical-align: middle; background: #e040fb; }
-  .kds-kit__chip--2 { background: #00e5ff; }
-  .kds-kit__seen { font-size: 12px; line-height: 16px; letter-spacing: .4px; color: var(--kds-text-2); margin-top: 2px; }
+  /* Различие экземпляров одного набора — только ТЕКСТОМ: «Ланч №1», «Ланч №2» (цвет в интерфейсе
+     занят статусами и не может быть единственным носителем связи). 14/20, #BDBDBD, не жирный;
+     номер показывается, только когда экземпляров этого набора в заказе больше одного. */
+  .kds-kit__inst, .kds-cset__inst { font-size: 14px; line-height: 20px; letter-spacing: .25px; color: #bdbdbd; font-weight: 400; margin-left: 6px; white-space: nowrap; }
+  /* Подпись частичной видимости — про видимость, а не про готовность: «на экране 2 из 3 блюд набора» */
+  .kds-kit__seen, .kds-cset__seen { font-size: 12px; line-height: 16px; letter-spacing: .4px; color: #bdbdbd; margin-top: 2px; }
+  .kds-seen-sub { display: block; color: #9e9e9e; font-size: 12px; line-height: 16px; letter-spacing: .4px; }
   .kds-kit--neg .kds-kit__name { color: var(--kds-ic-negative); }
-  .kds-kit__comp { display: flex; align-items: center; gap: 6px; min-height: 24px; padding: 0 12px 0 16px;
+  .kds-kit__comp { display: flex; align-items: center; gap: 6px; min-height: 24px; padding: 0 var(--ds-space-3x, 12px) 0 var(--ds-space-4x, 16px);
     font-size: 18px; line-height: 24px; letter-spacing: .5px; color: #fff; }
   .kds-kit__comp--plain { padding-left: 41px; }
   .kds-kit__comp--deep { padding-left: 41px; }
   .kds-kit__comp--tight { padding-right: 8px; }
   .kds-kit__comp--tall { min-height: 28px; }
-  .kds-kit__comp--neg { color: var(--kds-ic-negative); }
+  .kds-kit__comp--neg { color: var(--kds-ic-negative); text-decoration: line-through; }
   .kds-kit__qty { flex: 0 0 auto; min-width: 19px; height: 24px; background: #e0e0e0;
     border-radius: 6px; padding: 0 4px; font-size: 18px; font-weight: 700; line-height: 24px; letter-spacing: .5px; color: #333; }
   .kds-kit__qty--neg { background: transparent; box-shadow: inset 0 0 0 1px var(--kds-ic-negative); color: var(--kds-ic-negative); font-weight: 500; }
-  .kds-kit__comment { display: flex; align-items: flex-start; margin: 4px 0 0; padding: 2px 8px 0; }
+  .kds-kit__comment { display: flex; align-items: flex-start; margin: var(--ds-space-1x, 4px) 0 0; padding: 2px var(--ds-space-2x, 8px) 0; }
   .kds-kit__comment-in { flex: 1; min-width: 0; display: flex; align-items: flex-start; gap: 6px;
     border-top: 1px dashed var(--kds-line); padding: 3px 0 0; }
   .kds-kit__comment .material-icons { font-size: 16px; line-height: 1; color: var(--kds-ic-warning); padding-top: 4px; }
@@ -445,11 +453,13 @@
   .kds-kit__btn--cancelled { color: var(--kds-ic-negative); }
   .kds-kit--mods { box-shadow: none; }
   .kds-kit--mods .kds-kit__body { padding-bottom: 0; }
-  .kds-nest { display: flex; flex-direction: column; gap: 4px; }
-  .kds-nest__rows { display: flex; flex-direction: column; gap: 4px; margin-left: 24px; }
+  .kds-nest { display: flex; flex-direction: column; gap: var(--ds-space-1x, 4px); }
+  .kds-nest__rows { display: flex; flex-direction: column; gap: var(--ds-space-1x, 4px); margin-left: var(--ds-space-6x, 24px); }
 
   /* ── Отдельно готовящийся модификатор ── */
   .kds-mod__ico { font-size: 20px; color: var(--kds-ic-warning); flex: 0 0 auto; }
+  /* В строке отдельной задачи модификатора иконка post_add — 16 px слева у вторичной подписи связи */
+  .kds-drow__sub .kds-mod__ico { font-size: 16px; line-height: 16px; }
   .kds-dlink { display: inline-flex; align-items: center; gap: 4px; min-width: 0; font-size: 12px; line-height: 16px; color: var(--kds-text-3); }
   .kds-dlink .material-icons { font-size: 14px; color: var(--kds-text-2); }
   .kds-dsep { color: var(--kds-text-2); }
@@ -457,8 +467,8 @@
   /* ── Режим «по блюдам» — по макету Figma «Режим Блюда» (10602:36475):
         строка = [шапка заказа 360] + 8 + [блюдо 820 + кнопка 52], рамка 1px #616161, r8 ── */
   /* Список — как в макете: видимая область от шапки (48) до футера (56), скролл — отдельная полоса справа (Scroll) */
-  .kds-dlist { position: absolute; top: 48px; left: 16px; right: 24px; bottom: 56px; overflow-y: auto; overflow-x: hidden;
-    display: flex; flex-direction: column; gap: 4px; z-index: 1; scrollbar-width: none; }
+  .kds-dlist { position: absolute; top: 48px; left: var(--ds-space-4x, 16px); right: 24px; bottom: 56px; overflow-y: auto; overflow-x: hidden;
+    display: flex; flex-direction: column; gap: var(--ds-space-1x, 4px); z-index: 1; scrollbar-width: none; }
   .kds-dlist::-webkit-scrollbar { width: 0; height: 0; }
   /* Вертикальная полоса скролла (Figma: Scroll 12 px на правом краю, от шапки до футера;
      трек 8 px #9E9E9E r8, ползунок #616161 r8) */
@@ -488,7 +498,7 @@
   .kds-dl-body { flex: 1 1 auto; min-width: 0; display: flex; background: #212121; border-radius: 8px; overflow: hidden; }
   .kds-dl-body--indent { margin-left: 36px; }
   .kds-dl-body--sel { box-shadow: inset 4px 0 0 var(--kds-ic-negative); }
-  .kds-dl-main { flex: 1 1 auto; min-width: 0; padding: 4px 8px; display: flex; flex-direction: column; justify-content: center; }
+  .kds-dl-main { flex: 1 1 auto; min-width: 0; padding: var(--ds-space-1x, 4px) var(--ds-space-2x, 8px); display: flex; flex-direction: column; justify-content: center; }
   .kds-dl-cell { display: flex; flex-direction: column; justify-content: center; }
   .kds-dl-main--chips { padding-bottom: 8px; }
   .kds-dl-main--chips .kds-dl-cell { min-height: 48px; }
@@ -500,6 +510,11 @@
   .kds-dl-line { display: flex; align-items: center; gap: 6px; min-height: 28px; }
   .kds-dl-name { font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .kds-dl-name.is-neg { color: var(--kds-ic-negative); }
+  /* Вторичная подпись принадлежности (PB-8108): «Комбо: <название>» — 12/16 #9E9E9E, без состава набора */
+  .kds-row__sub, .kds-dl-sub { font-size: 12px; line-height: 16px; letter-spacing: .4px; color: #9e9e9e; margin-top: 2px; }
+  /* Позиция набора, которая не готовится (напиток забирает сборщик) — без статуса приготовления */
+  .kds-row__nocook { display: flex; align-items: center; gap: 4px; font-size: 12px; line-height: 16px; letter-spacing: .4px; color: #9e9e9e; margin-top: 2px; }
+  .kds-row__nocook .material-icons { font-size: 14px; line-height: 16px; color: #9e9e9e; }
   .kds-dl-qty { flex: 0 0 auto; min-width: 21px; height: 28px; padding: 0 4px; border-radius: 6px; background: #e0e0e0;
     color: #333; font-size: 22px; font-weight: 700; line-height: 26px; letter-spacing: .25px; text-align: center; }
   .kds-dl-star { flex: 0 0 auto; display: flex; color: var(--kds-ic-positive); }
@@ -520,15 +535,20 @@
   .kds-ditem { font-size: 12px; line-height: 16px; color: var(--kds-text-2); white-space: nowrap; }
   .kds-drow__sub { display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: wrap; }
 
-  /* Группа набора по сценариям: заголовок без кнопки/статуса + компоненты строками с кнопками (отступ 24) */
-  .kds-cset { display: flex; flex-direction: column; gap: 4px; }
-  .kds-cset__head { background: var(--kds-row); border-radius: 8px; padding: 4px 8px; min-height: 52px;
+  /* Группа набора по сценариям: заголовок без кнопки/статуса + компоненты строками с кнопками (отступ 24).
+     Вариант A (F7): группа — подложка на тон темнее строк (#1C1C1C), внутренний отступ 8, радиус 8;
+     строки внутри остаются #212121; заголовок стоит на подложке контейнера, без своей рамки. */
+  .kds-cset { display: flex; flex-direction: column; gap: var(--ds-space-1x, 4px); padding: var(--ds-space-2x, 8px); background: #1c1c1c; border-radius: 8px; }
+  /* Вариант B (состояние g-group-rail): без подложки — левый рейл 2 px #616161 на всю высоту */
+  .kds-cset--rail { background: transparent; border-left: 2px solid var(--kds-line); border-radius: 0 8px 8px 0; padding: var(--ds-space-2x, 8px) var(--ds-space-2x, 8px) var(--ds-space-2x, 8px) var(--ds-space-3x, 12px); }
+  .kds-cset--rail .kds-cset__head { background: var(--kds-row); }
+  .kds-cset__head { background: transparent; border-radius: 8px; padding: var(--ds-space-1x, 4px) var(--ds-space-2x, 8px); min-height: 52px;
     display: flex; flex-direction: column; justify-content: center; }
   .kds-cset__gline { display: flex; align-items: center; height: 16px; }
   .kds-cset__star { margin-left: auto; display: flex; color: var(--kds-ic-positive); }
-  .kds-cset__name { font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; color: #fff; }
-  .kds-cset__seen { font-size: 12px; line-height: 16px; letter-spacing: .4px; color: var(--kds-text-2); margin-top: 2px; }
-  .kds-cset__rows { display: flex; flex-direction: column; gap: 4px; margin-left: 24px; }
+  .kds-cset__name { font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; color: #fff;
+    min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .kds-cset__rows { display: flex; flex-direction: column; gap: var(--ds-space-1x, 4px); margin-left: var(--ds-space-6x, 24px); }
 
   /* ── Перенос чека: пунктир слева/справа/снизу, сверху открыт (24 px, как в макете) ── */
   .kds-transfer {
@@ -540,7 +560,7 @@
 
   /* ── Сокращение длинных названий + тултип полного названия ── */
   .kds-ellip { display: inline-block; max-width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
-  .kds-kit__name.kds-ellip { max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .kds-kit__name.kds-ellip { max-width: 100%; }
   .kds-dlink .kds-ellip { max-width: 300px; }
   .kds-tip {
     position: absolute; z-index: 30; display: none; pointer-events: none;
@@ -755,7 +775,7 @@
       /* 1. По заказам: группа из нескольких компонентов + то же блюдо отдельно (сценарий 2) */
       'g-multi': {
         nw: 1280, nh: 800, pill: 'Горячий цех', stat: 'Заказов: 1',
-        anno: 'Сценарий 2: заказ №214 · горячий цех, момент проверки на сборке. Группа «Ланч» — заголовок набора в «коробке» без кнопки, количества и статуса (гость 12/16 + звезда + название 22/28), под ним — «видно 2 из 3 позиций набора» (салат готовит холодный цех, на этом экране его нет). Компоненты — вложенные строки (отступ 24) со своими статусами и кнопками: картофель готов (зелёная галочка), бургер из «Ланча» ещё готовится (синяя). Второй бургер куплен отдельно и уже готов — но готовность отдельного бургера не заменяет бургер из набора.',
+        anno: 'Сценарий 2: заказ №214 · горячий цех, момент проверки на сборке. Группа «Ланч» — заголовок набора в «коробке» без кнопки, количества и статуса (гость 12/16 + звезда + название 22/28), под ним — «на экране 2 из 3 блюд набора» и пояснение «остальные — в других цехах» (салат готовит холодный цех). Компоненты — вложенные строки (отступ 24) со своими статусами и кнопками: картофель готов (зелёная галочка), бургер из «Ланча» ещё готовится (синяя). Второй бургер куплен отдельно и уже готов — но готовность отдельного бургера не заменяет бургер из набора.',
         orders: [
           { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
             meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '3']],
@@ -770,7 +790,7 @@
       /* 2. По заказам: один видимый компонент (сценарий 2.1, холодный цех) */
       'g-single': {
         nw: 1280, nh: 800, pill: 'Холодный цех', stat: 'Заказов: 2',
-        anno: 'Тот же заказ №214 · холодный цех. Группа «Ланч» выглядит так же, внутри — только салат. «Видно 1 из 3 позиций набора» — признак частичной видимости: состав набора не считается полным и готовым.',
+        anno: 'Тот же заказ №214 · холодный цех. Группа «Ланч» выглядит так же, внутри — только салат. «На экране 1 из 3 блюд набора» — признак частичной видимости: состав набора не считается полным и готовым.',
         orders: [
           { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
             meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '3']],
@@ -817,6 +837,21 @@
         ]
       },
 
+      /* 2в. Вариант B разделения группы: левый рейл 2 px вместо подложки (F7, для сравнения) */
+      'g-group-rail': {
+        nw: 1280, nh: 800, pill: 'Горячий цех', stat: 'Заказов: 1', rail: true,
+        anno: 'Вариант B разделения группы (сравнить с подложкой): контейнер не меняет фон, а помечает группу левым рейлом 2 px #616161 на всю высоту. Содержимое — тот же сценарий 2, что на экране «горячий цех»: удобно сравнить варианты A и B вживую.',
+        orders: [
+          { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '3']],
+            items: [
+              { k: 'cset', guest: 'Гость 1', star: true, title: 'Ланч', total: 3, rows: [
+                d('Бургер', 1, 'cooking'), d('Картофель', 1, 'ready') ] },
+              { k: 'dish', name: 'Бургер', qty: 1, st: 'ready' }
+            ] }
+        ]
+      },
+
       /* 3. По заказам: набор по курсам (сценарий 3.3) */
       'g-courses': {
         nw: 1280, nh: 800, pill: 'Горячий цех', stat: 'Заказов: 1',
@@ -836,7 +871,7 @@
       /* 3а. По заказам: обычное блюдо между компонентами набора (сценарий 3.2) */
       'g-between': {
         nw: 1280, nh: 800, pill: 'Горячий цех', stat: 'Заказов: 1',
-        anno: 'Сценарий 3.2: в одном курсе заказаны бургер и картофель из «Ланча», а между ними в исходном перечне — самостоятельно заказанный салат. Заказ идёт по обычному порядку, а компоненты набора собраны в одну целостную группу «Ланч» — салат в неё не попадает и группу не разрывает; приоритеты приготовления и принадлежность блюд к курсу не меняются.',
+        anno: 'Сценарий 3.2: в одном курсе заказаны бургер и картофель из «Ланча», а между ними в исходном перечне — самостоятельно заказанный салат. Компоненты набора собраны в одну целостную группу «Ланч» — салат в неё не попадает и группу не разрывает; группа собрана целиком, поэтому порядок внутри курса отличается от исходного (сравните с экраном «исходный порядок из заказа»).',
         orders: [
           { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
             meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '3']],
@@ -849,32 +884,27 @@
         ]
       },
 
+      /* 3б. Сценарий 3.2 — исходный порядок строк из заказа (без группировки) */
+      'g-between-order': {
+        nw: 1280, nh: 800, pill: 'Горячий цех', stat: 'Заказов: 1',
+        anno: 'Сценарий 3.2 · исходный порядок из заказа: строки идут как пришли — бургер, самостоятельно заказанный салат, картофель. Принадлежность показана вторичной подписью «Комбо: Ланч» у компонентов, группировки нет. На экране «как собрано» те же компоненты стоят одним блоком, и порядок в курсе отличается от исходного — это осознанный компромисс в пользу целостности группы.',
+        orders: [
+          { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '3']],
+            items: [
+              { k: 'dish', name: 'Бургер', qty: 1, st: 'cooking', combo: 'Ланч' },
+              { k: 'dish', name: 'Салат', qty: 1, st: 'ready' },
+              { k: 'dish', name: 'Картофель', qty: 1, st: 'ready', combo: 'Ланч' }
+            ] }
+        ]
+      },
+
       /* 4. По заказам: два экземпляра одного набора, разный состав (сценарий 3.1) */
       'g-instances': {
-        nw: 1280, nh: 880, pill: 'Сборка', stat: 'Заказов: 3',
-        anno: 'Заказ №215: один гость заказал два «Ланча» из одного комбо-меню с разным выбранным составом. Три карточки рядом: 1) без признака экземпляра; 2) цветная точка перед названием; 3) залитый цветом прямоугольник перед названием. Признак одинаков во всех курсах; цифры не используются — читаются как количество порций.',
+        nw: 1280, nh: 880, pill: 'Сборка', stat: 'Заказов: 1',
+        anno: 'Заказ №215: один гость заказал два «Ланча» из одного комбо-меню с разным выбранным составом. Экземпляры различаются номером в названии — «Ланч №1» и «Ланч №2» (14/20, #BDBDBD); номера одинаковы во всех курсах, цвет не используется. При одном экземпляре номера нет.',
         orders: [
           { num: '215', timer: '12:05', st: 'cooking', ch: '#215', rest: 'Константинопольский',
-            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 6'], ['person', '1']],
-            items: [
-              { k: 'course', label: 'Курс 1' },
-              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 1, total: 3, rows: [ d('Борщ', 1, 'cooking') ] },
-              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 2, total: 3, rows: [ d('Гаспачо', 1, 'waiting') ] },
-              { k: 'course', label: 'Курс 2' },
-              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 1, total: 3, rows: [ d('Котлета', 1, 'ready'), d('Чай', 1, 'waiting') ] },
-              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 2, total: 3, rows: [ d('Рыба', 1, 'cooking'), d('Компот', 1, 'waiting') ] }
-            ] },
-          { num: '215', timer: '12:05', st: 'cooking', ch: '#215', rest: 'Константинопольский', colorInst: true,
-            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 6'], ['person', '1']],
-            items: [
-              { k: 'course', label: 'Курс 1' },
-              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 1, total: 3, rows: [ d('Борщ', 1, 'cooking') ] },
-              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 2, total: 3, rows: [ d('Гаспачо', 1, 'waiting') ] },
-              { k: 'course', label: 'Курс 2' },
-              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 1, total: 3, rows: [ d('Котлета', 1, 'ready'), d('Чай', 1, 'waiting') ] },
-              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 2, total: 3, rows: [ d('Рыба', 1, 'cooking'), d('Компот', 1, 'waiting') ] }
-            ] },
-          { num: '215', timer: '12:05', st: 'cooking', ch: '#215', rest: 'Константинопольский', tintInst: true,
             meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 6'], ['person', '1']],
             items: [
               { k: 'course', label: 'Курс 1' },
@@ -890,9 +920,9 @@
       /* 5. По заказам: экземпляры с одинаковым составом (сценарий 3.1) */
       'g-instances-same': {
         nw: 1280, nh: 880, pill: 'Сборка', stat: 'Заказов: 1',
-        anno: 'Один гость заказал два «Ланча» с одинаковым составом: одинаковые названия и одинаковые позиции. Принадлежность видна по залитому прямоугольнику перед названием — маджентовый у первого набора, циановый у второго; количества и статусы порций у комплектов свои и не смешиваются.',
+        anno: 'Один гость заказал два «Ланча» с одинаковым составом: одинаковые названия и одинаковые позиции. Название экземпляр не различает, поэтому стоит номер в названии: «Ланч №1» и «Ланч №2» — различие читается без цвета; количества и статусы порций у комплектов свои и не смешиваются.',
         orders: [
-          { num: '218', timer: '05:33', st: 'cooking', ch: '#218', rest: 'Константинопольский', tintInst: true,
+          { num: '218', timer: '05:33', st: 'cooking', ch: '#218', rest: 'Константинопольский',
             meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 2'], ['person', '1']],
             items: [
               { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 1, total: 3, rows: [
@@ -906,13 +936,14 @@
       /* 6. По заказам: отдельно готовящийся модификатор (сценарий 3.6) */
       'g-modifier': {
         nw: 1280, nh: 800, pill: 'Горячий цех', stat: 'Заказов: 1',
-        anno: '«Соус к бургеру» готовится отдельной задачей. Бургера на этом экране нет — его готовит другой цех; у соуса обе связи: «к Бургеру» и «Ланч». Компонентом набора соус не становится. Пиктограммы у такой строки нет — в макете (DSGN-501) модификаторы идут текстом.',
+        anno: '«Соус к бургеру» готовится отдельной задачей. Бургера на этом экране нет — его готовит другой цех; у соуса обе связи текстом: «к Бургеру» и «Ланч №2», у подписи связи стоит пиктограмма post_add (16 px). Звезды набора у строки нет: компонентом набора соус не становится.',
         orders: [
           { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
             meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '1']],
             items: [
-              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 1, total: 3, rows: [ d('Картофель', 1, 'ready') ] },
-              { k: 'mod', name: 'Соус к бургеру', parent: 'Бургеру', combo: 'Ланч', inst: 1, st: 'cooking' }
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 1, total: 3, rows: [ d('Салат', 1, 'ready') ] },
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч', inst: 2, total: 3, rows: [ d('Картофель', 1, 'ready') ] },
+              { k: 'mod', name: 'Соус к бургеру', parent: 'Бургеру', combo: 'Ланч', inst: 2, st: 'cooking' }
             ] }
         ]
       },
@@ -934,18 +965,18 @@
       /* 8. По заказам: длинное название набора, узкий экран (сценарий 3.7) */
       'g-long': {
         nw: 720, nh: 800, pill: 'Горячий цех', stat: 'Заказов: 2',
-        anno: 'Узкий экран: длинные названия наборов сокращаются, полное название — по наведению на заголовок (тултип), состав набора при этом не раскрывается. Производственные сведения о блюде остаются первыми.',
+        anno: 'Узкий экран: длинные названия наборов сокращаются с многоточием и различаются уже в видимой части (напиток / суп); полное название открывается нажатием на строку заголовка (цель — вся строка) и скрывается само через 3 секунды; состав набора при этом не раскрывается. Производственные сведения о блюде остаются первыми.',
         orders: [
           { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
             meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '1']],
             items: [
-              { k: 'combo', guest: 'Гость 1', title: 'Ланч выходного дня с напитком и десертом на выбор', inst: null, total: 4, rows: [
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч дня с напитком и десертом на выбор', inst: null, total: 4, rows: [
                 d('Бургер', 1, 'cooking'), d('Картофель', 1, 'waiting') ] }
             ] },
           { num: '216', timer: '01:12', st: 'waiting', ch: '#216', rest: 'Константинопольский',
             meta: [['delivery_dining', 'Доставка'], ['schedule', '18:20']],
             items: [
-              { k: 'combo', guest: 'Гость 1', title: 'Ланч выходного дня с напитком на выбор', inst: null, total: 3, rows: [
+              { k: 'combo', guest: 'Гость 1', title: 'Ланч дня с супом и десертом на выбор', inst: null, total: 3, rows: [
                 d('Салат', 1, 'waiting') ] }
             ] }
         ]
@@ -953,8 +984,8 @@
 
       /* 9. Режим «по блюдам» — 1:1 по макету Figma «Режим Блюда» (10602:36475) */
       'd-list': {
-        nw: 1280, nh: 800, pill: 'Режим «по блюдам»', stat: 'Позиций: 17', total: '34',
-        anno: 'Режим «по блюдам» — 1:1 по макету «Режим Блюда» (10602:36475), состав строк взят из макета: строка 1240×60 = плашка заказа 360 (заливка 12 % цвета статуса, рамка 1px #616161, r8; номер 24/32, таймер 24/32 — жёлтый у «пора готовить», красный при просрочке, канал 14/20) + 8 + блюдо 820 с кнопкой 52 на всю высоту (фон #3B3B43, иконка 28). Блюдо: гость 12/16 #D6D6D6, название 22/28 Medium, количество плашкой 21×28 (#E0E0E0, без рамки), модификаторы/компоненты — ТЕКСТОМ 18/24 (у отменённой пиццы — красные, количество плашкой с красной рамкой), звезда набора справа на строке гостя, комментарий 16/24 пунктиром, «Гость 3» — красный кант 4 px слева. Кнопка — bump блюда, нажатие на плашку — bump всего заказа.',
+        nw: 1280, nh: 800, pill: 'Режим «по блюдам»', stat: 'Позиций: 18', total: '34',
+        anno: 'Режим «по блюдам» — 1:1 по макету «Режим Блюда» (10602:36475), состав строк взят из макета: строка 1240×60 = плашка заказа 360 (заливка 12 % цвета статуса, рамка 1px #616161, r8; номер 24/32, таймер 24/32 — жёлтый у «пора готовить», красный при просрочке, канал 14/20) + 8 + блюдо 820 с кнопкой 52 на всю высоту (фон #3B3B43, иконка 28). Блюдо: гость 12/16 #D6D6D6, название 22/28 Medium, количество плашкой 21×28 (#E0E0E0, без рамки), модификаторы/компоненты — ТЕКСТОМ 18/24 (у отменённой пиццы — красные, количество плашкой с красной рамкой), комментарий 16/24 пунктиром, «Гость 3» — красный кант 4 px слева. Принадлежность к набору (PB-8108) — только вторичной подписью «Комбо: …» у строки блюда; строки-контейнера набора нет, состав не раскрывается. Кнопка — bump блюда, нажатие на плашку — bump всего заказа.',
         list: true,
         rows: [
           { ord: '1028', ch: '#9753 Яндекс доставка', timer: '12:35', st: 'waiting', dish: { name: 'Морс ягодный 1 л.', st: 'waiting' } },
@@ -968,14 +999,73 @@
           { ord: '1028', ch: '#9753 Яндекс доставка', timer: '04:27', st: 'urgent', dish: { qty: 2, name: 'Кальмары', st: 'urgent', indent: true } },
           { ord: '1028', ch: '#9753 Яндекс доставка', timer: '04:27', st: 'urgent', dish: { qty: 2, name: 'Моцарелла', st: 'urgent', indent: true } },
           { ord: '1028', ch: '#9753 Яндекс доставка', timer: '04:27', st: 'urgent', dish: { guest: 'Гость 1', name: 'Паста карбонара', st: 'urgent' } },
-          { ord: '1028', ch: '#9753', timer: '- 00:27', timerNeg: true, st: 'cooking', dish: { guest: 'Гость 1', name: 'Комбо с пастой', st: 'cooking', star: true,
-            chips: [{ t: 'Паста карбонара' }, { t: 'Капучино' }], comment: 'Капучино на растительном молоке' } },
+          { ord: '1028', ch: '#9753', timer: '- 00:27', timerNeg: true, st: 'cooking', dish: { guest: 'Гость 1', name: 'Паста карбонара', st: 'cooking', star: true, combo: 'Комбо с пастой' } },
+          { ord: '1028', ch: '#9753', timer: '- 00:27', timerNeg: true, st: 'cooking', dish: { name: 'Капучино', st: 'cooking', combo: 'Комбо с пастой' } },
           { ord: '1028', ch: '#9753', timer: '- 00:27', timerNeg: true, st: 'cooking', dish: { guest: 'Гость 2', qty: 3, qtyBg: '#f5f5f5', name: 'Морс ягодный 1 л.', st: 'cooking' } },
           { ord: '1028', ch: '#9753', timer: '- 00:27', timerNeg: true, st: 'cooking', dish: { name: 'Морс ягодный 1 л.', st: 'cooking' } },
           { ord: '1028', ch: '#9753', timer: '- 00:27', timerNeg: true, st: 'cooking', dish: { guest: 'Гость 3', name: 'Паста карбонара', st: 'cooking', star: true, sel: true } },
           { ord: '1028', ch: '#9753', timer: '- 00:27', timerNeg: true, st: 'cooking', dish: { name: 'Креветки', st: 'cooking' } },
           { ord: '1028', ch: '#9753', timer: '- 00:27', timerNeg: true, st: 'cooking', dish: { name: 'Салат с морепродуктами', st: 'cooking' } },
           { ord: '1028', ch: '#9753', timer: '- 00:27', timerNeg: true, st: 'cooking', dish: { guest: 'Гость 2', name: 'Паста карбонара', st: 'cooking' } }
+        ]
+      },
+
+      /* 9а. Сценарий 2: включён фильтр по статусу «Готово» — способ показа группы тот же */
+      'g-filter': {
+        nw: 1280, nh: 800, pill: 'Горячий цех', stat: 'Заказов: 1', filterPre: 'done',
+        anno: 'Сценарий 2 · фильтр: включён фильтр «Готово» (зелёный счётчик в шапке подсвечен). Способ показа группы не меняется — «Ланч» остаётся группой с заголовком; из строк остаются только готовые блюда, а подпись видимости пересчитывается по тому, что реально видно: «на экране 1 из 3 блюд набора» — остальные скрыты фильтром, а не отсутствуют.',
+        orders: [
+          { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '3']],
+            items: [
+              { k: 'cset', guest: 'Гость 1', star: true, title: 'Ланч', total: 3, seenNote: 'остальные скрыты фильтром по статусу', rows: [
+                d('Бургер', 1, 'cooking'), d('Картофель', 1, 'ready') ] },
+              { k: 'dish', name: 'Бургер', qty: 1, st: 'ready' }
+            ] }
+        ]
+      },
+
+      /* 9б. Сценарий 2: в наборе есть позиция, которая не готовится (напиток берёт сборщик) */
+      'g-nocook': {
+        nw: 1280, nh: 800, pill: 'Горячий цех', stat: 'Заказов: 1',
+        anno: 'Сценарий 2 · позиция без приготовления: в «Ланче» есть напиток, который не готовят, — его берёт сборщик. В группе он показан без статуса приготовления и с подписью «не готовится — берёт сборщик»: позиция не выглядит отсутствующей, но и не притворяется задачей цеха.',
+        orders: [
+          { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '3']],
+            items: [
+              { k: 'cset', guest: 'Гость 1', star: true, title: 'Ланч', total: 3, rows: [
+                d('Бургер', 1, 'cooking', 'hot'), d('Картофель', 1, 'ready', 'hot'), d('Морс ягодный 1 л.', 1, 'nocook') ] }
+            ] }
+        ]
+      },
+
+      /* 9в. Сценарий 3.1: два разных набора с одинаковым блюдом в одном заказе */
+      'g-two-combos': {
+        nw: 1280, nh: 800, pill: 'Сборка', stat: 'Заказов: 1',
+        anno: 'Сценарий 3.1 · два разных набора с одинаковым блюдом в одном заказе: «Ланч» и «Детский набор» оба содержат бургер. Принадлежность различается по названию набора — каждая группа названа своим набором; блюдо «Бургер» не служит признаком набора: один и тот же бургер встречается в двух разных группах.',
+        orders: [
+          { num: '219', timer: '03:12', st: 'cooking', ch: '#219', rest: 'Константинопольский',
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 5'], ['person', '2']],
+            items: [
+              { k: 'cset', guest: 'Гость 1', star: true, title: 'Ланч', total: 2, rows: [
+                d('Бургер', 1, 'cooking'), d('Картофель', 1, 'ready') ] },
+              { k: 'cset', guest: 'Гость 2', star: true, title: 'Детский набор', total: 2, rows: [
+                d('Бургер', 1, 'waiting'), d('Морс ягодный 1 л.', 1, 'nocook') ] }
+            ] }
+        ]
+      },
+
+      /* 9г. Сценарий 3.1: отменён последний видимый компонент группы */
+      'g-cancel-last': {
+        nw: 1280, nh: 800, pill: 'Горячий цех', stat: 'Заказов: 1',
+        anno: 'Сценарий 3.1 · отменён последний видимый компонент: в «Ланче» на этом экране была одна строка, и её отменили. Пустая группа не остаётся — заголовок набора без строк не висит; в карточке остаётся только отдельно купленный бургер. Если бы в группе был хоть один действующий компонент, группа осталась бы с зачёркнутой строкой (экран «отменённое блюдо из набора»).',
+        orders: [
+          { num: '214', timer: '04:27', st: 'cooking', ch: '#214', rest: 'Константинопольский',
+            meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 4'], ['person', '3']],
+            items: [
+              { k: 'cset', guest: 'Гость 1', star: true, title: 'Ланч', total: 1, rows: [ d('Бургер', 1, 'cancelled', 'hot') ] },
+              { k: 'dish', name: 'Бургер', qty: 1, st: 'ready', kt: 'hot' }
+            ] }
         ]
       },
 
@@ -1004,7 +1094,7 @@
           ] },
           { title: 'Почему не возникает ложного сигнала о готовности набора', items: [
             'Общего статуса и кнопки «Завершить набор» нет: готовность видна только по статусам отдельных блюд.',
-            '«Видно N из M позиций набора» — про видимость на этом экране, а не про готовность; группа из одного компонента — та же группа, а не полный состав.',
+            '«На экране N из M блюд набора» — про видимость на этой карточке, а не про готовность; группа из одного компонента — та же группа, а не полный состав.',
             'Отменённый компонент зачёркнут и не показывается как необходимая часть комплекта.',
             'Цвет — не единственный носитель связи: название и маркер экземпляра текстовые; цвет занят статусами блюд.',
             'В «по блюдам» принадлежность — вторичная строка; название, количество, статус и время остаются первыми.'
@@ -1023,25 +1113,55 @@
     function dishRow(dd) {
       var st = dd.st || 'waiting';
       var neg = st === 'cancelled';
+      var nocook = st === 'nocook';
       var ico = RT.asm ? icoFor(st, 'asm') : (neg ? 'close' : (st === 'ready' ? 'check' : 'arrow_forward'));
       var guest = dd.guest
         ? '<div class="kds-guest">' + esc(dd.guest) + (dd.star ? '<span style="margin-left:auto">' + starIcon() + '</span>' : '') + '</div>'
         : '';
+      /* Вторичная подпись: принадлежность набору (PB-8108) или «не готовится» для позиции сборщика */
+      var sub = '';
+      if (dd.combo) {
+        sub = '<div class="kds-row__sub">Комбо: ' + esc(dd.combo) + (dd.inst && dd.many ? ' №' + dd.inst : '') + '</div>';
+      } else if (dd.sub) {
+        sub = '<div class="kds-row__sub">' + esc(dd.sub) + '</div>';
+      } else if (nocook) {
+        sub = '<div class="kds-row__nocook"><span class="material-icons">shopping_basket</span>не готовится — берёт сборщик</div>';
+      }
       /* Длинное название обрезаем и раскрываем полное по нажатию на всю строку (тач, не hover) */
       var long = dd.name.length > 26;
       var full = long ? ' data-full="' + esc(dd.name) + '"' : '';
       var rid = dd._rid ? ' data-rid="' + dd._rid + '"' : '';
+      var instRow = dd.instKey ? ' data-inst-row="' + esc(dd.instKey) + '"' : '';
       var ktc = dd.kt ? ' kds-row--kt-' + dd.kt : '';
-      /* Экран сборщика: у блюд нет кнопок — только иконка статуса (не кнопка) */
-      var ctl = RT.asm
-        ? '<span class="kds-row__ico kds-btn--' + st + '"><span class="material-icons">' + ico + '</span></span>'
-        : '<button class="kds-btn kds-btn--' + st + '" type="button"><span class="material-icons">' + ico + '</span></button>';
-      return '<div class="kds-row kds-row--' + st + (neg ? ' kds-row--neg' : '') + (dd.sel ? ' kds-row--sel' : '') + ktc + '"' + rid + '>' +
+      /* Экран сборщика: у блюд нет кнопок — только иконка статуса (не кнопка);
+         позиция без приготовления (напиток сборщика) — без статуса вовсе */
+      var ctl = nocook
+        ? ''
+        : RT.asm
+          ? '<span class="kds-row__ico kds-btn--' + st + '"><span class="material-icons">' + ico + '</span></span>'
+          : '<button class="kds-btn kds-btn--' + st + '" type="button"><span class="material-icons">' + ico + '</span></button>';
+      return '<div class="kds-row kds-row--' + st + (neg ? ' kds-row--neg' : '') + (dd.sel ? ' kds-row--sel' : '') + ktc + '"' + rid + instRow + '>' +
         '<div class="kds-row__main"' + full + '>' + guest +
           '<div class="kds-row__line">' + qtyBox(dd.qty, null, dd.qtyBg) + '<span class="kds-row__name' + (long ? ' kds-ellip' : '') + '">' + esc(dd.name) + '</span></div>' +
+          sub +
         '</div>' +
         ctl +
       '</div>';
+    }
+    /* Подпись частичной видимости: «на экране N из M блюд набора» (+ пояснение второй строкой).
+       Не прогресс и не готовность: N — сколько строк экземпляра видно на этой карточке. */
+    function seenCapHtml(g, cls) {
+      var n = g._seenN != null ? g._seenN : (g.rows || []).length;
+      var m = g._seenM != null ? g._seenM : (g.total || 0);
+      if (!m || n >= m) return '';
+      var note = g.seenNote || (RT.cfg && RT.cfg.nw < 760 ? '' : 'остальные — в других цехах');
+      return '<div class="' + cls + '" data-seen="' + esc(g._instKey || '') + '" data-seen-m="' + m + '">' +
+        '<span data-seen-l1>на экране ' + n + ' из ' + m + ' блюд набора</span>' +
+        (note ? '<span class="kds-seen-sub">' + esc(note) + '</span>' : '') + '</div>';
+    }
+    /* Номер экземпляра — только когда экземпляров набора в заказе больше одного */
+    function instHtml(g, cls) {
+      return (g._many && g.inst) ? '<span class="' + cls + '">№' + g.inst + '</span>' : '';
     }
     /* Блок набора: шапка (гость + звезда, название), компоненты, комментарий, одна кнопка на всю высоту */
     function setBlock(o) {
@@ -1055,19 +1175,14 @@
       var comment = cmText
         ? '<div class="kds-kit__comment"><div class="kds-kit__comment-in"><span class="material-icons">mode_comment</span><span class="kds-comment__text">' + esc(cmText) + '</span></div></div>'
         : '';
-      var seen = (g.rows || []).length;
-      var seenCap = (g.total && seen < g.total)
-        ? '<div class="kds-kit__seen">видно ' + seen + ' из ' + g.total + ' позиций набора</div>'
-        : '';
-      /* Экземпляр набора: в карточке с подложкой — тон шапки группы;
-         в карточке с точкой — цветная точка; в карточке с прямоугольником — залитая плашка */
-      var thinst = (g._many && g.inst && g._th) ? ' kds-kit--tint' + g.inst : '';
-      var dot = (g._many && g.inst && g._col) ? '<span class="kds-kit__dot kds-kit__dot--' + g.inst + '"></span>' : '';
-      var chip = (g._many && g.inst && g._tint) ? '<span class="kds-kit__chip kds-kit__chip--' + g.inst + '"></span>' : '';
-      return '<div class="kds-kit kds-kit--' + st + thinst + (g.neg ? ' kds-kit--neg' : '') + (o.tall ? ' kds-kit--tall' : '') + (o.mods ? ' kds-kit--mods' : '') + '"' + (g._rid ? ' data-rid="' + g._rid + '"' : '') + '>' +
+      var name = o.name;
+      var long = name.length > 26;
+      var headFull = long ? ' data-full="' + esc(name) + '"' : '';
+      return '<div class="kds-kit kds-kit--' + st + (g.neg ? ' kds-kit--neg' : '') + (o.tall ? ' kds-kit--tall' : '') + (o.mods ? ' kds-kit--mods' : '') + '"' + (g._rid ? ' data-rid="' + g._rid + '"' : '') + '>' +
         '<div class="kds-kit__body">' +
-          '<div class="kds-kit__head">' + gline +
-            '<div class="kds-kit__name">' + dot + chip + esc(o.name) + '</div>' + seenCap + '</div>' +
+          '<div class="kds-kit__head"' + headFull + '>' + gline +
+            '<div class="kds-kit__name' + (long ? ' kds-ellip' : '') + '">' + esc(name) + instHtml(g, 'kds-kit__inst') + '</div>' +
+            seenCapHtml(g, 'kds-kit__seen') + '</div>' +
           (o.kids || '') + comment +
         '</div>' +
         '<button class="kds-kit__btn kds-kit__btn--' + st + '" type="button"><span class="material-icons">' + icoFor(st, 'mgroup') + '</span></button>' +
@@ -1075,9 +1190,13 @@
     }
     /* Набор в карточке (Figma 10585:7793): компоненты — текстовые строки без своих кнопок */
     function comboGroup(g) {
+      /* Отменён последний видимый компонент — набор целиком отменён: пустой группы не остаётся */
+      if ((g.rows || []).length && g.rows.every(function (rr) { return (rr.st || 'waiting') === 'cancelled'; })) return '';
       var kids = (g.rows || []).map(function (rr) {
-        return '<div class="kds-kit__comp' + (rr.neg ? ' kds-kit__comp--neg' : '') + '"' + (rr._rid ? ' data-rid="' + rr._rid + '"' : '') + '>' +
-          (rr.qty > 1 ? '<span class="kds-kit__qty' + (rr.neg ? ' kds-kit__qty--neg' : '') + '">' + rr.qty + '</span>' : '') +
+        var neg = rr.neg || (rr.st || 'waiting') === 'cancelled';
+        return '<div class="kds-kit__comp' + (neg ? ' kds-kit__comp--neg' : '') + '"' + (rr._rid ? ' data-rid="' + rr._rid + '"' : '') +
+          (g._instKey ? ' data-inst-row="' + esc(g._instKey) + '"' : '') + '>' +
+          (rr.qty > 1 ? '<span class="kds-kit__qty' + (neg ? ' kds-kit__qty--neg' : '') + '">' + rr.qty + '</span>' : '') +
           '<span>' + esc(rr.name || rr.text) + '</span></div>';
       }).join('');
       return setBlock({ g: g, name: g.title || g.name, kids: kids });
@@ -1085,19 +1204,24 @@
     /* Группа набора по сценариям: заголовок без кнопки/количества/статуса,
        компоненты — вложенные строки (отступ 24) со своими кнопками и статусами */
     function csetGroup(g) {
+      var rows = g.rows || [];
+      /* Отменён последний видимый компонент — заголовок не висит без строк */
+      if (rows.length && rows.every(function (rr) { return (rr.st || 'waiting') === 'cancelled'; })) return '';
       var gline = (g.guest || g.star)
         ? '<div class="kds-cset__gline">' + (g.guest ? '<span class="kds-guest">' + esc(g.guest) + '</span>' : '') +
           (g.star ? '<span class="kds-cset__star">' + starIcon() + '</span>' : '') + '</div>'
         : '';
-      var seen = (g.rows || []).length;
-      var seenCap = (g.total && seen < g.total)
-        ? '<div class="kds-cset__seen">видно ' + seen + ' из ' + g.total + ' позиций набора</div>'
-        : '';
-      var kids = (g.rows || []).map(function (rr) {
-        return dishRow({ _rid: rr._rid, name: rr.name || rr.text, qty: rr.qty, st: rr.st || 'waiting', kt: rr.kt });
+      var title = g.title || g.name;
+      var long = title.length > 26;
+      var headFull = long ? ' data-full="' + esc(title) + '"' : '';
+      var kids = rows.map(function (rr) {
+        return dishRow({ _rid: rr._rid, name: rr.name || rr.text, qty: rr.qty, st: rr.st || 'waiting', kt: rr.kt, instKey: g._instKey });
       }).join('');
-      return '<div class="kds-cset">' +
-        '<div class="kds-cset__head">' + gline + '<div class="kds-cset__name">' + esc(g.title || g.name) + '</div>' + seenCap + '</div>' +
+      var rail = RT.cfg && RT.cfg.rail ? ' kds-cset--rail' : '';
+      return '<div class="kds-cset' + rail + '"' + (g._rid ? ' data-rid="' + g._rid + '"' : '') + '>' +
+        '<div class="kds-cset__head"' + headFull + '>' + gline +
+          '<div class="kds-cset__name' + (long ? ' kds-ellip' : '') + '">' + esc(title) + instHtml(g, 'kds-cset__inst') + '</div>' +
+          seenCapHtml(g, 'kds-cset__seen') + '</div>' +
         '<div class="kds-cset__rows">' + kids + '</div></div>';
     }
     /* Группа макета: та же «коробка», но строки-модификаторы с количеством */
@@ -1123,14 +1247,16 @@
       }).join('');
       return '<div class="kds-nest">' + head + '<div class="kds-nest__rows">' + subs + '</div></div>';
     }
-    /* Отдельно готовящийся модификатор: строка блюда + обе связи (в макете DSGN-501
-       моды идут текстом, без отдельной пиктограммы) */
+    /* Отдельно готовящийся модификатор: строка блюда + обе связи ТЕКСТОМ; пиктограмма post_add
+       у подписи связи (F5), звезды набора здесь нет — модификатор не компонент набора */
     function modRow(m) {
+      var link = esc(m.combo) + (m._many && m.inst ? ' №' + m.inst : '');
       return '<div class="kds-row"' + (m._rid ? ' data-rid="' + m._rid + '"' : '') + '>' +
         '<div class="kds-row__main">' +
           '<div class="kds-row__line"><span class="kds-row__name">' + esc(m.name) + '</span></div>' +
-          '<div class="kds-drow__sub"><span class="kds-ditem">к ' + esc(m.parent) + '</span><span class="kds-dsep">·</span>' +
-            '<span class="kds-dlink">' + starIcon() + esc(m.combo) + '</span></div>' +
+          '<div class="kds-drow__sub"><span class="material-icons kds-mod__ico">post_add</span>' +
+            '<span class="kds-ditem">к ' + esc(m.parent) + '</span><span class="kds-dsep">·</span>' +
+            '<span class="kds-dlink">' + link + '</span></div>' +
         '</div>' +
         '<button class="kds-btn kds-btn--' + (m.st || 'waiting') + '" type="button"><span class="material-icons">' + icoFor(m.st || 'waiting', 'mod') + '</span></button>' +
       '</div>';
@@ -1256,6 +1382,8 @@
           (d.star ? '<span class="kds-dl-star">' + svgIco('stars', 16) + '</span>' : '') + '</div>'
         : '';
       var qty = d.qty > 1 ? '<span class="kds-dl-qty"' + (d.qtyBg ? ' style="background:' + d.qtyBg + '"' : '') + '>' + d.qty + '</span>' : '';
+      /* Принадлежность набору — вторичной подписью под названием, без состава (PB-8108) */
+      var sub = d.combo ? '<div class="kds-dl-sub">Комбо: ' + esc(d.combo) + (d.inst ? ' №' + d.inst : '') + '</div>' : '';
       return '<div class="kds-dl-row"' + (d._rid ? ' data-rid="' + d._rid + '"' : '') + '>' +
         '<button class="kds-dl-stub kds-dl-stub--' + (rr.st || 'waiting') + '" type="button" data-ord="' + esc(rr.ord) + '">' +
           '<span class="kds-dl-stub__top"><span class="kds-dl-stub__num">' + esc(rr.ord) + '</span>' +
@@ -1266,6 +1394,7 @@
           '<div class="kds-dl-main' + (chips ? ' kds-dl-main--chips' : '') + (comment ? ' kds-dl-main--combo' : '') + '">' +
             '<div class="kds-dl-cell">' + gline +
               '<div class="kds-dl-line">' + qty + '<span class="kds-dl-name' + (neg ? ' is-neg' : '') + '">' + esc(d.name) + '</span></div>' +
+              sub +
             '</div>' +
             chips +
             comment +
@@ -1298,18 +1427,26 @@
     /* ── Описание экрана под макетом: для каждого экрана свой заголовок и текст ── */
     var DOC = {
       'base': { t: 'Экран как в Figma', s: 'база без задачи', q: 'Набор — не блюдо, не подача и не статус: у него нет количества, статуса, времени и действий. Всё исполняемое остаётся у блюд: количество, модификаторы, статус, время.', d: 'Сценарием не задан — это база 1:1 по Figma, на которой держатся остальные экраны: шапка карточки, строки блюд с кнопками статусов, перенос чека пунктиром, готовая карточка с блоком набора, отменённый заказ.' },
-      'g-multi': { t: 'По заказам · блюда набора одним блоком', s: 'сценарий 2 · горячий цех', q: 'Режим «по заказам»: в пределах курса видимые компоненты одного набора — целостная группа с названием набора независимо от их числа, включая единственный видимый компонент; другие блюда внутрь не вклиниваются.', d: 'Сделано по сценарию 2 (горячий цех): в «Ланче» видны только блюда этого цеха — бургер и картофель, сверху подпись «видно 2 из 3»; заголовок набора без кнопки и без статуса; отдельно купленный бургер стоит своей строкой и бургер из набора не заменяет.' },
-      'g-single': { t: 'По заказам · блюда набора одним блоком', s: 'сценарий 2 · холодный цех', q: 'Частичная видимость: отсутствие строки блюда не означает, что оно готово или отсутствует в наборе, и экран не должен создавать такое впечатление. Один или несколько компонентов внутри группы не означают, что показан полный состав.', d: 'Сделано по сценарию 2 (холодный цех): тот же заказ №214, в «Ланче» только салат и подпись «видно 1 из 3» — группа из одного компонента остаётся той же группой набора и не выдаёт себя за полный состав.' },
-      'g-kitchens': { t: 'По заказам · блюда набора одним блоком', s: 'сценарий 2 · оба цеха', q: 'Цех и фильтры: на цеховом экране видна только часть набора, и фильтр не должен переключать способ обозначения набора. Группа из единственного видимого компонента — норма, а не особый случай: тот же набор на другом экране с несколькими компонентами выглядит как та же группа.', d: 'Сделано по сценарию 2 (оба цеха на одном экране): у каждого блюда справа рамка цвета цеха (PB-6800), «Ланч» виден целиком — бургер и картофель горячего цеха, салат холодного; отдельный бургер готов, но бургер из набора не заменяет.' },
+      'g-multi': { t: 'По заказам · блюда набора одним блоком', s: 'сценарий 2 · горячий цех', q: 'Режим «по заказам»: в пределах курса видимые компоненты одного набора — целостная группа с названием набора независимо от их числа, включая единственный видимый компонент; другие блюда внутрь не вклиниваются.', d: 'Сделано по сценарию 2 (горячий цех): в «Ланче» видны только блюда этого цеха — бургер и картофель, сверху подпись «на экране 2 из 3 блюд набора» и «остальные — в других цехах»; заголовок набора без кнопки и без статуса; отдельно купленный бургер стоит своей строкой и бургер из набора не заменяет.' },
+      'g-single': { t: 'По заказам · блюда набора одним блоком', s: 'сценарий 2 · холодный цех', q: 'Частичная видимость: отсутствие строки блюда не означает, что оно готово или отсутствует в наборе, и экран не должен создавать такое впечатление. Один или несколько компонентов внутри группы не означают, что показан полный состав.', d: 'Сделано по сценарию 2 (холодный цех): тот же заказ №214, в «Ланче» только салат и подпись «на экране 1 из 3 блюд набора» — группа из одного компонента остаётся той же группой набора и не выдаёт себя за полный состав.' },
+      'g-kitchens': { t: 'По заказам · блюда набора одним блоком', s: 'сценарий 2 · оба цеха', q: 'Цех и фильтры: на цеховом экране видна только часть набора, и фильтр не должен переключать способ обозначения набора.', d: 'Сделано по сценарию 2 (оба цеха на одном экране): у каждого блюда справа рамка цвета цеха (PB-6800), «Ланч» виден целиком — бургер и картофель горячего цеха, салат холодного; отдельный бургер готов, но бургер из набора не заменяет.' },
       'g-assembly': { t: 'По заказам · экран сборщика', s: 'сценарий 2', q: 'Часть позиций набора может не требовать приготовления — их берёт сборщик.', d: 'Сделано по сценарию 2 (экран сборщика, здесь доставка): шапка нейтральная — без заливки статуса и без кнопки; у блюд только иконки статусов и рамка цеха, кнопок нет; «Ланч» целиком — готовые картофель и салат собирает сборщик, бургер ещё готовится.' },
-      'g-courses': { t: 'По заказам · набор разложен по курсам', s: 'сценарий 3.3', q: 'Курсы: набор не равен подаче. В пределах одного курса компоненты конкретного экземпляра набора воспринимаются как одна целостная группа, другие блюда её не разрывают. Части набора из разных курсов между курсами не перемещаются, но их принадлежность должна оставаться понятной.', d: 'Сделано по сценарию 3.3: «Бизнес-ланч» разложен по двум курсам — суп в первом, бургер и картофель во втором; в каждом курсе своя группа набора с подписью «видно N из 3»; через границу курса группы не соединяются и порядок выдачи не меняется; активного или дизейбл-курса нет — в сценарии такого состояния нет.' },
-      'g-between': { t: 'По заказам · отдельное блюдо между блюдами набора', s: 'сценарий 3.2', q: 'Группировка и курсы: компоновка, при которой целостность группы внутри курса видна, части набора из разных курсов не перемещаются между курсами, а порядок заказов, курсы и производственные приоритеты сохраняются.', d: 'Сделано по сценарию 3.2: набор «Ланч» стоит между других блюд заказа — сверху самостоятельно заказанный салат, снизу отдельно купленный бургер; салат в группу набора не попадает и её не разрывает; курс и приоритеты сохраняются.' },
-      'g-instances': { t: 'По заказам · два набора, разный состав', s: 'сценарий 3.1', q: 'В одном заказе возможны одно и то же блюдо с разной принадлежностью (в наборе и отдельно), несколько экземпляров одного набора и разные наборы с одинаковым блюдом.', d: 'Сделано по сценарию 3.1: один гость заказал два «Ланча» из одного комбо-меню — у первого борщ, котлета, чай, у второго гаспачо, рыба, компот. Три карточки рядом: без признака, с цветной точкой и с залитым прямоугольником; признак повторяется в каждом курсе.' },
-      'g-instances-same': { t: 'По заказам · два набора, одинаковый состав', s: 'сценарий 3.1', q: 'Экземпляры одного набора — это повторно заказанный набор с независимо выбранными блюдами: название у них общее и экземпляр оно не идентифицирует, поэтому различать их нужно всегда, в том числе при совпавшем выбранном составе, — и внутри одного курса, и между курсами. Количества и статусы отдельных порций нельзя смешивать.', d: 'Сделано по сценарию 3.1: повторно заказанный набор с совпавшим составом — название экземпляр не различает, поэтому стоит признак-прямоугольник (маджентовый у первого, циановый у второго); количества и статусы порций у комплектов не смешиваются.' },
-      'g-modifier': { t: 'По заказам · модификатор готовится отдельно', s: 'сценарий 3.6', q: 'Модификатор относится к блюду, а не к набору. Если модификатор готовится отдельной позицией — по существующим правилам, — он сохраняет две связи: с родительским блюдом и с конкретным экземпляром набора этого блюда. Отдельным компонентом набора он при этом не становится: компонент набора — блюдо вместе со своими модификаторами, поэтому состав набора не меняется. Обе связи должны читаться и тогда, когда родительского блюда на экране нет.', d: 'Сделано по сценарию 3.6: «Соус к бургеру» — отдельная задача, и видны обе его связи — «к Бургеру» и «Ланч», хотя бургера на экране нет (другой цех); компонентом набора соус не становится и свои статус и кнопку сохраняет.' },
+      'g-courses': { t: 'По заказам · набор разложен по курсам', s: 'сценарий 3.3', q: 'Курсы: набор не равен подаче. В пределах одного курса компоненты конкретного экземпляра набора воспринимаются как одна целостная группа, другие блюда её не разрывают. Части набора из разных курсов между курсами не перемещаются, но их принадлежность должна оставаться понятной.', d: 'Сделано по сценарию 3.3: «Бизнес-ланч» разложен по двум курсам — суп в первом, бургер и картофель во втором; видимость считается по всей карточке (3 из 3 — подписи нет); через границу курса группы не соединяются и порядок выдачи не меняется; активного или дизейбл-курса нет — в сценарии такого состояния нет.' },
+      'g-between': { t: 'По заказам · отдельное блюдо между блюдами набора', s: 'сценарий 3.2', q: 'Группировка и курсы: компоновка, при которой целостность группы внутри курса видна, части набора из разных курсов не перемещаются между курсами, а порядок заказов, курсы и производственные приоритеты сохраняются.', d: 'Сделано по сценарию 3.2: набор «Ланч» стоит между других блюд заказа — сверху самостоятельно заказанный салат, снизу отдельно купленный бургер; салат в группу набора не попадает и её не разрывает. Группа собрана целиком, поэтому порядок внутри курса отличается от исходного — сравните с экраном «исходный порядок из заказа».' },
+      'g-between-order': { t: 'По заказам · исходный порядок из заказа', s: 'сценарий 3.2 · как пришло', q: 'Группировка и курсы: компоновка, при которой целостность группы внутри курса видна, части набора из разных курсов не перемещаются между курсами, а порядок заказов, курсы и производственные приоритеты сохраняются.', d: 'Сделано по сценарию 3.2 как контрольное состояние: строки идут в исходном порядке (бургер, салат, картофель), принадлежность показана вторичной подписью «Комбо: Ланч» у компонентов, группировки нет. Разница с экраном «как собрано» видна глазами: группа собирается целиком, и порядок в курсе меняется.' },
+      'g-instances': { t: 'По заказам · два набора, разный состав', s: 'сценарий 3.1', q: 'В одном заказе возможны одно и то же блюдо с разной принадлежностью (в наборе и отдельно), несколько экземпляров одного набора и разные наборы с одинаковым блюдом.', d: 'Сделано по сценарию 3.1: один гость заказал два «Ланча» из одного комбо-меню — у первого борщ, котлета, чай, у второго гаспачо, рыба, компот. Экземпляры различаются номером в названии («Ланч №1», «Ланч №2»), номера одинаковы во всех курсах; цветные маркеры не используются.' },
+      'g-instances-same': { t: 'По заказам · два набора, одинаковый состав', s: 'сценарий 3.1', q: 'Экземпляры одного набора — это повторно заказанный набор с независимо выбранными блюдами: название у них общее и экземпляр оно не идентифицирует, поэтому различать их нужно всегда, в том числе при совпавшем выбранном составе, — и внутри одного курса, и между курсами. Количества и статусы отдельных порций нельзя смешивать.', d: 'Сделано по сценарию 3.1: повторно заказанный набор с совпавшим составом — название экземпляр не различает, поэтому стоит номер («Ланч №1», «Ланч №2»); различие читается без цвета; количества и статусы порций у комплектов не смешиваются.' },
+      'g-modifier': { t: 'По заказам · модификатор готовится отдельно', s: 'сценарий 3.6', q: 'Модификатор относится к блюду, а не к набору. Если модификатор готовится отдельной позицией — по существующим правилам, — он сохраняет две связи: с родительским блюдом и с конкретным экземпляром набора этого блюда. Отдельным компонентом набора он при этом не становится: компонент набора — блюдо вместе со своими модификаторами, поэтому состав набора не меняется. Обе связи должны читаться и тогда, когда родительского блюда на экране нет.', d: 'Сделано по сценарию 3.6: «Соус к бургеру» — отдельная задача; обе связи текстом: «к Бургеру · Ланч №2», у подписи — пиктограмма post_add 16 px. Звезды набора у строки нет; компонентом набора соус не становится и свои статус и кнопку сохраняет.' },
       'g-cancelled': { t: 'По заказам · отменённое блюдо из набора', s: '', q: 'Принадлежность уже отправленных на кухню блюд к набору не меняется. Отмена и изменение блюд обрабатываются по обычным правилам изменения заказа: отменённое блюдо не показывается как необходимая часть комплекта.', d: 'Отдельного сценария в списке нет — сделано по требованию задачи: отменённое блюдо не показывается как необходимая часть комплекта — бургер из набора зачёркнут, картофель готов, отдельный бургер вне группы готов как обычно.' },
-      'g-long': { t: 'По заказам · длинное название, узкий экран', s: 'сценарий 3.7', q: 'Название набора есть всегда. При нехватке места допускается сокращённое представление, но полное название должно оставаться доступным сотруднику. Производственные сведения о блюде — название и количество, статус, модификаторы, время — остаются первыми.', d: 'Сделано по сценарию 3.7: экран 720 px, два набора с похожими названиями, которые различаются в конце; название сокращается, полное открывается нажатием по строке (на мыши — наведением), состав при этом не раскрывается.' },
-      'd-list': { t: 'По блюдам · набор подписан текстом', s: 'сценарий 2.2', q: 'Режим «по блюдам»: компактное текстовое указание принадлежности у строки блюда, без показа остальных компонентов набора.', d: 'Сделано по сценарию 2.2: в плоском списке принадлежность указана текстом в строке — «Комбо с пастой» с компонентами текстом и комментарием пунктиром; остальные позиции — обычные строки блюд со своей кнопкой, количество и статус не вытесняются.' }
+      'g-long': { t: 'По заказам · длинное название, узкий экран', s: 'сценарий 3.7', q: 'Название набора есть всегда. При нехватке места допускается сокращённое представление, но полное название должно оставаться доступным сотруднику. Производственные сведения о блюде — название и количество, статус, модификаторы, время — остаются первыми.', d: 'Сделано по сценарию 3.7: экран 720 px, два набора с похожими названиями, которые различаются в видимой части (напиток / суп); названия сокращаются с многоточием, полное имя открывается нажатием на строку заголовка (поповер, авто-скрытие 3 с, раскладка не сдвигается), состав не раскрывается.' },
+      'd-list': { t: 'По блюдам · набор подписан текстом', s: 'сценарий 2.2', q: 'Режим «по блюдам»: компактное текстовое указание принадлежности у строки блюда, без показа остальных компонентов набора.', d: 'Сделано по сценарию 2.2: строки-контейнера набора нет — каждая позиция набора идёт своей строкой с подписью «Комбо: <название>» 12/16 #9E9E9E; состав набора не выводится ни чипами, ни текстом. Число строк равно числу блюд, название, количество, статус и время остаются первыми.' },
+      'g-group-rail': { t: 'Сценарий 2 · группа с левым рейлом', s: 'вариант B, для сравнения', q: 'Группа из единственного видимого компонента — норма, а не особый случай: тот же набор на другом экране с несколькими компонентами выглядит как та же группа.', d: 'Вариант B разделения группы: без подложки, левый рейл 2 px #616161 на всю высоту контейнера. Содержимое — тот же сценарий 2, что на экране «горячий цех»; сравнивается с вариантом A (подложка #1C1C1C) на соседних экранах.' },
+      'g-filter': { t: 'Сценарий 2 · включён фильтр «Готово»', s: 'фильтр по статусу', q: 'Цех и фильтры: на цеховом экране видна только часть набора, и фильтр не должен переключать способ обозначения набора.', d: 'Сделано по сценарию 2: в шапке включён фильтр «Готово» — в «Ланче» остаётся только готовая строка, но группа и её заголовок — те же. Подпись видимости пересчитана по видимым строкам: «на экране 1 из 3 блюд набора», с пояснением, что остальные скрыты фильтром, а не отсутствуют.' },
+      'g-nocook': { t: 'Сценарий 2 · позиция без приготовления', s: 'напиток берёт сборщик', q: 'Часть позиций набора может не требовать приготовления — их берёт сборщик.', d: 'Сделано по сценарию 2: в «Ланче» есть напиток, который не готовят. В группе он без статуса приготовления и с подписью «не готовится — берёт сборщик»: позиция видна и не выглядит отсутствующей, но и не притворяется задачей цеха.' },
+      'g-two-combos': { t: 'Сценарий 3.1 · два набора с одним блюдом', s: 'разные наборы, общий бургер', q: 'В одном заказе возможны одно и то же блюдо с разной принадлежностью (в наборе и отдельно), несколько экземпляров одного набора и разные наборы с одинаковым блюдом.', d: 'Сделано по сценарию 3.1: «Ланч» и «Детский набор» оба содержат бургер. Принадлежность различается по названию набора, а не по названию блюда: один и тот же бургер стоит в двух разных группах со своими заголовками.' },
+      'g-cancel-last': { t: 'Сценарий 3.1 · отменён последний компонент', s: 'пустая группа не остаётся', q: 'Отмена и изменение блюд обрабатываются по обычным правилам изменения заказа: отменённое блюдо не показывается как необходимая часть комплекта.', d: 'Сделано по сценарию 3.1: единственный видимый компонент «Ланча» отменён — группы и её заголовка на экране нет (пустая группа не остаётся); видна только отдельно купленная позиция. Если в группе остаётся хоть один действующий компонент, группа остаётся с зачёркнутой строкой — это экран «отменённое блюдо из набора».' },
+      'icons': { t: 'Пиктограммы · звезда набора и post_add', s: 'решение', q: '', d: 'Звезда в круге — знак набора (у заголовка и в строке принадлежности); post_add 16 px — только у отдельной задачи модификатора, который готовится отдельно, и не заменяет звезду набора.' },
+      'rationale': { t: 'Обоснование решения', s: '', q: '', d: 'Почему группы набора не путаются со строками блюд, не дают ложного сигнала о готовности и различаются без цвета.' }
     };
     function docBlock(id) {
       var x = DOC[id] || DOC['base'];
@@ -1386,7 +1523,7 @@
       bindVScroll(RT.view);
       bindInteractive(RT.view);
       sortBoard();
-      RT.CNT0 = null; RT.filter = null;
+      RT.CNT0 = null; RT.filter = cfg.filterPre || null;   /* g-filter: фильтр включён при открытии */
       applyCounts(); syncUndo(); applyTheme(); applyZoom(); startTicker();
       fitScale();
     }
@@ -1437,7 +1574,7 @@
         tip.style.left = Math.min(Math.max(p.x, 8), maxLeft) + 'px';
         tip.style.top = top + 'px';
         clearTimeout(hideT);
-        if (auto) hideT = setTimeout(hide, 4000);
+        if (auto) hideT = setTimeout(hide, 3000);
       }
       function target(e) { return e.target && e.target.closest ? e.target.closest('[data-full]') : null; }
 
@@ -1621,18 +1758,41 @@
       (cfg.orders || []).forEach(function (o, i) {
         o._cid = 'c' + i;
         if (o.timer) o._secs = parseTimer(o.timer);
-        /* номер экземпляра — по порядку вхождения этого набора в заказ; нужен только когда наборов несколько */
-        var titles = {};
+        /* Экземпляры набора: ключ = название + номер экземпляра (comboId на бэкенде).
+           Номер показываем, только когда экземпляров этого набора в заказе больше одного. */
+        var instSets = {};                       // title -> { inst: true, ... }
         (o.items || []).forEach(function (it) {
-          if (it.k === 'combo' && it.title) titles[it.title] = (titles[it.title] || 0) + 1;
+          if ((it.k !== 'combo' && it.k !== 'cset') || !it.title) return;
+          var t = instSets[it.title] = instSets[it.title] || {};
+          t[it.inst == null ? '' : it.inst] = true;
+        });
+        function instCount(title) {
+          var t = instSets[title];
+          return t ? Object.keys(t).length : 0;
+        }
+        /* «На экране N из M блюд набора»: N — строки экземпляра, видимые на ВСЕЙ карточке
+           (по всем курсам), M — общее число позиций экземпляра (comboTotal).
+           Учитываем предустановленный фильтр (g-filter): скрытые фильтром строки не считаем. */
+        var agg = {};
+        (o.items || []).forEach(function (it) {
+          if ((it.k !== 'combo' && it.k !== 'cset') || !it.title) return;
+          var key = it.title + '|' + (it.inst == null ? '' : it.inst);
+          agg[key] = agg[key] || { n: 0, m: 0 };
+          (it.rows || []).forEach(function (rw) {
+            var st = rw.st || 'waiting';
+            if (cfg.filterPre && !inBucket(cfg.filterPre, st, false)) return;
+            agg[key].n++;
+          });
+          agg[key].m = Math.max(agg[key].m, it.total || 0);
         });
         (o.items || []).forEach(function (it) {
-          if (it.k === 'combo' && it.title && titles[it.title] > 1) {
-            it._many = true;
-            it._th = !!o.tintHead;      // карточка с подложкой шапки группы
-            it._col = !!o.colorInst;    // карточка с цветной точкой
-            it._tint = !!o.tintInst;    // карточка с залитым прямоугольником
-          }
+          if ((it.k !== 'combo' && it.k !== 'cset') || !it.title) return;
+          var key = it.title + '|' + (it.inst == null ? '' : it.inst);
+          it._instKey = key;
+          it._seenN = agg[key].n;
+          it._seenM = agg[key].m;
+          it._many = instCount(it.title) > 1;
+          (it.rows || []).forEach(function (rw) { rw._instKey = key; });
         });
         (o.items || []).forEach(function (it) {
           if (it.k === 'mgroup') {
@@ -1645,7 +1805,11 @@
             (it.rows || []).forEach(function (rw) { if (!rw.st) rw.st = 'waiting'; A(rw, 'dish', o._cid); });
             return;
           }
-          if (it.k === 'mod') { if (!it.st) it.st = 'waiting'; A(it, 'mod', o._cid); return; }
+          if (it.k === 'mod') {
+            if (!it.st) it.st = 'waiting';
+            it._many = instCount(it.combo) > 1;
+            A(it, 'mod', o._cid); return;
+          }
           if (it.k === 'transfer' || it.k === 'course') return;
           if (!it.st) it.st = 'waiting';
           A(it, 'dish', o._cid);
@@ -1957,21 +2121,34 @@
         Array.prototype.forEach.call(art.querySelectorAll('[data-rid]'), function (el) {
           var m = RT.M[el.getAttribute('data-rid')];
           if (!m) return;
-          /* коробка набора не блюдо: её видимость решается по её блюдам (ниже) */
-          if (el.classList.contains('kds-kit') && el.querySelector('[data-rid]')) return;
+          /* контейнер группы не блюдо: его видимость решается по его блюдам (ниже) */
+          if ((el.classList.contains('kds-kit') || el.classList.contains('kds-cset')) && el.querySelector('[data-rid]')) return;
           var st = m.o.st || 'waiting';
           var hide = (st === 'done') || !matchFilter(st, overdue);
           var want = hide ? 'none' : '';
           if (el.style.display !== want) { el.style.display = want; changed = true; }
           if (!hide) any = true;
         });
-        /* коробка набора видна, только если внутри есть видимое блюдо */
-        Array.prototype.forEach.call(art.querySelectorAll('.kds-kit[data-rid]'), function (box) {
+        /* контейнер группы виден, только если внутри есть видимое блюдо */
+        Array.prototype.forEach.call(art.querySelectorAll('.kds-kit[data-rid], .kds-cset[data-rid]'), function (box) {
           var kids = box.querySelectorAll('[data-rid]');
           if (!kids.length) return;
           var alive = Array.prototype.some.call(kids, function (k) { return k.style.display !== 'none'; });
           var wantBox = alive ? '' : 'none';
           if (box.style.display !== wantBox) { box.style.display = wantBox; changed = true; }
+        });
+        /* подпись частичной видимости — по реально видимым строкам экземпляра на карточке */
+        Array.prototype.forEach.call(art.querySelectorAll('[data-seen]'), function (cap) {
+          var key = cap.getAttribute('data-seen') || '';
+          var m = +cap.getAttribute('data-seen-m') || 0;
+          var n = 0;
+          Array.prototype.forEach.call(art.querySelectorAll('[data-inst-row="' + key.replace(/"/g, '\\"') + '"]'), function (r) {
+            if (r.style.display !== 'none') n++;
+          });
+          var l1 = cap.querySelector('[data-seen-l1]');
+          if (l1) l1.textContent = 'на экране ' + n + ' из ' + m + ' блюд набора';
+          var wantCap = n > 0 && n < m ? '' : 'none';
+          if (cap.style.display !== wantCap) { cap.style.display = wantCap; changed = true; }
         });
         var want = (o._hidden || (!!RT.filter && !any)) ? 'none' : '';
         if (art.style.display !== want) { art.style.display = want; changed = true; }
