@@ -13,7 +13,6 @@ window.dsLayouts = {
     { file: 'kds-combo.html', state: 'g-single', title: 'Сценарий 2 · блюда набора одним блоком · холодный цех' },
     { file: 'kds-combo.html', state: 'g-kitchens', title: 'Сценарий 2 · блюда набора одним блоком · оба цеха' },
     { file: 'kds-combo.html', state: 'g-assembly', title: 'Сценарий 2 · экран сборщика' },
-    { file: 'kds-combo.html', state: 'g-group-rail', title: 'Сценарий 2 · группа с левым рейлом (вариант B)' },
     { file: 'kds-combo.html', state: 'g-courses', title: 'Сценарий 3.3 · набор разложен по курсам' },
     { file: 'kds-combo.html', state: 'g-between', title: 'Сценарий 3.2 · блюда набора собраны в блок' },
     { file: 'kds-combo.html', state: 'g-between-order', title: 'Сценарий 3.2 · исходный порядок из заказа' },
