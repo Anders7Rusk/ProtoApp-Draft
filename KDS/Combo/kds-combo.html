@@ -1023,7 +1023,7 @@
     function dishRow(dd) {
       var st = dd.st || 'waiting';
       var neg = st === 'cancelled';
-      var ico = neg ? 'close' : (st === 'ready' ? 'check' : 'arrow_forward');
+      var ico = RT.asm ? icoFor(st, 'asm') : (neg ? 'close' : (st === 'ready' ? 'check' : 'arrow_forward'));
       var guest = dd.guest
         ? '<div class="kds-guest">' + esc(dd.guest) + (dd.star ? '<span style="margin-left:auto">' + starIcon() + '</span>' : '') + '</div>'
         : '';
@@ -1596,6 +1596,14 @@
     }
     /* Иконка кнопки из статуса: стрелка → в работу, галочка → готово, крестик/корзина → отмена */
     function icoFor(st, kind) {
+      /* экран сборщика (Figma DSGN-509): статус без кнопки — часы (ожидает), update (готовится),
+         галочка (готово), корзина (отменено) */
+      if (kind === 'asm') {
+        if (st === 'cancelled') return 'delete';
+        if (st === 'ready') return 'check';
+        if (st === 'cooking') return 'update';
+        return 'access_time';
+      }
       if (kind === 'mgroup' || kind === 'lrow') return st === 'cancelled' ? 'delete' : (st === 'ready' ? 'check' : 'arrow_forward');
       if (st === 'cancelled') return 'close';
       if (st === 'ready') return 'check';
@@ -1782,7 +1790,7 @@
             if (icoEl) {
               icoEl.className = 'kds-row__ico kds-btn--' + st;
               var gl = icoEl.querySelector('.material-icons');
-              if (gl) gl.textContent = icoFor(st, 'dish');
+              if (gl) gl.textContent = icoFor(st, 'asm');
             }
           }
         }
