@@ -429,9 +429,10 @@
      номер показывается, только когда экземпляров этого набора в заказе больше одного. */
   .kds-kit__inst, .kds-cset__inst { font-size: 14px; line-height: 20px; letter-spacing: .25px; color: #bdbdbd; font-weight: 400; margin-left: 6px; white-space: nowrap; }
   /* Подпись частичной видимости — про видимость, а не про готовность. Компактно, в ОДНОЙ строке
-     с названием, справа: «2 из 3 блюд» 12/16 #9E9E9E (решение дизайнера 22.10.2026) */
+     с названием, справа: «2 из 3 блюд» 14/20, medium, #BDBDBD — читается с рабочего расстояния
+     на тач-терминале (решение дизайнера 22.10.2026) */
   .kds-kit__seen, .kds-cset__seen { margin-left: auto; flex: 0 0 auto; white-space: nowrap;
-    font-size: 12px; line-height: 16px; letter-spacing: .4px; color: #9e9e9e; }
+    font-size: 14px; line-height: 20px; letter-spacing: .25px; font-weight: 500; color: #bdbdbd; }
   /* Строка «название + счётчик»: название слева, подпись видимости — справа */
   .kds-cset__row, .kds-kit__nrow { display: flex; align-items: center; gap: var(--ds-space-2x, 8px); min-width: 0; }
   .kds-seen-sub { display: none; }
