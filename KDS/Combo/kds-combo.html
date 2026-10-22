@@ -552,7 +552,9 @@
   .kds-cset__name { display: flex; align-items: center; gap: var(--ds-space-2x, 8px); min-width: 0;
     font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; color: #fff; }
   /* Пиктограмма набора — fastfood из Figma «Icons (New)» (инлайн-SVG, не шрифт Material Icons), 16 px */
-  .kds-cset__ico { flex: 0 0 16px; width: 16px; height: 16px; display: inline-flex; align-items: center; color: #616161; }
+  /* Иконка набора в заголовке группы: цвет и размер — как у иконок в шапке карточки (--kds-ic-neutral, 20 px)
+     и рядом с текстом 22/28 — 16 px */
+  .kds-cset__ico { flex: 0 0 16px; width: 16px; height: 16px; display: inline-flex; align-items: center; color: var(--kds-ic-neutral); }
   .kds-cset__ico .kds-svg-ico { width: 16px; height: 16px; }
   .kds-cset__t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .kds-cset__rows { display: flex; flex-direction: column; gap: var(--ds-space-1x, 4px); margin-left: var(--ds-space-4x, 16px); }
@@ -589,6 +591,7 @@
   .kds-poster__cell { flex: 1; min-width: 0; background: var(--kds-row); border: 1px solid var(--kds-line); border-radius: 8px; padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
   .kds-poster__ico { font-size: 40px; color: var(--kds-ic-accent); }
   .kds-poster__ico--warn { color: var(--kds-ic-warning); }
+  .kds-poster__ico--neutral { color: var(--kds-ic-neutral); display: inline-flex; align-items: center; }
   /* Иконка набора fastfood — нейтральный #616161 (как в Figma), не статусный цвет */
   .kds-poster__ico--muted { color: #616161; display: inline-flex; align-items: center; }
   .kds-poster__title { font-size: 20px; font-weight: 500; line-height: 28px; }
@@ -1410,7 +1413,7 @@
           var cells = c.row.map(function (cell) {
             return '<div class="kds-poster__cell">' +
               (cell.star ? '<span class="kds-star kds-star--lg">' + svgIco('stars', 40) + '</span>' :
-                cell.svg ? '<span class="kds-poster__ico kds-poster__ico--muted">' + svgIco(cell.svg, 40) + '</span>' :
+                cell.svg ? '<span class="kds-poster__ico ' + (cell.muted ? 'kds-poster__ico--muted' : 'kds-poster__ico--neutral') + '">' + svgIco(cell.svg, 40) + '</span>' :
                 '<span class="kds-poster__ico' + (cell.warn ? ' kds-poster__ico--warn' : '') + (cell.muted ? ' kds-poster__ico--muted' : '') + ' material-icons">' + cell.ico + '</span>') +
               '<div class="kds-poster__title">' + esc(cell.title) + '</div>' +
               '<div class="kds-poster__sub">' + esc(cell.sub) + '</div>' +
