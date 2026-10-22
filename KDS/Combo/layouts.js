@@ -26,7 +26,7 @@ window.dsLayouts = {
     { file: 'kds-combo.html', state: 'g-nocook', title: 'Сценарий 2 · позиция без приготовления' },
     { file: 'kds-combo.html', state: 'g-two-combos', title: 'Сценарий 3.1 · два набора с одним блюдом' },
     { file: 'kds-combo.html', state: 'g-cancel-last', title: 'Сценарий 3.1 · отменён последний компонент' },
-    { file: 'kds-combo.html', state: 'icons', title: 'Пиктограммы · звезда набора и post_add' },
+    { file: 'kds-combo.html', state: 'icons', title: 'Пиктограммы · fastfood, звезда, post_add' },
     { file: 'kds-combo.html', state: 'rationale', title: 'Обоснование решения' },
   ]
 };
