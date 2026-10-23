@@ -702,8 +702,9 @@
   /* Модификатор блюда — строкой под названием, как служебная подпись 12/16 #9E9E9E */
   .kds-row__mods { display: flex; flex-direction: column; gap: 2px; margin-top: 0; }
   .kds-row__mod { font-size: 12px; line-height: 16px; letter-spacing: .4px; color: #9e9e9e; }
-  /* Отменённый модификатор у блюда (не блюдо): красный, без зачёркивания */
+  /* Отменённый модификатор у блюда (не блюдо): красный; удалённый — зачёркнутый */
   .kds-row__mod--neg { color: var(--kds-ic-negative); }
+  .kds-row__mod--del { text-decoration: line-through; }
   /* Вариант «модификатор как комментарий» (только g-two-combos, сценарий 3.5) — геометрия 1:1
      по Figma «Comment» (10628:57896): отступы от соседних блоков по 4, внутри pt 2,
      пунктир 1px #616161, pt 4 до текста, зазор иконка–текст 6, иконка 16 (pt 4 — центр иконки
@@ -1229,7 +1230,8 @@
             meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 3'], ['person', '1']],
             items: [
               { k: 'cset', guest: 'Гость 1', title: 'Ланч', inst: null, total: 2, rows: [
-                { k: 'dish', name: 'Бургер', qty: 1, st: 'cooking', mods: [{ t: 'Соус барбекю', neg: true }] },
+                { k: 'dish', name: 'Бургер', qty: 1, st: 'cooking',
+                  subMod: { name: 'Соус барбекю', parent: 'Бургеру', combo: 'Ланч', chip: '', st: 'cancelled', noLink: true, noSub: true } },
                 d('Картофель', 1, 'ready') ] }
             ] }
         ]
@@ -1345,7 +1347,8 @@
             dd.mods.map(function (x) {
               var t = typeof x === 'string' ? x : x.t;
               var neg = typeof x !== 'string' && x.neg;
-              return '<div class="kds-row__mod' + (neg ? ' kds-row__mod--neg' : '') + '">' + esc(t) + '</div>';
+              var del = typeof x !== 'string' && x.del;
+              return '<div class="kds-row__mod' + (neg ? ' kds-row__mod--neg' : '') + (del ? ' kds-row__mod--del' : '') + '">' + esc(t) + '</div>';
             }).join('') +
             (dd.modCmt ? '</div></div>' : '') +
           '</div>'
@@ -1501,15 +1504,21 @@
        смысла не утверждена — пока иконки нет (кандидат post_add показан только на постере) */
     function modRow(m) {
       /* связь с набором: если в заказе несколько его экземпляров — с номером экземпляра.
-         noLink — мод вложен в набор под блюдом: связь с экземпляром видна вложенностью */
+         noLink — мод вложен в набор под блюдом: связь с экземпляром видна вложенностью.
+         st cancelled — удалённый мод: красный, зачёркнутый, справа крестик */
+      var neg = m.st === 'cancelled';
       var link = esc(m.combo) + (m._chip && m.inst ? ' ' + m.inst : '');
       var linkPart = m.noLink ? '' : '<span class="kds-dsep">·</span><span class="kds-dlink">' + link + '</span>';
-      return '<div class="kds-row kds-row--mod"' + (m._rid ? ' data-rid="' + m._rid + '"' : '') + '>' +
+      var ctl = neg
+        ? '<span class="kds-row__ico kds-row__ico--x"><span class="material-icons">close</span></span>'
+        : '<button class="kds-btn kds-btn--' + (m.st || 'waiting') + '" type="button"><span class="material-icons">' + icoFor(m.st || 'waiting', 'mod') + '</span></button>';
+      var sub = m.noSub ? '' : '<div class="kds-drow__sub"><span class="kds-ditem">к ' + esc(m.parent) + '</span>' + linkPart + '</div>';
+      return '<div class="kds-row kds-row--mod' + (neg ? ' kds-row--neg kds-row--cancelled' : '') + '"' + (m._rid ? ' data-rid="' + m._rid + '"' : '') + '>' +
         '<div class="kds-row__main">' +
           '<div class="kds-row__line"><span class="kds-row__name">' + esc(m.name) + '</span></div>' +
-          '<div class="kds-drow__sub"><span class="kds-ditem">к ' + esc(m.parent) + '</span>' + linkPart + '</div>' +
+          sub +
         '</div>' +
-        '<button class="kds-btn kds-btn--' + (m.st || 'waiting') + '" type="button"><span class="material-icons">' + icoFor(m.st || 'waiting', 'mod') + '</span></button>' +
+        ctl +
       '</div>';
     }
     /* Блок «моды готовятся отдельно» (g-modifier-sep): шапка — иконка + название набора
