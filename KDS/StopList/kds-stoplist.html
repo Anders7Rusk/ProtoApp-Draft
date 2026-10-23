@@ -838,9 +838,9 @@
   .kds-srow__top { display: flex; align-items: stretch; min-height: 52px; }
   .kds-srow__main { flex: 1 1 auto; min-width: 0; padding: var(--ds-space-1x, 4px) var(--ds-space-2x, 8px);
     display: flex; flex-direction: column; justify-content: center; cursor: pointer; }
-  .kds-srow__name { font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; color: var(--kds-text); }
-  /* Имя и плашка остатка — рядом (label+value): на полноширинном списке плашка справа давала пустой разрыв по центру */
-  .kds-srow__l1 { display: flex; align-items: center; gap: var(--ds-space-2x, 8px); min-width: 0; }
+  .kds-srow__name { font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; color: var(--kds-text); white-space: nowrap; }
+  /* Имя и плашка остатка — рядом (label+value), зазор 6 как у строки блюда базы (.kds-row__line) */
+  .kds-srow__l1 { display: flex; align-items: center; gap: 6px; min-width: 0; }
   .kds-srow__cap { font-size: 12px; line-height: 16px; letter-spacing: .4px; color: var(--kds-text-2); }
   /* Плашка остатка — как плашка количества базы: #E0E0E0, 22/28 Bold #333, число и единица вместе */
   /* Плашка количества — теперь внутри .kds-srow__l1 (рядом с названием) */
@@ -857,7 +857,7 @@
   .kds-srow__check:active { background: rgba(255, 255, 255, .08); }
   /* Размеры позиции — как в Figma 10628:57825: отдельные строки-коробки 52 с отступом 24 слева
      (правая кромка по списку), название 22/28, плашка остатка 22/28, свой карандаш 52 */
-  .kds-srow--sub { width: 696px; margin-left: 24px; }
+  .kds-sbody .kds-srow--sub { width: 696px; margin-left: 24px; }
   /* Поле остатка — коробка в стиле строки 52 (#212121 r8): число + единица, ввод дробный;
      при фокусе всё значение выделено (inputmode=decimal). Используется в попапе редактирования. */
   .kds-sfield { display: flex; align-items: center; gap: var(--ds-space-2x, 8px); background: var(--kds-row);
@@ -1453,8 +1453,8 @@
       var edit = (it.sizes && it.sizes.length) ? '' :
         '<button class="kds-btn kds-srow__btn" type="button" data-sl-edit="' + i + '"><span class="material-icons">edit</span></button>';
       return '<div class="kds-srow" data-sl-row="' + i + '" data-sl-name="' + esc(it.name) + '">' +
-        '<div class="kds-srow__top">' + chk + main + edit + '</div>' +
-        (it.sizes && it.sizes.length ? slSizesHtml(it, i) : '') + '</div>';
+        '<div class="kds-srow__top">' + chk + main + edit + '</div></div>' +
+        (it.sizes && it.sizes.length ? slSizesHtml(it, i) : '');
     }
     /* Размеры позиции — отдельные строки с отступом (Figma 10628:57825): название 22/28,
        плашка остатка 22/28, справа свой карандаш 52 */
