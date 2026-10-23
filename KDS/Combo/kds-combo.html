@@ -172,9 +172,12 @@
   /* Корпус планшета вокруг кадра — как в kds-screen.html (ux-прототип KDS):
      светлый кант → тёмный безель → экран, камера сверху по центру.
      Тени нет: вокруг скруглённых углов на белом фоне она даёт серый ореол */
+  /* Корпус планшета вокруг кадра — как в kds-screen.html (ux-прототип KDS):
+     светлый кант → тёмный безель → экран, камера сверху по центру.
+     Тени нет — серый ореол по углам она и давала */
   .kds-shell { position: relative; display: inline-block; padding: 34px; border-radius: 52px;
     background: #101013; border: 2px solid #c6c6ce; }
-  .kds-shell .kds-view { border-radius: 0; }
+  .kds-shell .kds-view { border-radius: 16px; }
   .kds-shell::after { content: ''; position: absolute; top: 13px; left: 50%; transform: translateX(-50%);
     width: 8px; height: 8px; border-radius: 50%;
     background: radial-gradient(circle at 35% 35%, #3c3c44, #0d0d10 65%);
@@ -182,9 +185,6 @@
   .kds-shell--mob { padding: 18px; border-radius: 40px; }
   /* Два кадра в ряд: основной и мобильный */
   .kds-boards { display: flex; align-items: flex-start; gap: 24px; }
-  /* Подложка вокруг корпуса планшета — белая, в цвет страницы:
-     по углам скруглённого корпуса не остаётся серого */
-  .kds-stage { display: inline-block; padding: 20px; background: #ffffff; border-radius: 16px; }
   .kds-boards .kds-fit { flex: 0 0 auto; }
   .kds-fit--mob { height: auto; }
   .kds-fit::-webkit-scrollbar { height: 8px; }
@@ -1882,10 +1882,10 @@
       var view = mkView(cfg.nw, cfg.nh);
       var mobView = cfg.mobile ? mkView(cfg.mobile.nw || 375, cfg.mobile.nh || 812) : '';
       host.innerHTML = '<div class="kds-anno">' + esc(cfg.anno) + '</div>' +
-        '<div class="kds-stage"><div class="kds-boards">' +
+        '<div class="kds-boards">' +
           '<div class="kds-fit"><div class="kds-shell">' + view + '</div></div>' +
           (mobView ? '<div class="kds-fit kds-fit--mob"><div class="kds-shell kds-shell--mob">' + mobView + '</div></div>' : '') +
-        '</div></div>' + docBlock(id);
+        '</div>' + docBlock(id);
       RT.view = host.querySelector('.kds-view');
       RT.layer = RT.view.querySelector('.kds-zoom');
       bindTips(RT.view);
