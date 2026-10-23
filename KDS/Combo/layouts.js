@@ -14,7 +14,7 @@ window.dsLayouts = {
     /* Сценарий 2.1 — видимая часть набора, фильтр */
     { file: 'kds-combo.html', state: 'g-multi', title: 'Сценарий 2.1 · блюда набора одним блоком · горячий цех' },
     { file: 'kds-combo.html', state: 'g-single', title: 'Сценарий 2.1 · блюда набора одним блоком · холодный цех' },
-    { file: 'kds-combo.html', state: 'g-filter', title: 'Сценарий 2.1 · включён фильтр «Готово»' },
+    { file: 'kds-combo.html', state: 'g-filter', title: 'Требование задачи · включён фильтр «Готово»' },
 
     /* Сценарий 2.2 — режим «по блюдам» */
     { file: 'kds-combo.html', state: 'd-list', title: 'Сценарий 2.2 · по блюдам · набор подписан текстом' },
