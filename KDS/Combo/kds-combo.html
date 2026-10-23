@@ -735,8 +735,12 @@
   .kds-cset__inst { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
     min-width: 28px; height: 28px; padding: 0 7px; border-radius: 8px; background: #333333;
     font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: .15px; color: #d6d6d6; margin-left: 0; white-space: nowrap; }
-  /* Вариант для примерки (экран 9): заголовок набора — как у блюд, 22/28, #FFF */
-  .kds-cset--t20 .kds-cset__name { font-size: 22px; line-height: 28px; color: var(--kds-text); }
+  /* Вариант для примерки: заголовок набора — 20/24 (примерка на второй карточке экрана 3.1).
+     Шапка набора — не кликабельная зона, поэтому высота по контенту: 4 + 16 + 24 + 4 = 48 */
+  .kds-cset--t20 .kds-cset__name { font-size: 20px; line-height: 24px; color: #bdbdbd; }
+  .kds-cset--t20 .kds-cset__ico { color: var(--kds-ic-neutral); }
+  .kds-cset--t20 .kds-cset__head { min-height: 0; }
+  .kds-cset--t20 .kds-cset__inst { height: 24px; }
   /* Строки группы — с отступом 26 px и вертикальной полосой 2 px слева (решение дизайнера 22.10.2026):
      полоса от верха первой строки до низа последней, на 16 px от края карточки, строки сдвинуты на 10 px вправо */
   .kds-cset__rows { display: flex; flex-direction: column; gap: var(--ds-space-1x, 4px); margin-left: 26px; position: relative; }
@@ -1089,8 +1093,8 @@
 
       /* 4. По заказам: два экземпляра одного набора, разный состав (сценарий 3.1) */
       'g-instances': {
-        nw: 1280, nh: 880, pill: 'Сборка', stat: 'Заказов: 2', nameStyle: 't20',
-        anno: 'Заказ №215: один гость заказал два «Ланча» из одного комбо-меню с разным выбранным составом. Номеров у названий нет — оба блока называются «Ланч»; различаются они составом и статусами: первый — борщ / котлета / чай, второй — гаспачо / рыба / компот. Второй заказ №216 — та же карточка для сравнения.',
+        nw: 1280, nh: 880, pill: 'Сборка', stat: 'Заказов: 2',
+        anno: 'Заказ №215: один гость заказал два «Ланча» из одного комбо-меню с разным выбранным составом. Номеров у названий нет — оба блока называются «Ланч»; различаются они составом и статусами: первый — борщ / котлета / чай, второй — гаспачо / рыба / компот. Второй заказ №216 — та же карточка для сравнения, название набора — 20/24 (примерка размера).',
         orders: [
           { num: '215', timer: '12:05', st: 'cooking', ch: '#215', rest: 'Константинопольский', tintIco: true,
             meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 6'], ['person', '1']],
@@ -1102,7 +1106,7 @@
               { k: 'cset', guest: 'Гость 1', title: 'Ланч', inst: 1, total: 3, rows: [ d('Котлета', 1, 'ready'), d('Чай', 1, 'waiting') ] },
               { k: 'cset', guest: 'Гость 1', title: 'Ланч', inst: 2, total: 3, rows: [ d('Рыба', 1, 'cooking'), d('Компот', 1, 'waiting') ] }
             ] },
-          { num: '216', timer: '12:05', st: 'cooking', ch: '#216', rest: 'Константинопольский', instChip: true,
+          { num: '216', timer: '12:05', st: 'cooking', ch: '#216', rest: 'Константинопольский', instChip: true, nameStyle: 't20',
             meta: [['receipt_long', 'Обычный заказ'], ['chair', 'Стол 6'], ['person', '1']],
             items: [
               { k: 'course', label: 'Курс 1' },
@@ -1404,7 +1408,7 @@
           (g._chip ? '<span class="kds-cset__inst">' + esc(g._chip) + '</span>' : '') + '</div>' +
           cap + '</div>';
       var headCls = 'kds-cset__head' + (g._guestRight && !gline ? ' kds-cset__head--tight' : '');
-      return '<div class="kds-cset' + (RT.cfg && RT.cfg.nameStyle ? ' kds-cset--' + RT.cfg.nameStyle : '') + '"' + (g._rid ? ' data-rid="' + g._rid + '"' : '') + '>' +
+      return '<div class="kds-cset' + ((g._nameStyle || (RT.cfg && RT.cfg.nameStyle)) ? ' kds-cset--' + (g._nameStyle || RT.cfg.nameStyle) : '') + '"' + (g._rid ? ' data-rid="' + g._rid + '"' : '') + '>' +
         '<div class="' + headCls + '"' + headFull + '>' + gline + nameRow + '</div>' +
         '<div class="kds-cset__rows">' + kids + '</div></div>';
     }
@@ -2148,6 +2152,7 @@
           if (o.tintIco) it._icoColor = (['#00E5FF', '#D500F9'][(it.inst || 1) - 1]) || '#90A4AE';
           if (o.instChip && it.inst) it._chip = String(it.inst);
           if (o.guestRight) it._guestRight = true;
+          if (o.nameStyle) it._nameStyle = o.nameStyle;
           (it.rows || []).forEach(function (rw) { rw._instKey = key; });
         });
         (o.items || []).forEach(function (it) {
