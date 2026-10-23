@@ -36,7 +36,8 @@ window.dsLayouts = {
     { file: 'kds-combo.html', state: 'g-two-combos', title: 'Сценарий 3.5 · два набора с одним блюдом и разными модификаторами' },
 
     /* Сценарий 3.6 — модификатор отдельной задачей */
-    { file: 'kds-combo.html', state: 'g-modifier', title: 'Сценарий 3.6 · модификатор готовится отдельно' },
+    { file: 'kds-combo.html', state: 'g-modifier', title: 'Сценарий 3.6 · модификатор готовится вместе' },
+    { file: 'kds-combo.html', state: 'g-modifier-sep', title: 'Сценарий 3.6 · модификатор готовится отдельно' },
 
     /* Сценарий 3.7 — длинное название, узкий экран */
     { file: 'kds-combo.html', state: 'g-long', title: 'Сценарий 3.7 · длинное название, узкий экран' },
