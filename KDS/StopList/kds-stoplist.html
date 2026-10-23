@@ -14,7 +14,8 @@
       по Figma «Web KDS Экраны» (файл 05VEoPOZuAVHLfYI6yqVjz, узел 10497:3361), каркас
       render()/mkView(), SCREENS, палитра .kds-view, панель ревью connect.js + layouts.js,
       переключение — событие dsreview:state и ?state=. Меняется в базе только одно —
-      кнопка «Стоп-лист» в шапке (block + текст, иконка — кандидат, не утверждена);
+      кнопка «Стоп-лист» в шапке (block + текст, иконка — кандидат, не утверждена;
+      по указанию заказчика 23.10.2026 кнопка — в ПРАВОМ блоке шапки, рядом с иконками);
     • каркас страницы — подключение одной строкой: `../../Design-System/connect.js` с флагами
       data-no-header data-no-sidenav (это экран кухни); панель ревью и селект «Экраны» приходят
       сами (ds-review.js из connect.js), реестр — layouts.js рядом;
@@ -27,7 +28,7 @@
     • демо-контента нет — только собственные экраны прототипа (правило 16.10.2026).
 
   ЭКРАНЫ — ЧТО ПРОИСХОДИТ (реестр layouts.js, 18 состояний = 18 ключей SCREENS):
-    1. base — база 1:1 из kds-combo + кнопка «Стоп-лист» в шапке (block + текст)
+    1. base — база 1:1 из kds-combo + кнопка «Стоп-лист» в правом блоке шапки (block + текст)
     2. base-noaccess — та же база без кнопки входа (опция выкл / нет права / смена выкл)
     3. list — стоп-лист: поиск, «Добавить позицию», «Выбрать», «Печать», 4 позиции,
        у «Маргариты» размеры 25/30/35 см; футер «В стоп-листе: 4 позиции»
@@ -644,8 +645,12 @@
   .kds-cset__inst { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
     min-width: 28px; height: 28px; padding: 0 7px; border-radius: 8px; background: #333333;
     font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: .15px; color: #d6d6d6; margin-left: 0; white-space: nowrap; }
-  /* Вариант для примерки (экран 9): заголовок набора — как у блюд, 22/28, #FFF */
-  .kds-cset--t20 .kds-cset__name { font-size: 22px; line-height: 28px; color: var(--kds-text); }
+  /* Вариант для примерки: заголовок набора — 20/24 (примерка на второй карточке экрана 3.1).
+     Шапка набора — не кликабельная зона, поэтому высота по контенту: 4 + 16 + 24 + 4 = 48 */
+  .kds-cset--t20 .kds-cset__name { font-size: 20px; line-height: 24px; color: #bdbdbd; }
+  .kds-cset--t20 .kds-cset__ico { color: var(--kds-ic-neutral); }
+  .kds-cset--t20 .kds-cset__head { min-height: 0; }
+  .kds-cset--t20 .kds-cset__inst { height: 24px; }
   /* Строки группы — с отступом 26 px и вертикальной полосой 2 px слева (решение дизайнера 22.10.2026):
      полоса от верха первой строки до низа последней, на 16 px от края карточки, строки сдвинуты на 10 px вправо */
   .kds-cset__rows { display: flex; flex-direction: column; gap: var(--ds-space-1x, 4px); margin-left: 26px; position: relative; }
@@ -1707,7 +1712,6 @@
           '<span class="kds-tb-list" data-clock>' + nowHHMM() + '</span>' +
           '<button class="kds-tb-list kds-tb-pick" type="button" data-select="term"><span class="material-icons">monitor</span><span data-val>Имя терминала</span></button>' +
           '<button class="kds-tb-list kds-tb-pick kds-tb-rest" type="button" data-select="rest"><span class="material-icons">person</span><span data-val>Константинопольский</span><span class="kds-tb-chev material-icons">keyboard_arrow_down</span></button>' +
-          (cfg.stopBtn ? '<button class="kds-tb-list kds-tb-pick" type="button" data-stopbtn><span class="material-icons">block</span><span data-val>Стоп-лист</span></button>' : '') +
           '<span class="kds-tb-states">' +
             (cfg.stat ? '<button class="kds-tb-state kds-tb-state--accent" type="button" data-filter="run"><span class="kds-tb-ico">' + svgIco('clock_loader_40', 20) + '</span><b data-cnt="run">12</b></button>' +
               '<button class="kds-tb-state kds-tb-state--negative" type="button" data-filter="over"><span class="material-icons">info</span><b data-cnt="over">2</b></button>' +
@@ -1716,6 +1720,7 @@
           '</span>' +
         '</div>' +
         '<div class="kds-tb-icons">' +
+          (cfg.stopBtn ? '<button class="kds-tb-list kds-tb-pick" type="button" data-stopbtn><span class="material-icons">block</span><span data-val>Стоп-лист</span></button>' : '') +
           '<button class="kds-iconbtn kds-iconbtn--power" type="button" data-act="power"><span class="material-icons">power_settings_new</span></button>' +
           '<button class="kds-iconbtn" type="button" data-pop="settings"><span class="material-icons">settings</span></button>' +
         '</div>' +
@@ -1882,7 +1887,7 @@
           (g._chip ? '<span class="kds-cset__inst">' + esc(g._chip) + '</span>' : '') + '</div>' +
           cap + '</div>';
       var headCls = 'kds-cset__head' + (g._guestRight && !gline ? ' kds-cset__head--tight' : '');
-      return '<div class="kds-cset' + (RT.cfg && RT.cfg.nameStyle ? ' kds-cset--' + RT.cfg.nameStyle : '') + '"' + (g._rid ? ' data-rid="' + g._rid + '"' : '') + '>' +
+      return '<div class="kds-cset' + ((g._nameStyle || (RT.cfg && RT.cfg.nameStyle)) ? ' kds-cset--' + (g._nameStyle || RT.cfg.nameStyle) : '') + '"' + (g._rid ? ' data-rid="' + g._rid + '"' : '') + '>' +
         '<div class="' + headCls + '"' + headFull + '>' + gline + nameRow + '</div>' +
         '<div class="kds-cset__rows">' + kids + '</div></div>';
     }
@@ -2618,6 +2623,7 @@
           if (o.tintIco) it._icoColor = (['#00E5FF', '#D500F9'][(it.inst || 1) - 1]) || '#90A4AE';
           if (o.instChip && it.inst) it._chip = String(it.inst);
           if (o.guestRight) it._guestRight = true;
+          if (o.nameStyle) it._nameStyle = o.nameStyle;
           (it.rows || []).forEach(function (rw) { rw._instKey = key; });
         });
         (o.items || []).forEach(function (it) {
