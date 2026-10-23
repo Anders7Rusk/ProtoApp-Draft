@@ -359,10 +359,11 @@
   .kds-scrollstrip { position: absolute; left: 0; right: 0; bottom: 56px; height: 12px; padding: 2px; z-index: 6; }
   .kds-scrollstrip__thumb { height: 8px; border-radius: 8px; background: #333333; }
 
-  /* ── Футер (Figma: Footer 1280×56, pad 4/16, space-between; текст Medium 16/24 ls .5) ── */
+  /* ── Футер (Figma: Footer 1280×56, pad 4/16, space-between; текст Medium 16/24 ls .5;
+        фон — rgba(18,18,18,0.92), нижние углы скруглены рамкой кадра) ── */
   .kds-footer {
     position: absolute; left: 0; right: 0; bottom: 0; height: 56px; padding: 4px 16px; z-index: 6;
-    background: var(--kds-surface);
+    background: rgba(18, 18, 18, .92);
     display: flex; align-items: center; justify-content: space-between; gap: 24px;
   }
   .kds-footer__left { display: flex; align-items: center; gap: 24px; min-width: 0; }
