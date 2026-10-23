@@ -396,10 +396,15 @@
   .kds-view--mob .kds-footer__btn:disabled { opacity: 1; }
   /* ── Контент мобильного кадра (Figma PB-6623): одна колонка, карточка во всю ширину,
         строки и кнопки 56 ── */
-  /* индикаторы прокрутки не показываем нигде: это терминал, а не веб-страница.
-     Прокрутка (палец, пан, колесо) продолжает работать */
-  .kds-vscroll,
-  .kds-scrollstrip { display: none !important; }
+  /* Индикаторы прокрутки — как в Figma: внизу полоса Scroll 12 px (ползунок 8 px #333),
+     в режиме «по блюдам» — вертикальная полоса справа (трек #9E9E9E, ползунок #616161).
+     Сама прокрутка — палец/пан/колесо, индикатор только показывает позицию */
+  .kds-vscroll { display: none; }
+  .kds-scrollstrip { display: block; }
+  .kds-dlist ~ .kds-scrollstrip { display: none; }
+  .kds-dlist ~ .kds-vscroll { display: block; }
+  /* На мобильном кадре индикаторов нет */
+  .kds-view--mob .kds-scrollstrip, .kds-view--mob .kds-vscroll { display: none; }
   .kds-view--mob .kds-board { top: 48px; left: 12px; right: 12px; bottom: 80px;
     flex-direction: column; flex-wrap: nowrap; gap: 12px; }
   .kds-view--mob .kds-card, .kds-view--narrow.kds-view--mob .kds-card { width: 100%; }
@@ -1999,13 +2004,14 @@
       if (!board) { strip.style.display = 'none'; return; }
       function upd() {
         var cw = board.clientWidth, sw = board.scrollWidth;
-        if (sw <= cw) { strip.style.display = 'none'; return; }
+        /* Полоса видна всегда, как в макете: при переполнении ползунок — доля,
+           без переполнения — во всю ширину трека */
         strip.style.display = 'block';
         var track = cw - 4;
-        var w = Math.max(48, Math.round(track * cw / sw));
+        var w = Math.min(track, Math.max(48, Math.round(track * cw / sw)));
         thumb.style.width = w + 'px';
         var max = track - w;
-        thumb.style.transform = 'translateX(' + Math.round((board.scrollLeft / (sw - cw)) * max) + 'px)';
+        thumb.style.transform = 'translateX(' + (sw > cw ? Math.round((board.scrollLeft / (sw - cw)) * max) : 0) + 'px)';
       }
       board.addEventListener('scroll', upd);
       upd();
