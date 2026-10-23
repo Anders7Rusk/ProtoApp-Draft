@@ -1465,7 +1465,7 @@
       }
       var nameRow = '<div class="kds-cset__row"><div class="kds-cset__name"><span class="kds-cset__ico"' + (g._icoColor ? ' style="color:' + g._icoColor + '"' : '') + '>' + svgIco('fastfood', 20) + '</span>' +
           '<span class="kds-cset__t' + (long ? ' kds-ellip' : '') + '">' + esc(title) + '</span>' +
-          (g._chip ? '<span class="kds-cset__inst">' + esc(g._chip) + '</span>' : '') + '</div>' +
+          (g._chip ? '<span class="kds-cset__inst"' + (g._chipColor ? ' style="background:' + g._chipColor + '"' : '') + '>' + esc(g._chip) + '</span>' : '') + '</div>' +
           cap + '</div>';
       var headCls = 'kds-cset__head' + (g.headTall ? ' kds-cset__head--tall' : '') + (g._guestRight && !gline ? ' kds-cset__head--tight' : '');
       /* Вторая строка шапки (например «Модификаторы») — как строка гостя, но под названием: отступ на ширину иконки + зазор */
@@ -2231,6 +2231,7 @@
           /* примерка: цвет иконки набора — нестатусный, закреплён за экземпляром */
           if (o.tintIco) it._icoColor = (['#00E5FF', '#D500F9'][(it.inst || 1) - 1]) || '#90A4AE';
           if (o.instChip && it.inst) it._chip = String(it.inst);
+          if (o.instTint && it.inst) it._chipColor = (['rgba(0, 229, 255, .12)', 'rgba(213, 0, 249, .12)'][(it.inst || 1) - 1]) || 'rgba(144, 164, 174, .12)';
           if (o.guestRight) it._guestRight = true;
           if (o.nameStyle) it._nameStyle = o.nameStyle;
           (it.rows || []).forEach(function (rw) { rw._instKey = key; });
