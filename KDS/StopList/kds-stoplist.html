@@ -835,12 +835,14 @@
   .kds-srow__main { flex: 1 1 auto; min-width: 0; padding: var(--ds-space-1x, 4px) var(--ds-space-2x, 8px);
     display: flex; flex-direction: column; justify-content: center; cursor: pointer; }
   .kds-srow__name { font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; color: var(--kds-text); }
+  /* Имя и плашка остатка — рядом (label+value): на полноширинном списке плашка справа давала пустой разрыв по центру */
+  .kds-srow__l1 { display: flex; align-items: center; gap: var(--ds-space-2x, 8px); min-width: 0; }
   .kds-srow__cap { font-size: 12px; line-height: 16px; letter-spacing: .4px; color: var(--kds-text-2); }
   /* Плашка остатка — как плашка количества базы: #E0E0E0, 22/28 Bold #333, число и единица вместе */
-  .kds-srow__top .kds-qty { align-self: center; margin-right: var(--ds-space-2x, 8px); }
+  /* Плашка количества — теперь внутри .kds-srow__l1 (рядом с названием) */
   .kds-qty--empty { min-width: 28px; }
   /* Полный стоп — красный текст вместо плашки (остаток 0 виден, отдельного бейджа нет) */
-  .kds-sstop { flex: 0 0 auto; align-self: center; margin-right: var(--ds-space-2x, 8px);
+  .kds-sstop { flex: 0 0 auto; align-self: center;
     font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; color: var(--kds-ic-negative); }
   /* Чекбокс режима выбора — слева у строки */
   .kds-srow__check { flex: 0 0 52px; width: 52px; border: 0; background: transparent; color: var(--kds-text-2);
@@ -852,7 +854,7 @@
   /* Размеры позиции: вложенные строки (отступ 16, текст 18/24), у каждой своя плашка */
   .kds-ssizes { display: flex; flex-direction: column; padding: 0 var(--ds-space-2x, 8px) var(--ds-space-1x, 4px); }
   .kds-ssize { display: flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 8px 0 16px; }
-  .kds-ssize__n { flex: 1 1 auto; min-width: 0; font-size: 18px; line-height: 24px; letter-spacing: .5px; color: var(--kds-text); }
+  .kds-ssize__n { flex: 0 0 auto; min-width: 0; font-size: 18px; line-height: 24px; letter-spacing: .5px; color: var(--kds-text); }
   .kds-sqty { flex: 0 0 auto; min-width: 19px; height: 24px; padding: 0 4px; border-radius: 6px; background: #e0e0e0;
     font-size: 18px; font-weight: 700; line-height: 24px; letter-spacing: .5px; color: #333; }
   .kds-ssize__stop { flex: 0 0 auto; font-size: 18px; line-height: 24px; font-weight: 500; color: var(--kds-ic-negative); }
@@ -1421,23 +1423,18 @@
             '<span class="kds-srow__cap">' + esc(it.cap || 'Без ограничения') + '</span>' +
           '</div></div>' + (it._open ? slPanelHtml(it, i) : '') + '</div>';
       }
-      var main = '<div class="kds-srow__main">' +
-        '<span class="kds-srow__name">' + esc(it.name) + '</span>' +
+      var l1 = '<div class="kds-srow__l1"><span class="kds-srow__name">' + esc(it.name) + '</span>' +
+        (it.stop || !it.sizes || !it.sizes.length ? slPlateHtml(it) : '') +
+      '</div>';
+      var main = '<div class="kds-srow__main">' + l1 +
         (it.excluded ? '<span class="kds-srow__cap">Исключена из меню</span>' : '') +
       '</div>';
       var chk = RT.sl.selMode
         ? '<button class="kds-srow__check" type="button" data-sl-check="' + i + '"><span class="material-icons">' + (RT.sl.checks[i] ? 'check_box' : 'check_box_outline_blank') + '</span></button>'
         : '';
-      var body;
-      if (it.stop || !it.sizes || !it.sizes.length) {
-        body = '<div class="kds-srow__top">' + chk + main + slPlateHtml(it) +
-          '<button class="kds-btn kds-srow__btn" type="button" data-sl-edit="' + i + '"><span class="material-icons">edit</span></button>' +
-        '</div>';
-      } else {
-        body = '<div class="kds-srow__top">' + chk + main +
-          '<button class="kds-btn kds-srow__btn" type="button" data-sl-edit="' + i + '"><span class="material-icons">edit</span></button>' +
-        '</div>' + slSizeRowsHtml(it);
-      }
+      var body = '<div class="kds-srow__top">' + chk + main +
+        '<button class="kds-btn kds-srow__btn" type="button" data-sl-edit="' + i + '"><span class="material-icons">edit</span></button>' +
+      '</div>' + (it.stop || !it.sizes || !it.sizes.length ? '' : slSizeRowsHtml(it));
       return '<div class="kds-srow' + (it._open ? ' kds-srow--open' : '') + (RT.sl.selMode ? ' kds-srow--selmode' : '') + '" data-sl-row="' + i + '" data-sl-name="' + esc(it.name) + '">' +
         body + (it._open ? slPanelHtml(it, i) : '') + '</div>';
     }
@@ -2125,7 +2122,7 @@
     }
     /* ── Описание экрана под макетом: для каждого экрана свой заголовок и текст ── */
     var DOC = {
-      'base': { t: 'Экран повара + вход в стоп-лист', s: 'база 1:1 · единственное изменение — кнопка в шапке', q: 'Стоп-лист — отдельная сущность. Это не строка заказа, не подача и не статус блюда. Внесение позиции в стоп-лист не удаляет блюдо из меню и не меняет отображение или обработку заказов.', d: 'База 1:1 из kds-combo.html (экран повара по Figma 10497:3361): карточки, статусы, фильтры, «Отменить» — не тронуты. Единственное изменение — кнопка «Стоп-лист» в шапке (block + текст, между кнопкой ресторана и счётчиками; иконка — кандидат, см. постер icons). Переход — через панель ревью.' },
+      'base': { t: 'Экран повара + вход в стоп-лист', s: 'база 1:1 · единственное изменение — кнопка в шапке', q: 'Стоп-лист — отдельная сущность. Это не строка заказа, не подача и не статус блюда. Внесение позиции в стоп-лист не удаляет блюдо из меню и не меняет отображение или обработку заказов.', d: 'База 1:1 из kds-combo.html (экран повара по Figma 10497:3361): карточки, статусы, фильтры, «Отменить» — не тронуты. Единственное изменение — кнопка «Стоп-лист» в шапке (block + текст, справа перед счётчиками; иконка — кандидат, см. постер icons). Переход — по кнопке и через панель ревью.' },
       'base-noaccess': { t: 'Экран повара без входа', s: 'опция выключена / нет права / смена выключена', q: 'Работа со стоп-листом доступна только при включённой персональной смене, после авторизации сотрудника с правом «Редактировать стоп-лист» и при включённой опции стоп-листа. При отсутствии любого из условий интерфейс стоп-листа недоступен.', d: 'Та же база, но кнопки входа в шапке НЕТ и никакого намёка на функцию: действий нет, частично работающего интерфейса не показываем.' },
       'list': { t: 'Стоп-лист', s: 'список позиций · терминальная группа «Зал»', q: 'Стоп-лист — набор позиций, для которых задано ограничение. Три состояния позиции: без ограничения — остаток не задан, это не то же самое, что остаток 0; ограниченный остаток N; полный стоп — остаток 0.', d: 'Сделано по §5.2–5.3 и 5.11 ТЗ: шапка «К заказам · Стоп-лист · Терминальная группа: Зал», поиск, «Добавить позицию» (акцент), «Выбрать», «Печать»; позиции: «Фокачча — 2,5 шт» (дробный остаток без округления), «Маргарита» с размерами 25/30/35 см (12 шт / 4 шт / Полный стоп), «Тирамису — Полный стоп», «Паста карбонара — 8 шт»; футер «В стоп-листе: 4 позиции» — «Всего заказов» и «Отменить» на стоп-листе нет.' },
       'list-empty': { t: 'Стоп-лист пуст', s: 'ограничений нет', q: 'Состояния, которые нужно отрисовать: Ограничений нет — пустой стоп-лист и как задать ограничение.', d: 'Пустой стоп-лист: «Ограничений нет» + «Нажмите «Добавить позицию», чтобы задать остаток» + акцентная кнопка. Понятно, как задать первое ограничение; ничего лишнего.' },
@@ -2380,6 +2377,7 @@
       applyCounts(); syncUndo(); applyTheme(); applyZoom(); startTicker();
       fitScale();
       syncMobClass();
+      cmtMount(id);
     }
     /* На реальном узком вьюпорте шапка переходит в мобильный вариант (Figma «Header» 375) */
     function syncMobClass() {
