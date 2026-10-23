@@ -102,11 +102,13 @@
   /* В режиме панели ревью подпись не нужна — иначе экран 1280×800 не влезает в кадр */
   body.dsr-page .kds-anno { display: none; }
 
-  /* ── Описание экрана под макетом (читается на самой странице) ── */
+  /* ── Описание экрана: заголовок НАД макетом, описание — под ним ── */
   .kds-doc {
     margin: 20px 0 4px; max-width: 1280px;
     font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   }
+  .kds-doc--head { margin: 0 0 16px; }
+  .kds-doc--body { margin: 20px 0 4px; }
   .kds-doc__title { font-size: 20px; font-weight: 500; line-height: 28px; letter-spacing: .15px; color: #333; margin: 0 0 8px; }
   .kds-doc__item { font-size: 14px; line-height: 22px; color: #333; margin: 0; }
   .kds-doc__item b { font-weight: 500; }
@@ -2142,10 +2144,14 @@
       'icons': { t: 'Постер · пиктограммы', s: 'все — кандидаты, не утверждены', d: 'Постер пиктограмм: block (вход в стоп-лист), edit (действие строки), print (печать), restaurant / straighten (уровни «Всё блюдо» / «Размеры»). Все помечены «кандидат, не утверждена» — ни одна иконка не выдана за утверждённую.' },
       'rationale': { t: 'Постер · обоснование решений', s: 'согласовано с дизайнером 23.10.2026', d: 'Шесть решений по открытым вопросам задачи — по карточке на каждое, отмечено, что решения согласованы с дизайнером.' }
     };
-    function docBlock(id) {
+    function docHead(id) {
       var x = DOC[id] || DOC['base'];
-      return '<div class="kds-doc"><div class="kds-doc__title">' +
-        (x.s ? x.t + ' · ' + x.s : x.t) + '</div>' +
+      return '<div class="kds-doc kds-doc--head"><div class="kds-doc__title">' +
+        (x.s ? x.t + ' · ' + x.s : x.t) + '</div></div>';
+    }
+    function docBody(id) {
+      var x = DOC[id] || DOC['base'];
+      return '<div class="kds-doc kds-doc--body">' +
         (x.q ? '<p class="kds-doc__q"><b>Цитата сценария (PB-8102):</b> «' + x.q + '»</p>' : '') +
         '<p class="kds-doc__item">' + x.d + '</p></div>';
     }
@@ -2350,11 +2356,12 @@
       }
       var view = mkView(cfg.nw, cfg.nh);
       var mobView = cfg.mobile ? mkView(cfg.mobile.nw || 375, cfg.mobile.nh || 812) : '';
-      host.innerHTML = '<div class="kds-anno">' + esc(cfg.anno) + '</div>' +
+      host.innerHTML = docHead(id) +
+        '<div class="kds-anno">' + esc(cfg.anno) + '</div>' +
         '<div class="kds-boards">' +
           '<div class="kds-fit"><div class="kds-shell">' + view + '</div></div>' +
           (mobView ? '<div class="kds-fit kds-fit--mob"><div class="kds-shell kds-shell--mob">' + mobView + '</div></div>' : '') +
-        '</div>' + docBlock(id);
+        '</div>' + docBody(id);
       RT.view = host.querySelector('.kds-view');
       RT.layer = RT.view.querySelector('.kds-zoom');
       bindTips(RT.view);

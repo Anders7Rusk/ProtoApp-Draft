@@ -192,11 +192,13 @@
   /* В режиме панели ревью подпись не нужна — иначе экран 1280×800 не влезает в кадр */
   body.dsr-page .kds-anno { display: none; }
 
-  /* ── Описание экрана под макетом (читается на самой странице) ── */
+  /* ── Описание экрана: заголовок НАД макетом, описание — под ним ── */
   .kds-doc {
     margin: 20px 0 4px; max-width: 1280px;
     font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   }
+  .kds-doc--head { margin: 0 0 16px; }
+  .kds-doc--body { margin: 20px 0 4px; }
   .kds-doc__title { font-size: 20px; font-weight: 500; line-height: 28px; letter-spacing: .15px; color: #333; margin: 0 0 8px; }
   .kds-doc__item { font-size: 14px; line-height: 22px; color: #333; margin: 0; }
   .kds-doc__item b { font-weight: 500; }
@@ -1658,10 +1660,14 @@
       'g-nocook': { t: 'По заказам · позиция без приготовления', s: 'сценарий 3.4 · напиток берёт сборщик', q: 'Часть позиций набора может не требовать приготовления — их берёт сборщик.', d: 'Сделано по сценарию 3.4: в «Ланче» есть напиток, который не готовят. В группе он без статуса приготовления и с подписью «не готовится — берёт сборщик»: позиция видна и не выглядит отсутствующей, но и не притворяется задачей цеха.' },
       'g-two-combos': { t: 'По заказам · два набора с одним блюдом', s: 'сценарий 3.5 · разные наборы, общий бургер', q: 'В одном заказе возможны одно и то же блюдо с разной принадлежностью (в наборе и отдельно), несколько экземпляров одного набора и разные наборы с одинаковым блюдом.', d: 'Сделано по сценарию 3.5: «Ланч» и «Детский набор» оба содержат бургер, но с разными выборами: в «Ланче» бургер без лука, в «Детском наборе» — с курицей (модификатор строкой под названием, 12/16 #9E9E9E). Повар готовит фактически выбранное блюдо с его модификаторами; сборщик раскладывает позиции по комплектам — принадлежность читается по названию набора, вариант — по модификатору, а не по слову «Бургер». Блюд с модификатором на экране два, у каждого своя кнопка статуса; модификатор не становится отдельным компонентом набора.' }
     };
-    function docBlock(id) {
+    function docHead(id) {
       var x = DOC[id] || DOC['base'];
-      return '<div class="kds-doc"><div class="kds-doc__title">' +
-        (x.s ? x.t + ' · ' + x.s : x.t) + '</div>' +
+      return '<div class="kds-doc kds-doc--head"><div class="kds-doc__title">' +
+        (x.s ? x.t + ' · ' + x.s : x.t) + '</div></div>';
+    }
+    function docBody(id) {
+      var x = DOC[id] || DOC['base'];
+      return '<div class="kds-doc kds-doc--body">' +
         (x.q ? '<p class="kds-doc__q"><b>Сценарий из задачи PB-8108:</b> «' + x.q + '»</p>' : '') +
         '<p class="kds-doc__item">' + x.d + '</p></div>';
     }
@@ -1881,11 +1887,12 @@
       }
       var view = mkView(cfg.nw, cfg.nh);
       var mobView = cfg.mobile ? mkView(cfg.mobile.nw || 375, cfg.mobile.nh || 812) : '';
-      host.innerHTML = '<div class="kds-anno">' + esc(cfg.anno) + '</div>' +
+      host.innerHTML = docHead(id) +
+        '<div class="kds-anno">' + esc(cfg.anno) + '</div>' +
         '<div class="kds-boards">' +
           '<div class="kds-fit"><div class="kds-shell">' + view + '</div></div>' +
           (mobView ? '<div class="kds-fit kds-fit--mob"><div class="kds-shell kds-shell--mob">' + mobView + '</div></div>' : '') +
-        '</div>' + docBlock(id);
+        '</div>' + docBody(id);
       RT.view = host.querySelector('.kds-view');
       RT.layer = RT.view.querySelector('.kds-zoom');
       bindTips(RT.view);
