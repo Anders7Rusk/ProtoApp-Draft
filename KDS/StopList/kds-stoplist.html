@@ -15,7 +15,7 @@
       render()/mkView(), SCREENS, палитра .kds-view, панель ревью connect.js + layouts.js,
       переключение — событие dsreview:state и ?state=. Меняется в базе только одно —
       кнопка «Стоп-лист» в шапке (block + текст, иконка — кандидат, не утверждена;
-      по указанию заказчика 23.10.2026 кнопка — в ПРАВОМ блоке шапки, рядом с иконками);
+      позиция — перед иконками показателей/счётчиками, по указанию заказчика 23.10.2026);
     • каркас страницы — подключение одной строкой: `../../Design-System/connect.js` с флагами
       data-no-header data-no-sidenav (это экран кухни); панель ревью и селект «Экраны» приходят
       сами (ds-review.js из connect.js), реестр — layouts.js рядом;
@@ -28,7 +28,7 @@
     • демо-контента нет — только собственные экраны прототипа (правило 16.10.2026).
 
   ЭКРАНЫ — ЧТО ПРОИСХОДИТ (реестр layouts.js, 18 состояний = 18 ключей SCREENS):
-    1. base — база 1:1 из kds-combo + кнопка «Стоп-лист» в правом блоке шапки (block + текст)
+    1. base — база 1:1 из kds-combo + кнопка «Стоп-лист» в шапке перед счётчиками (block + текст)
     2. base-noaccess — та же база без кнопки входа (опция выкл / нет права / смена выкл)
     3. list — стоп-лист: поиск, «Добавить позицию», «Выбрать», «Печать», 4 позиции,
        у «Маргариты» размеры 25/30/35 см; футер «В стоп-листе: 4 позиции»
@@ -1712,6 +1712,7 @@
           '<span class="kds-tb-list" data-clock>' + nowHHMM() + '</span>' +
           '<button class="kds-tb-list kds-tb-pick" type="button" data-select="term"><span class="material-icons">monitor</span><span data-val>Имя терминала</span></button>' +
           '<button class="kds-tb-list kds-tb-pick kds-tb-rest" type="button" data-select="rest"><span class="material-icons">person</span><span data-val>Константинопольский</span><span class="kds-tb-chev material-icons">keyboard_arrow_down</span></button>' +
+          (cfg.stopBtn ? '<button class="kds-tb-list kds-tb-pick" type="button" data-stopbtn><span class="material-icons">block</span><span data-val>Стоп-лист</span></button>' : '') +
           '<span class="kds-tb-states">' +
             (cfg.stat ? '<button class="kds-tb-state kds-tb-state--accent" type="button" data-filter="run"><span class="kds-tb-ico">' + svgIco('clock_loader_40', 20) + '</span><b data-cnt="run">12</b></button>' +
               '<button class="kds-tb-state kds-tb-state--negative" type="button" data-filter="over"><span class="material-icons">info</span><b data-cnt="over">2</b></button>' +
@@ -1720,7 +1721,6 @@
           '</span>' +
         '</div>' +
         '<div class="kds-tb-icons">' +
-          (cfg.stopBtn ? '<button class="kds-tb-list kds-tb-pick" type="button" data-stopbtn><span class="material-icons">block</span><span data-val>Стоп-лист</span></button>' : '') +
           '<button class="kds-iconbtn kds-iconbtn--power" type="button" data-act="power"><span class="material-icons">power_settings_new</span></button>' +
           '<button class="kds-iconbtn" type="button" data-pop="settings"><span class="material-icons">settings</span></button>' +
         '</div>' +
