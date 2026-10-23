@@ -811,7 +811,7 @@
   .kds-slist > * { width: 640px; max-width: 100%; }
   /* Заголовок экрана: «Стоп-лист» 22/28 + подпись терминальной группы */
   .kds-sl-head { display: flex; flex-direction: column; gap: 4px; padding: 8px 0 12px; }
-  .kds-sl-head__t { font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; color: var(--kds-text); }
+  .kds-sl-head__t { font-size: 24px; font-weight: 500; line-height: 32px; letter-spacing: .5px; color: var(--kds-text); }
   .kds-sl-head__s { font-size: 14px; line-height: 20px; color: var(--kds-text-2); }
   /* Полоса над списком: поле поиска + кнопки («Добавить позицию» — акцент, «Печать» — обводка) */
   .kds-shead { display: flex; align-items: center; gap: var(--ds-space-2x, 8px); }
@@ -843,7 +843,9 @@
     display: flex; flex-direction: column; justify-content: center; cursor: pointer; }
   .kds-srow__name { font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; color: var(--kds-text); }
   /* Имя и плашка остатка — рядом (label+value): на полноширинном списке плашка справа давала пустой разрыв по центру */
-  .kds-srow__l1 { display: flex; align-items: center; gap: var(--ds-space-2x, 8px); min-width: 0; }
+  /* Зона остатка: выровненная правая колонка — цифры всех строк сканируются по вертикали */
+  .kds-srow__rest { flex: 0 0 auto; display: flex; align-items: center; justify-content: flex-end;
+    min-width: 96px; margin-right: var(--ds-space-2x, 8px); }
   .kds-srow__cap { font-size: 12px; line-height: 16px; letter-spacing: .4px; color: var(--kds-text-2); }
   /* Плашка остатка — как плашка количества базы: #E0E0E0, 22/28 Bold #333, число и единица вместе */
   /* Плашка количества — теперь внутри .kds-srow__l1 (рядом с названием) */
@@ -860,6 +862,7 @@
   /* Размеры позиции: вложенные строки (отступ 16, текст 18/24), у каждой своя плашка */
   .kds-ssizes { display: flex; flex-direction: column; padding: 0 var(--ds-space-2x, 8px) var(--ds-space-1x, 4px); }
   .kds-ssize { display: flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 8px 0 16px; }
+  .kds-ssize .kds-sqty, .kds-ssize .kds-ssize__stop { margin-left: auto; margin-right: 60px; min-width: 96px; text-align: right; }
   .kds-ssize__n { flex: 0 0 auto; min-width: 0; font-size: 18px; line-height: 24px; letter-spacing: .5px; color: var(--kds-text); }
   .kds-sqty { flex: 0 0 auto; min-width: 19px; height: 24px; padding: 0 4px; border-radius: 6px; background: #e0e0e0;
     font-size: 18px; font-weight: 700; line-height: 24px; letter-spacing: .5px; color: #333; }
@@ -1429,14 +1432,14 @@
             '<span class="kds-srow__cap">' + esc(it.cap || 'Без ограничения') + '</span>' +
           '</div></div>' + (it._open ? slPanelHtml(it, i) : '') + '</div>';
       }
-      var l1 = '<div class="kds-srow__l1"><span class="kds-srow__name">' + esc(it.name) + '</span>' +
-        (it.stop || !it.sizes || !it.sizes.length ? slPlateHtml(it) : '') +
-      '</div>';
-      var main = '<div class="kds-srow__main">' + l1 +
+      var main = '<div class="kds-srow__main">' +
+        '<span class="kds-srow__name">' + esc(it.name) + '</span>' +
         (it.excluded ? '<span class="kds-srow__cap">Исключена из меню</span>' : '') +
       '</div>';
+      var rest = (it.stop || !it.sizes || !it.sizes.length)
+        ? '<div class="kds-srow__rest">' + slPlateHtml(it) + '</div>' : '';
       var chk = '<button class="kds-srow__check" type="button" data-sl-check="' + i + '"><span class="material-icons">' + (RT.sl.checks[i] ? 'check_box' : 'check_box_outline_blank') + '</span></button>';
-      var body = '<div class="kds-srow__top">' + chk + main +
+      var body = '<div class="kds-srow__top">' + chk + main + rest +
         '<button class="kds-btn kds-srow__btn" type="button" data-sl-edit="' + i + '"><span class="material-icons">edit</span></button>' +
       '</div>' + (it.stop || !it.sizes || !it.sizes.length ? '' : slSizeRowsHtml(it));
       return '<div class="kds-srow' + (it._open ? ' kds-srow--open' : '') + '" data-sl-row="' + i + '" data-sl-name="' + esc(it.name) + '">' +
