@@ -169,8 +169,22 @@
     color: #616161; margin: 0 0 12px; max-width: 1280px;
   }
   .kds-fit { position: relative; overflow-x: auto; }
+  /* Корпус планшета вокруг кадра — как в kds-screen.html (ux-прототип KDS):
+     светлый кант → тёмный безель → экран, камера сверху по центру.
+     Тени нет: вокруг скруглённых углов на белом фоне она даёт серый ореол */
+  .kds-shell { position: relative; display: inline-block; padding: 34px; border-radius: 52px;
+    background: #101013; border: 2px solid #c6c6ce; }
+  .kds-shell .kds-view { border-radius: 0; }
+  .kds-shell::after { content: ''; position: absolute; top: 13px; left: 50%; transform: translateX(-50%);
+    width: 8px; height: 8px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #3c3c44, #0d0d10 65%);
+    box-shadow: 0 0 0 1px #2a2a30; }
+  .kds-shell--mob { padding: 18px; border-radius: 40px; }
   /* Два кадра в ряд: основной и мобильный */
   .kds-boards { display: flex; align-items: flex-start; gap: 24px; }
+  /* Подложка вокруг корпуса планшета — белая, в цвет страницы:
+     по углам скруглённого корпуса не остаётся серого */
+  .kds-stage { display: inline-block; padding: 20px; background: #ffffff; border-radius: 16px; }
   .kds-boards .kds-fit { flex: 0 0 auto; }
   .kds-fit--mob { height: auto; }
   .kds-fit::-webkit-scrollbar { height: 8px; }
@@ -1868,10 +1882,10 @@
       var view = mkView(cfg.nw, cfg.nh);
       var mobView = cfg.mobile ? mkView(cfg.mobile.nw || 375, cfg.mobile.nh || 812) : '';
       host.innerHTML = '<div class="kds-anno">' + esc(cfg.anno) + '</div>' +
-        '<div class="kds-boards">' +
-          '<div class="kds-fit">' + view + '</div>' +
-          (mobView ? '<div class="kds-fit kds-fit--mob">' + mobView + '</div>' : '') +
-        '</div>' + docBlock(id);
+        '<div class="kds-stage"><div class="kds-boards">' +
+          '<div class="kds-fit"><div class="kds-shell">' + view + '</div></div>' +
+          (mobView ? '<div class="kds-fit kds-fit--mob"><div class="kds-shell kds-shell--mob">' + mobView + '</div></div>' : '') +
+        '</div></div>' + docBlock(id);
       RT.view = host.querySelector('.kds-view');
       RT.layer = RT.view.querySelector('.kds-zoom');
       bindTips(RT.view);
@@ -1902,12 +1916,12 @@
     function fitScale() {
       var fit = host.querySelector('.kds-fit');
       if (!fit) return;
-      var view = fit.firstElementChild;
-      if (!view) return;
+      var shell = fit.firstElementChild;
+      if (!shell) return;
       var scale = 1;
-      view.style.transform = 'none';
-      view.style.transformOrigin = 'top left';
-      fit.style.height = Math.ceil(view.offsetHeight * scale) + 'px';
+      shell.style.transform = 'none';
+      shell.style.transformOrigin = 'top left';
+      fit.style.height = Math.ceil(shell.offsetHeight * scale) + 'px';
     }
 
     /* ── Тултип полного названия (своя раскладка: Hint для тёмной темы КДС в ДС нет) ── */
