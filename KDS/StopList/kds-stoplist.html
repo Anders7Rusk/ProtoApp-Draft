@@ -806,7 +806,13 @@
   .kds-view--light .kds-menu__item:active, .kds-view--light .kds-menu__item.is-sel { background: #f5f5f5; }
 
   /* ── Стоп-лист (PB-8111): отдельный интерфейс вместо экрана заказов, каркас тот же ── */
-  .kds-slist { position: absolute; top: 48px; left: var(--ds-space-4x, 16px); right: var(--ds-space-4x, 16px); bottom: 56px; z-index: 1; display: flex; flex-direction: column; }
+  .kds-slist { position: absolute; top: 60px; left: var(--ds-space-4x, 16px); right: var(--ds-space-4x, 16px); bottom: 56px; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+  /* Контент стоп-листа — колонкой по центру (640), не на всю ширину панели */
+  .kds-slist > * { width: 640px; max-width: 100%; }
+  /* Заголовок экрана: «Стоп-лист» 22/28 + подпись терминальной группы */
+  .kds-sl-head { display: flex; flex-direction: column; gap: 4px; padding: 8px 0 12px; }
+  .kds-sl-head__t { font-size: 22px; font-weight: 500; line-height: 28px; letter-spacing: .25px; color: var(--kds-text); }
+  .kds-sl-head__s { font-size: 14px; line-height: 20px; color: var(--kds-text-2); }
   /* Полоса над списком: поле поиска + кнопки («Добавить позицию» — акцент, «Печать» — обводка) */
   .kds-shead { display: flex; align-items: center; gap: var(--ds-space-2x, 8px); }
   .kds-ssearch { flex: 1 1 auto; min-width: 0; height: 52px; background: var(--kds-row); border-radius: 8px;
@@ -819,7 +825,7 @@
   /* Кнопки стоп-листа: акцент (заливка #448aff, текст #fff, r12, высота 48) и обводка (как кнопка футера базы) */
   .kds-btn-acc, .kds-btn-out { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     height: 48px; padding: 14px 16px; border-radius: 12px; flex: 0 0 auto;
-    font-size: 14px; font-weight: 500; line-height: 20px; letter-spacing: .5px; text-transform: uppercase; white-space: nowrap; }
+    font-size: 14px; font-weight: 500; line-height: 20px; letter-spacing: .5px; white-space: nowrap; }
   .kds-btn-acc { border: 0; background: #448aff; color: #fff; }
   .kds-btn-acc .material-icons { font-size: 20px; color: #fff; }
   .kds-btn-acc:active { filter: brightness(.92); }
@@ -885,17 +891,17 @@
     align-items: center; justify-content: center; gap: 8px; }
   .kds-sempty__t { font-size: 22px; font-weight: 500; line-height: 28px; color: var(--kds-text); }
   .kds-sempty__d { font-size: 14px; line-height: 20px; color: var(--kds-text-2); margin-bottom: 8px; }
-  /* Шапка экрана стоп-листа: возврат + заголовок с подписью, справа часы и иконки */
-  .kds-sl-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
-  .kds-sl-title__t { font-size: 16px; font-weight: 500; line-height: 24px; letter-spacing: .5px; color: var(--kds-text); white-space: nowrap; }
-  .kds-sl-title__s { font-size: 14px; line-height: 20px; color: var(--kds-text-2); white-space: nowrap; }
+  /* Шапка стоп-листа: топбар 56, кнопки 40 — тач-норма мобильной шапки базы */
+  .kds-topbar--sl { height: 56px; padding: 8px 16px; }
+  .kds-topbar--sl .kds-tb-list { height: 40px; }
+  .kds-topbar--sl .kds-iconbtn { width: 40px; height: 40px; }
   .kds-sl-right { flex: 0 0 auto; display: flex; align-items: center; gap: 16px; margin-left: auto; }
   /* Панель массовых действий — поверх футера */
-  .kds-mass { position: absolute; left: var(--ds-space-4x, 16px); right: var(--ds-space-4x, 16px); bottom: 64px; z-index: 20;
+  .kds-mass { position: absolute; left: 50%; transform: translateX(-50%); width: 640px; max-width: calc(100% - 32px); bottom: 64px; z-index: 20;
     display: flex; align-items: center; gap: 12px; background: var(--kds-row); border-radius: 8px; padding: 8px 12px 8px 16px; }
   .kds-mass__n { flex: 0 0 auto; margin-right: auto; font-size: 16px; font-weight: 500; line-height: 24px; letter-spacing: .5px; color: var(--kds-text); }
   /* Баннер-сообщение: нейтральный, коробка строк базы, авто-скрытие 3 с */
-  .kds-sbanner { position: absolute; left: var(--ds-space-4x, 16px); right: var(--ds-space-4x, 16px); top: 56px; z-index: 20;
+  .kds-sbanner { position: absolute; left: var(--ds-space-4x, 16px); right: var(--ds-space-4x, 16px); top: 68px; z-index: 20;
     background: var(--kds-row); border-radius: 8px; padding: 12px 16px;
     font-size: 16px; line-height: 24px; letter-spacing: .25px; color: var(--kds-text); }
   .kds-sbanner--bottom { top: auto; bottom: 64px; }
@@ -908,7 +914,7 @@
   .kds-sconfirm__btns { display: flex; gap: var(--ds-space-2x, 8px); justify-content: space-between; margin-top: 8px; }
   /* Постеры: сетка карточек решений */
   .kds-poster--grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .kds-view--mob .kds-sl-title__s, .kds-view--mob .kds-sl-right .kds-tb-list { display: none; }
+  .kds-view--mob .kds-sl-right .kds-tb-list { display: none; }
   /* Зазор «Стоп-лист» → иконки показателей — такой же, как показатели → группа иконок (32) */
   .kds-tb-states > [data-stopbtn] { margin-right: 20px; }
 </style>
@@ -1444,12 +1450,13 @@
     function slScreen(cfg) {
       var items = slData();
       var headBtns = RT.sl.addMode ? '' :
-        '<button class="kds-btn-acc" type="button" data-sl-add><span class="material-icons">add</span>Добавить позицию</button>' +
-        '<button class="kds-btn-out" type="button" data-sl-print><span class="material-icons">print</span>Печать</button>';
+        '<button class="kds-btn-acc" type="button" data-sl-add><span class="material-icons">add</span>Добавить позицию</button>';
       var rows = items.length
         ? '<div class="kds-sbody" data-sl-body>' + items.map(slRowHtml).join('') + '</div>'
         : slEmptyHtml();
       return '<div class="kds-slist">' +
+        '<div class="kds-sl-head"><div class="kds-sl-head__t">' + (RT.sl.addMode ? 'Добавить в стоп-лист' : 'Стоп-лист') + '</div>' +
+          '<div class="kds-sl-head__s">Терминальная группа: Зал</div></div>' +
         '<div class="kds-shead">' +
           '<label class="kds-ssearch"><span class="material-icons">search</span><input class="kds-ssearch__in" type="text" placeholder="Найти позицию" data-sl-search></label>' +
           headBtns +
@@ -1757,11 +1764,9 @@
       '</div>';
     }
     function slTopbarHtml(cfg) {
-      return '<div class="kds-topbar">' +
+      return '<div class="kds-topbar kds-topbar--sl">' +
         '<div class="kds-tb-lists">' +
           '<button class="kds-tb-list kds-tb-pick" type="button" data-sl-back="' + (cfg.mode === 'add' ? 'list' : 'base') + '"><span class="material-icons">arrow_back</span><span data-val>' + (cfg.mode === 'add' ? 'К списку' : 'К заказам') + '</span></button>' +
-          '<div class="kds-sl-title"><span class="kds-sl-title__t">' + (cfg.mode === 'add' ? 'Добавить в стоп-лист' : 'Стоп-лист') + '</span>' +
-            '<span class="kds-sl-title__s">Терминальная группа: Зал</span></div>' +
         '</div>' +
         '<div class="kds-sl-right">' +
           '<span class="kds-tb-list" data-clock>' + nowHHMM() + '</span>' +
@@ -1781,7 +1786,7 @@
       return '<div class="kds-footer">' +
         '<div class="kds-footer__left"><span class="kds-footer__ver">WebKDS v. 9.4.5.208229</span><span class="kds-footer__status"><span class="kds-dot"></span>Включен</span></div>' +
         '<span class="kds-footer__total">В стоп-листе: ' + slCount() + ' ' + slPlur(slCount()) + '</span>' +
-        '<div class="kds-footer__right"><button class="kds-footer__btn" type="button" data-sl-print><span class="material-icons">print</span>Печать</button></div>' +
+        '<div class="kds-footer__right"><button class="kds-btn-out" type="button" data-sl-print><span class="material-icons">print</span>Печать</button></div>' +
       '</div>';
     }
 
