@@ -79,6 +79,20 @@
     color: #616161; margin: 0 0 12px; max-width: 1280px;
   }
   .kds-fit { position: relative; overflow-x: auto; }
+  /* Корпус планшета вокруг кадра — как в kds-screen.html (ux-прототип KDS):
+     светлый кант → тёмный безель → экран, камера сверху по центру.
+     Тени нет: вокруг скруглённых углов на белом фоне она даёт серый ореол */
+  /* Корпус планшета вокруг кадра — как в kds-screen.html (ux-прототип KDS):
+     светлый кант → тёмный безель → экран, камера сверху по центру.
+     Тени нет — серый ореол по углам она и давала */
+  .kds-shell { position: relative; display: inline-block; padding: 34px; border-radius: 52px;
+    background: #101013; border: 2px solid #c6c6ce; }
+  .kds-shell .kds-view { border-radius: 16px; }
+  .kds-shell::after { content: ''; position: absolute; top: 13px; left: 50%; transform: translateX(-50%);
+    width: 8px; height: 8px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #3c3c44, #0d0d10 65%);
+    box-shadow: 0 0 0 1px #2a2a30; }
+  .kds-shell--mob { padding: 18px; border-radius: 40px; }
   /* Два кадра в ряд: основной и мобильный */
   .kds-boards { display: flex; align-items: flex-start; gap: 24px; }
   .kds-boards .kds-fit { flex: 0 0 auto; }
@@ -269,10 +283,11 @@
   .kds-scrollstrip { position: absolute; left: 0; right: 0; bottom: 56px; height: 12px; padding: 2px; z-index: 6; }
   .kds-scrollstrip__thumb { height: 8px; border-radius: 8px; background: #333333; }
 
-  /* ── Футер (Figma: Footer 1280×56, pad 4/16, space-between; текст Medium 16/24 ls .5) ── */
+  /* ── Футер (Figma: Footer 1280×56, pad 4/16, space-between; текст Medium 16/24 ls .5;
+        фон — rgba(18,18,18,0.92), нижние углы скруглены рамкой кадра) ── */
   .kds-footer {
     position: absolute; left: 0; right: 0; bottom: 0; height: 56px; padding: 4px 16px; z-index: 6;
-    background: var(--kds-surface);
+    background: rgba(18, 18, 18, .92);
     display: flex; align-items: center; justify-content: space-between; gap: 24px;
   }
   .kds-footer__left { display: flex; align-items: center; gap: 24px; min-width: 0; }
@@ -305,10 +320,15 @@
   .kds-view--mob .kds-footer__btn:disabled { opacity: 1; }
   /* ── Контент мобильного кадра (Figma PB-6623): одна колонка, карточка во всю ширину,
         строки и кнопки 56 ── */
-  /* индикаторы прокрутки не показываем нигде: это терминал, а не веб-страница.
-     Прокрутка (палец, пан, колесо) продолжает работать */
-  .kds-vscroll,
-  .kds-scrollstrip { display: none !important; }
+  /* Индикаторы прокрутки — как в Figma: внизу полоса Scroll 12 px (ползунок 8 px #333),
+     в режиме «по блюдам» — вертикальная полоса справа (трек #9E9E9E, ползунок #616161).
+     Сама прокрутка — палец/пан/колесо, индикатор только показывает позицию */
+  .kds-vscroll { display: none; }
+  .kds-scrollstrip { display: block; }
+  .kds-dlist ~ .kds-scrollstrip { display: none; }
+  .kds-dlist ~ .kds-vscroll { display: block; }
+  /* На мобильном кадре индикаторов нет */
+  .kds-view--mob .kds-scrollstrip, .kds-view--mob .kds-vscroll { display: none; }
   .kds-view--mob .kds-board { top: 48px; left: 12px; right: 12px; bottom: 80px;
     flex-direction: column; flex-wrap: nowrap; gap: 12px; }
   .kds-view--mob .kds-card, .kds-view--narrow.kds-view--mob .kds-card { width: 100%; }
@@ -2332,8 +2352,8 @@
       var mobView = cfg.mobile ? mkView(cfg.mobile.nw || 375, cfg.mobile.nh || 812) : '';
       host.innerHTML = '<div class="kds-anno">' + esc(cfg.anno) + '</div>' +
         '<div class="kds-boards">' +
-          '<div class="kds-fit">' + view + '</div>' +
-          (mobView ? '<div class="kds-fit kds-fit--mob">' + mobView + '</div>' : '') +
+          '<div class="kds-fit"><div class="kds-shell">' + view + '</div></div>' +
+          (mobView ? '<div class="kds-fit kds-fit--mob"><div class="kds-shell kds-shell--mob">' + mobView + '</div></div>' : '') +
         '</div>' + docBlock(id);
       RT.view = host.querySelector('.kds-view');
       RT.layer = RT.view.querySelector('.kds-zoom');
@@ -2369,12 +2389,12 @@
     function fitScale() {
       var fit = host.querySelector('.kds-fit');
       if (!fit) return;
-      var view = fit.firstElementChild;
-      if (!view) return;
+      var shell = fit.firstElementChild;
+      if (!shell) return;
       var scale = 1;
-      view.style.transform = 'none';
-      view.style.transformOrigin = 'top left';
-      fit.style.height = Math.ceil(view.offsetHeight * scale) + 'px';
+      shell.style.transform = 'none';
+      shell.style.transformOrigin = 'top left';
+      fit.style.height = Math.ceil(shell.offsetHeight * scale) + 'px';
     }
 
     /* ── Тултип полного названия (своя раскладка: Hint для тёмной темы КДС в ДС нет) ── */
@@ -2471,13 +2491,14 @@
       if (!board) { strip.style.display = 'none'; return; }
       function upd() {
         var cw = board.clientWidth, sw = board.scrollWidth;
-        if (sw <= cw) { strip.style.display = 'none'; return; }
+        /* Полоса видна всегда, как в макете: при переполнении ползунок — доля,
+           без переполнения — во всю ширину трека */
         strip.style.display = 'block';
         var track = cw - 4;
-        var w = Math.max(48, Math.round(track * cw / sw));
+        var w = Math.min(track, Math.max(48, Math.round(track * cw / sw)));
         thumb.style.width = w + 'px';
         var max = track - w;
-        thumb.style.transform = 'translateX(' + Math.round((board.scrollLeft / (sw - cw)) * max) + 'px)';
+        thumb.style.transform = 'translateX(' + (sw > cw ? Math.round((board.scrollLeft / (sw - cw)) * max) : 0) + 'px)';
       }
       board.addEventListener('scroll', upd);
       upd();
