@@ -3,28 +3,48 @@
    комбо-набору на кухонном экране», сценарии — приложение PB-8101-combo-user-scenarios-2026-10-19.md,
    выдержка из PB-7812).
    Один файл kds-combo.html: экраны переключаются селектом «Экраны» через state
-   (в контенте ссылок-переключателей нет — правило 19.10.2026). Демо-контента нет — только свои экраны. */
+   (в контенте ссылок-переключателей нет — правило 19.10.2026). Демо-контента нет — только свои экраны.
+   Порядок — по номерам сценариев: база → 2.1 → 2.2 → 3.1 → 3.2 → 3.3 → 3.4 → 3.5 → 3.6 → 3.7 → вне сценариев. */
 window.dsLayouts = {
   проект: 'КДС · Комбо-набор',
   адаптив: true,
   шаги: [
     { file: 'kds-combo.html', state: 'base', title: 'База · экран как в Figma' },
-    { file: 'kds-combo.html', state: 'g-multi', title: 'Сценарий 2 · блюда набора одним блоком · горячий цех' },
-    { file: 'kds-combo.html', state: 'g-single', title: 'Сценарий 2 · блюда набора одним блоком · холодный цех' },
-    { file: 'kds-combo.html', state: 'g-kitchens', title: 'Сценарий 2 · блюда набора одним блоком · оба цеха' },
-    { file: 'kds-combo.html', state: 'g-assembly', title: 'Сценарий 2 · экран сборщика' },
-    { file: 'kds-combo.html', state: 'g-courses', title: 'Сценарий 3.3 · набор разложен по курсам' },
-    { file: 'kds-combo.html', state: 'g-between', title: 'Сценарий 3.2 · блюда набора собраны в блок' },
-    { file: 'kds-combo.html', state: 'g-between-order', title: 'Сценарий 3.2 · исходный порядок из заказа' },
+
+    /* Сценарий 2.1 — видимая часть набора, фильтр */
+    { file: 'kds-combo.html', state: 'g-multi', title: 'Сценарий 2.1 · блюда набора одним блоком · горячий цех' },
+    { file: 'kds-combo.html', state: 'g-single', title: 'Сценарий 2.1 · блюда набора одним блоком · холодный цех' },
+    { file: 'kds-combo.html', state: 'g-filter', title: 'Сценарий 2.1 · включён фильтр «Готово»' },
+
+    /* Сценарий 2.2 — режим «по блюдам» */
+    { file: 'kds-combo.html', state: 'd-list', title: 'Сценарий 2.2 · по блюдам · набор подписан текстом' },
+
+    /* Сценарий 3.1 — экземпляры одного набора */
     { file: 'kds-combo.html', state: 'g-instances', title: 'Сценарий 3.1 · два набора, разный состав' },
     { file: 'kds-combo.html', state: 'g-instances-same', title: 'Сценарий 3.1 · два набора, одинаковый состав' },
+
+    /* Сценарий 3.2 — группировка и курсы */
+    { file: 'kds-combo.html', state: 'g-between', title: 'Сценарий 3.2 · группа внутри курса, части набора в разных курсах' },
+    { file: 'kds-combo.html', state: 'g-between-order', title: 'Сценарий 3.2 · исходный порядок из заказа' },
+
+    /* Сценарий 3.3 — курсы */
+    { file: 'kds-combo.html', state: 'g-courses', title: 'Сценарий 3.3 · набор разложен по курсам' },
+
+    /* Сценарий 3.4 — разные места приготовления */
+    { file: 'kds-combo.html', state: 'g-kitchens', title: 'Сценарий 3.4 · блюда набора одним блоком · оба цеха' },
+    { file: 'kds-combo.html', state: 'g-assembly', title: 'Сценарий 3.4 · экран сборщика' },
+    { file: 'kds-combo.html', state: 'g-nocook', title: 'Сценарий 3.4 · позиция без приготовления' },
+
+    /* Сценарий 3.5 — два набора с одним блюдом */
+    { file: 'kds-combo.html', state: 'g-two-combos', title: 'Сценарий 3.5 · два набора с одним блюдом и разными модификаторами' },
+
+    /* Сценарий 3.6 — модификатор отдельной задачей */
     { file: 'kds-combo.html', state: 'g-modifier', title: 'Сценарий 3.6 · модификатор готовится отдельно' },
-    { file: 'kds-combo.html', state: 'g-cancelled', title: 'Отменённое блюдо из набора' },
+
+    /* Сценарий 3.7 — длинное название, узкий экран */
     { file: 'kds-combo.html', state: 'g-long', title: 'Сценарий 3.7 · длинное название, узкий экран' },
-    { file: 'kds-combo.html', state: 'd-list', title: 'Сценарий 2.2 · по блюдам · набор подписан текстом' },
-    { file: 'kds-combo.html', state: 'g-filter', title: 'Сценарий 2 · включён фильтр «Готово»' },
-    { file: 'kds-combo.html', state: 'g-nocook', title: 'Сценарий 2 · позиция без приготовления' },
-    { file: 'kds-combo.html', state: 'g-two-combos', title: 'Сценарий 3.1 · два набора с одним блюдом' },
-    { file: 'kds-combo.html', state: 'g-cancel-last', title: 'Сценарий 3.1 · отменён последний компонент' },
+
+    /* Требование задачи PB-8108 (в списке сценариев его нет) */
+    { file: 'kds-combo.html', state: 'g-cancelled', title: 'Требование задачи · отменённое блюдо из набора' },
   ]
 };
