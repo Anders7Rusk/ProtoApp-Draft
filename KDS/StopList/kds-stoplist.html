@@ -47,8 +47,12 @@
    17. icons — постер пиктограмм (все — кандидаты, не утверждены)
    18. rationale — постер «Обоснование решений» (6 решений, согласованы с дизайнером 23.10.2026)
 
-  ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ — только селектом «Экраны» в плашке ревью (событие dsreview:state,
-  ?state=<id> — прямая ссылка); в контенте ссылок-переключателей нет (правило 19.10.2026).
+  ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ:
+    • селект «Экраны» в плашке ревью (событие dsreview:state) и прямая ссылка ?state=<id>;
+    • живые переходы в контенте (по указанию заказчика 23.10.2026): кнопка «Стоп-лист»
+      в шапке базы открывает список; «К заказам» возвращает к экрану заказов;
+      «Добавить позицию» открывает внесение; «К списку» возвращает к списку;
+      внесённая позиция появляется в списке (живёт до перезагрузки страницы).
 -->
 <script src="../../Design-System/connect.js" data-no-header data-no-sidenav defer></script>
 <style>
@@ -1411,12 +1415,12 @@
     function slEmptyHtml() {
       return '<div class="kds-sempty"><div class="kds-sempty__t">Ограничений нет</div>' +
         '<div class="kds-sempty__d">Нажмите «Добавить позицию», чтобы задать остаток</div>' +
-        '<button class="kds-btn-acc" type="button"><span class="material-icons">add</span>Добавить позицию</button></div>';
+        '<button class="kds-btn-acc" type="button" data-sl-add><span class="material-icons">add</span>Добавить позицию</button></div>';
     }
     function slScreen(cfg) {
       var items = slData();
       var headBtns = RT.sl.addMode ? '' :
-        '<button class="kds-btn-acc" type="button"><span class="material-icons">add</span>Добавить позицию</button>' +
+        '<button class="kds-btn-acc" type="button" data-sl-add><span class="material-icons">add</span>Добавить позицию</button>' +
         '<button class="kds-btn-out' + (RT.sl.selMode ? ' is-on' : '') + '" type="button" data-sl-select>Выбрать</button>' +
         '<button class="kds-tb-list kds-tb-pick" type="button" data-sl-print><span class="material-icons">print</span><span data-val>Печать</span></button>';
       var rows = items.length
@@ -1574,6 +1578,7 @@
           return;
         }
         slData().splice(i, 1);
+        SLX = SLX.filter(function (x) { return x.name !== it.name; });
         refreshSl();
         return;
       }
@@ -1605,6 +1610,11 @@
           }
         }
         if (bad) return;               /* поле остаётся в фокусе со значением для правки */
+        if (RT.sl.addMode) {           /* внесение: позиция появляется в стоп-листе */
+          SLX.push({ name: it.name, rest: it.rest, unit: it.unit || 'шт' });
+          render('list');
+          return;
+        }
         it._open = false;
         refreshSl();
         return;
@@ -1632,7 +1642,11 @@
           if (!it.stop && !it.rest) { skipped++; return; }
           done++; removed.push(i);
         });
-        removed.sort(function (a, b) { return b - a; }).forEach(function (i) { items.splice(i, 1); });
+        removed.sort(function (a, b) { return b - a; }).forEach(function (i) {
+          var nm = items[i].name;
+          items.splice(i, 1);
+          SLX = SLX.filter(function (x) { return x.name !== nm; });
+        });
         RT.sl.selMode = false; RT.sl.checks = {};
         refreshSl();
         if (skipped) slBanner('Снято ограничений: ' + done + ' · пропущено: ' + skipped + ' (без ограничения)');
@@ -1651,6 +1665,7 @@
       closeSlConfirm();
       if (a === 'yes') {
         slData().length = 0;
+        SLX.length = 0;
         RT.sl.selMode = false; RT.sl.checks = {};
         refreshSl();
       }
@@ -1709,7 +1724,7 @@
     function slTopbarHtml(cfg) {
       return '<div class="kds-topbar">' +
         '<div class="kds-tb-lists">' +
-          '<button class="kds-tb-list kds-tb-pick" type="button" data-sl-back><span class="material-icons">arrow_back</span><span data-val>' + (cfg.mode === 'add' ? 'К списку' : 'К заказам') + '</span></button>' +
+          '<button class="kds-tb-list kds-tb-pick" type="button" data-sl-back="' + (cfg.mode === 'add' ? 'list' : 'base') + '"><span class="material-icons">arrow_back</span><span data-val>' + (cfg.mode === 'add' ? 'К списку' : 'К заказам') + '</span></button>' +
           '<div class="kds-sl-title"><span class="kds-sl-title__t">' + (cfg.mode === 'add' ? 'Добавить в стоп-лист' : 'Стоп-лист') + '</span>' +
             '<span class="kds-sl-title__s">Терминальная группа: Зал</span></div>' +
         '</div>' +
@@ -2273,6 +2288,8 @@
 
     /* ── Сборка экрана ── */
     var host = document.getElementById('kdsHost');
+    /* Позиции, добавленные в стоп-лист по ходу работы (живут до перезагрузки страницы) */
+    var SLX = [];
     function render(id) {
       var src = SCREENS[id] || SCREENS['list'];
       var cfg = JSON.parse(JSON.stringify(src));          // рабочая копия: состояние живёт до смены экрана
@@ -2281,6 +2298,7 @@
         ? { addMode: cfg.mode === 'add', selMode: !!cfg.selMode, checks: {}, q: '' }
         : null;
       if (RT.sl && cfg.sel) cfg.sel.forEach(function (i) { RT.sl.checks[i] = true; });
+      if (id === 'list' && SLX.length) cfg.items = (cfg.items || []).concat(SLX);
       prep(cfg);
       var body;
       if (cfg.posters) body = posters(cfg.posters);
@@ -3186,6 +3204,10 @@
           }
           var cf = t.closest('[data-sl-confirm]');
           if (cf) { slConfirm(cf.getAttribute('data-sl-confirm')); return; }
+          var back = t.closest('[data-sl-back]');
+          if (back) { render(back.getAttribute('data-sl-back')); return; }
+          var addb = t.closest('[data-sl-add]');
+          if (addb) { render('add'); return; }
           var edit = t.closest('[data-sl-edit]');
           if (edit) { toggleSlOpen(+edit.getAttribute('data-sl-edit')); return; }
           var lvl = t.closest('[data-sl-lvl]');
@@ -3213,6 +3235,8 @@
           }
           closeSlPanels();
         }
+        var stb = t.closest('[data-stopbtn]');
+        if (stb) { e.stopPropagation(); render('list'); return; }
         var pop = t.closest('[data-pop]');
         if (pop) {
           e.stopPropagation();
