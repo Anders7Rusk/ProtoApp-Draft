@@ -11,10 +11,9 @@ window.dsLayouts = {
   шаги: [
     { file: 'kds-combo.html', state: 'base', title: 'База · экран как в Figma' },
 
-    /* Сценарий 2.1 — видимая часть набора, фильтр */
+    /* Сценарий 2.1 — видимая часть набора */
     { file: 'kds-combo.html', state: 'g-multi', title: 'Сценарий 2.1 · блюда набора одним блоком · горячий цех' },
     { file: 'kds-combo.html', state: 'g-single', title: 'Сценарий 2.1 · блюда набора одним блоком · холодный цех' },
-    { file: 'kds-combo.html', state: 'g-filter', title: 'Требование задачи · включён фильтр «Готово»' },
 
     /* Сценарий 2.2 — режим «по блюдам» */
     { file: 'kds-combo.html', state: 'd-list', title: 'Сценарий 2.2 · по блюдам · набор подписан текстом' },
@@ -25,7 +24,6 @@ window.dsLayouts = {
 
     /* Сценарий 3.2 — группировка и курсы */
     { file: 'kds-combo.html', state: 'g-between', title: 'Сценарий 3.2 · группа внутри курса, части набора в разных курсах' },
-    { file: 'kds-combo.html', state: 'g-between-order', title: 'Сценарий 3.2 · исходный порядок из заказа' },
 
     /* Сценарий 3.3 — курсы */
     { file: 'kds-combo.html', state: 'g-courses', title: 'Сценарий 3.3 · набор разложен по курсам' },
@@ -33,7 +31,6 @@ window.dsLayouts = {
     /* Сценарий 3.4 — разные места приготовления */
     { file: 'kds-combo.html', state: 'g-kitchens', title: 'Сценарий 3.4 · блюда набора одним блоком · оба цеха' },
     { file: 'kds-combo.html', state: 'g-assembly', title: 'Сценарий 3.4 · экран сборщика' },
-    { file: 'kds-combo.html', state: 'g-nocook', title: 'Сценарий 3.4 · позиция без приготовления' },
 
     /* Сценарий 3.5 — два набора с одним блюдом */
     { file: 'kds-combo.html', state: 'g-two-combos', title: 'Сценарий 3.5 · два набора с одним блюдом и разными модификаторами' },
