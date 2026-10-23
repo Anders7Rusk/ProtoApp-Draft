@@ -189,6 +189,50 @@
   .kds-doc__item em { font-style: normal; color: #616161; }
   .kds-doc__q { font-size: 14px; line-height: 22px; color: #616161; margin: 8px 0 0; }
   .kds-doc__q b { font-weight: 500; color: #333; }
+  /* ── Комментарии к экрану: кнопка + панель (fixed → доступно при любом скролле) ── */
+  .kds-cmt-fab { position: fixed; right: 20px; bottom: 20px; z-index: 70; display: inline-flex; align-items: center; gap: 8px;
+    height: 44px; padding: 0 16px; border: 1px solid #e0e0e0; border-radius: 22px; background: #fff; color: #333;
+    box-shadow: 0 2px 8px rgba(0,0,0,.12); font: 500 14px/20px 'Roboto', Arial, sans-serif; cursor: pointer; }
+  .kds-cmt-fab:hover { background: #f5f5f5; }
+  .kds-cmt-fab .material-icons { font-size: 20px; }
+  .kds-cmt-fab.has-cmt { border-color: #448aff; color: #1565c0; }
+  .kds-cmt-fab__n:empty { display: none; }
+  .kds-cmt-fab__n { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: #448aff; color: #fff;
+    font-size: 12px; line-height: 20px; text-align: center; }
+  .kds-cmt-panel { position: fixed; right: 20px; bottom: 76px; z-index: 70; display: none; flex-direction: column;
+    width: 360px; max-height: calc(100vh - 120px); padding: 12px; border-radius: 12px; background: #fff;
+    box-shadow: 0 8px 24px rgba(0,0,0,.18); font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif; }
+  .kds-cmt-panel.is-open { display: flex; }
+  .kds-cmt__head { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; line-height: 20px; color: #333; margin: 0 0 8px; }
+  .kds-cmt__n { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px;
+    border-radius: 10px; background: #e0e0e0; color: #616161; font-size: 12px; line-height: 20px; font-weight: 500; }
+  .kds-cmt__n--zero { display: none; }
+  .kds-cmt__copy { margin-left: auto; height: 28px; padding: 0 10px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff;
+    font: 500 12px/18px 'Roboto', Arial, sans-serif; color: #333; cursor: pointer; }
+  .kds-cmt__copy:hover { background: #f5f5f5; }
+  .kds-cmt__close { flex: 0 0 28px; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 6px; background: transparent;
+    color: #9e9e9e; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .kds-cmt__close:hover { background: #f5f5f5; color: #333; }
+  .kds-cmt__close .material-icons { font-size: 18px; }
+  .kds-cmt__list { list-style: none; margin: 0 0 8px; padding: 0 2px 0 0; display: flex; flex-direction: column; gap: 4px;
+    overflow-y: auto; flex: 1 1 auto; min-height: 0; }
+  .kds-cmt__i { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border-radius: 8px; background: #f5f5f5;
+    font-size: 14px; line-height: 20px; color: #333; }
+  .kds-cmt__t { flex: 1; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .kds-cmt__time { flex: 0 0 auto; font-size: 12px; line-height: 20px; color: #9e9e9e; white-space: nowrap; }
+  .kds-cmt__del { flex: 0 0 24px; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 6px; background: transparent;
+    color: #9e9e9e; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .kds-cmt__del:hover { background: #e0e0e0; color: #333; }
+  .kds-cmt__del .material-icons { font-size: 16px; }
+  .kds-cmt__empty { font-size: 14px; line-height: 20px; color: #9e9e9e; margin: 0 0 8px; }
+  .kds-cmt__add { display: flex; gap: 8px; align-items: flex-start; }
+  .kds-cmt__input { flex: 1; min-width: 0; min-height: 40px; max-height: 120px; resize: vertical; padding: 9px 12px;
+    border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; font: 400 14px/20px 'Roboto', Arial, sans-serif; color: #333; }
+  .kds-cmt__input:focus { outline: none; border-color: #448aff; }
+  .kds-cmt__send { flex: 0 0 auto; height: 40px; padding: 0 14px; border: 0; border-radius: 8px; background: #448aff; color: #fff;
+    font: 500 14px/20px 'Roboto', Arial, sans-serif; cursor: pointer; }
+  .kds-cmt__send:disabled { background: #e0e0e0; color: #9e9e9e; cursor: default; }
+  .kds-cmt__hint { font-size: 11px; line-height: 15px; color: #9e9e9e; margin: 6px 0 0; }
   /* Список всех сценариев прототипа под описанием экрана: каждый экран отдельно, со своим описанием */
   .kds-scen { margin: 16px 0 0; border-top: 1px solid #e0e0e0; padding-top: 12px; }
   .kds-scen__head { font-size: 14px; font-weight: 500; line-height: 20px; color: #333; margin: 0 0 8px; }
@@ -1627,6 +1671,144 @@
         '<ul class="kds-scen__list">' + rows + '</ul></div>';
     }
 
+    /* ── Комментарии к экрану ──
+       Хранятся локально в браузере (localStorage), ключ — id экрана.
+       Внимание: у file:// и GitHub Pages это РАЗНЫЕ хранилища, между устройствами не синхронизируются. */
+    var CMT_KEY = 'kdsComboComments:v1';
+    function cmtAll() {
+      try { var raw = window.localStorage.getItem(CMT_KEY); return raw ? (JSON.parse(raw) || {}) : {}; }
+      catch (e) { return {}; }
+    }
+    function cmtSave(all) {
+      try { window.localStorage.setItem(CMT_KEY, JSON.stringify(all)); } catch (e) {}
+    }
+    function cmtListOf(id) { var a = cmtAll(); return (a[id] || []).slice(); }
+    function cmtStamp(ts) {
+      var d = new Date(ts); var p = function (n) { return (n < 10 ? '0' : '') + n; };
+      return p(d.getDate()) + '.' + p(d.getMonth() + 1) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+    }
+    function cmtPanelHtml(id) {
+      var list = cmtListOf(id);
+      var items = list.map(function (c) {
+        return '<li class="kds-cmt__i" data-cmt-id="' + esc(c.id) + '">' +
+          '<span class="kds-cmt__t">' + esc(c.text) + '</span>' +
+          '<span class="kds-cmt__time">' + cmtStamp(c.ts) + '</span>' +
+          '<button class="kds-cmt__del" type="button" data-cmt-del="' + esc(c.id) + '" title="Удалить"><span class="material-icons">close</span></button>' +
+        '</li>';
+      }).join('');
+      return '<div class="kds-cmt__head">Комментарии к экрану' +
+          '<span class="kds-cmt__n' + (list.length ? '' : ' kds-cmt__n--zero') + '">' + list.length + '</span>' +
+          '<button class="kds-cmt__copy" type="button" data-cmt-copy>Скопировать все</button>' +
+          '<button class="kds-cmt__close" type="button" data-cmt-close title="Закрыть"><span class="material-icons">close</span></button>' +
+        '</div>' +
+        (items
+          ? '<ul class="kds-cmt__list">' + items + '</ul>'
+          : '<p class="kds-cmt__empty">Пока нет. Напиши замечание — оно сохранится в этом браузере.</p>') +
+        '<div class="kds-cmt__add">' +
+          '<textarea class="kds-cmt__input" data-cmt-input rows="2" placeholder="Замечание к экрану…"></textarea>' +
+          '<button class="kds-cmt__send" type="button" data-cmt-send disabled>Добавить</button>' +
+        '</div>' +
+        '<p class="kds-cmt__hint">Хранится локально в этом браузере (localStorage) — на опубликованной странице и у коллег этих комментариев не будет. Ctrl+Enter — добавить.</p>';
+    }
+    /* Кнопка и панель создаются один раз (fixed — доступны при любом скролле),
+       содержимое перерисовывается под текущий экран */
+    function cmtMount(id) {
+      var fab = document.getElementById('kdsCmtFab');
+      var panel = document.getElementById('kdsCmtPanel');
+      if (!fab) {
+        fab = document.createElement('button');
+        fab.id = 'kdsCmtFab'; fab.type = 'button'; fab.className = 'kds-cmt-fab';
+        fab.innerHTML = '<span class="material-icons">mode_comment</span><span class="kds-cmt-fab__n"></span>';
+        document.body.appendChild(fab);
+      }
+      if (!panel) {
+        panel = document.createElement('div');
+        panel.id = 'kdsCmtPanel'; panel.className = 'kds-cmt-panel';
+        document.body.appendChild(panel);
+      }
+      panel.setAttribute('data-cmt-screen', id);
+      panel.innerHTML = cmtPanelHtml(id);
+      var n = cmtListOf(id).length;
+      fab.querySelector('.kds-cmt-fab__n').textContent = n ? String(n) : '';
+      fab.classList.toggle('has-cmt', !!n);
+      fab.title = 'Комментарии к экрану' + (n ? ' (' + n + ')' : '');
+    }
+    function cmtAdd(sec) {
+      if (!sec) return;
+      var id = sec.getAttribute('data-cmt-screen');
+      var ta = sec.querySelector('[data-cmt-input]');
+      var text = ((ta && ta.value) || '').trim();
+      if (!text) return;
+      var all = cmtAll();
+      (all[id] = all[id] || []).push({ id: 'c' + Date.now() + Math.random().toString(36).slice(2, 6), text: text, ts: Date.now() });
+      cmtSave(all);
+      cmtMount(id);
+    }
+    function cmtCopyFallback(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.top = '-1000px';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+    function cmtCopyAll(btn) {
+      var all = cmtAll();
+      var ids = SCREEN_ORDER.filter(function (s) { return (all[s] || []).length; });
+      var flash = function (msg) { if (!btn) return; var old = btn.textContent; btn.textContent = msg; setTimeout(function () { btn.textContent = old; }, 1600); };
+      if (!ids.length) { flash('Пока пусто'); return; }
+      var out = ['Комментарии · КДС «Комбо-набор»', ''];
+      ids.forEach(function (s) {
+        out.push((SCREEN_ORDER.indexOf(s) + 1) + '. ' + ((DOC[s] && DOC[s].t) || s) + ' (' + s + ')');
+        all[s].forEach(function (c) { out.push('   • ' + cmtStamp(c.ts) + ' — ' + c.text); });
+        out.push('');
+      });
+      var text = out.join('\n');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { flash('Скопировано'); }, function () { cmtCopyFallback(text); flash('Скопировано'); });
+      } else { cmtCopyFallback(text); flash('Скопировано'); }
+    }
+    /* Обработчики — на документе: переживают перерисовку экрана */
+    document.addEventListener('input', function (e) {
+      var ta = e.target && e.target.closest ? e.target.closest('[data-cmt-input]') : null;
+      if (!ta) return;
+      var panel = ta.closest('.kds-cmt-panel');
+      var btn = panel && panel.querySelector('[data-cmt-send]');
+      if (btn) btn.disabled = !ta.value.trim();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (!(e.ctrlKey || e.metaKey) || e.key !== 'Enter') return;
+      var ta = e.target && e.target.closest ? e.target.closest('[data-cmt-input]') : null;
+      if (!ta) return;
+      e.preventDefault();
+      cmtAdd(ta.closest('.kds-cmt-panel'));
+    });
+    document.addEventListener('click', function (e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+      if (t.closest('#kdsCmtFab')) {
+        var p = document.getElementById('kdsCmtPanel');
+        if (p) {
+          p.classList.toggle('is-open');
+          if (p.classList.contains('is-open')) { var ta0 = p.querySelector('[data-cmt-input]'); if (ta0) ta0.focus(); }
+        }
+        return;
+      }
+      var panel = t.closest('.kds-cmt-panel');
+      if (!panel) return;
+      if (t.closest('[data-cmt-close]')) { panel.classList.remove('is-open'); return; }
+      if (t.closest('[data-cmt-send]')) { cmtAdd(panel); return; }
+      var del = t.closest('[data-cmt-del]');
+      if (del) {
+        var id = panel.getAttribute('data-cmt-screen');
+        var all = cmtAll();
+        all[id] = (all[id] || []).filter(function (c) { return c.id !== del.getAttribute('data-cmt-del'); });
+        if (!all[id].length) delete all[id];
+        cmtSave(all); cmtMount(id); return;
+      }
+      var cp = t.closest('[data-cmt-copy]');
+      if (cp) cmtCopyAll(cp);
+    });
+
     /* ── Сборка экрана ── */
     var host = document.getElementById('kdsHost');
     function render(id) {
@@ -1692,6 +1874,7 @@
       applyCounts(); syncUndo(); applyTheme(); applyZoom(); startTicker();
       fitScale();
       syncMobClass();
+      cmtMount(id);
     }
 
     /* На реальном узком вьюпорте шапка переходит в мобильный вариант (Figma «Header» 375) */
